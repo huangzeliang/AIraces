@@ -13,14 +13,24 @@ from flask import Flask, request
 
 
 BASE_DIR = Path(__file__).resolve().parent
-DATA_FILE = BASE_DIR / "data" / "users.json"
+PROJECT_DIR = BASE_DIR
+DATA_FILE = PROJECT_DIR / "data" / "users.json"
 DATA_LOCK = threading.Lock()
 ALLOWED_ROLES = {"管理员", "运营", "编辑", "普通用户"}
 ALLOWED_STATUSES = {"启用", "停用"}
 EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
-app = Flask(__name__)
+environment = os.environ.get("APP_ENV", "production").strip().lower()
+is_development = environment == "development"
+
+app = Flask(
+    __name__,
+    template_folder=str(PROJECT_DIR / "templates"),
+    static_folder=str(PROJECT_DIR / "static"),
+)
 app.secret_key = os.environ.get("SECRET_KEY", "local-demo-only-change-me")
+app.config["APP_ENV"] = environment
+app.config["IS_DEVELOPMENT"] = is_development
 
 
 def read_users():
@@ -75,9 +85,9 @@ services = SimpleNamespace(
 
 # Each developer owns one route file. Keep shared setup here, so starting the
 # application and registering all routes always takes one command.
-for module_name in ("1", "2", "3", "4"):
+for module_name in ("backend.1", "backend.2", "backend.3", "backend.4"):
     import_module(module_name).register(app, services)
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000)
+    app.run(host="127.0.0.1", port=5000, debug=app.config["IS_DEVELOPMENT"])

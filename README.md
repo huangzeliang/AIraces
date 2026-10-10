@@ -2,29 +2,49 @@
 
 一个基于 Flask 的本地用户管理页面，支持搜索、状态筛选，以及用户的新增、查看、编辑和删除。数据保存在 `data/users.json`，首次打开即可看到四条示例记录。
 
-## 启动
+后端路由与依赖清单集中在 `backend/`；根目录的 `app.py` 是应用启动入口，本地 JSON 数据保留在 `data/` 中，`templates/` 和 `static/` 则作为页面模板和静态资源。
+
+## 安装
 
 需要 Python 3.10 或更新版本。在项目目录运行：
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-python app.py
+pip install -r backend/requirements.txt
 ```
 
-浏览器打开 <http://127.0.0.1:5000>。
+## 启动
 
-## 四人分工
+应用通过 `APP_ENV` 区分运行环境。启动后浏览器打开 <http://127.0.0.1:5000>。
 
-所有人使用同一个启动命令 `python app.py`。`app.py` 负责启动、JSON 读写和表单校验，通常不需要改动。接口按文件分开：
+### 本地开发（自动重载）
 
-| 文件 | 负责的接口 |
+修改 Python 后端文件后 Flask 会自动重启；修改模板或静态文件后刷新浏览器即可看到效果。
+
+```bash
+APP_ENV=development python app.py
+```
+
+### 生产环境（不自动重载）
+
+```bash
+APP_ENV=production python app.py
+```
+
+Flask 自带服务器仅适用于本地开发；正式部署应使用生产级 WSGI 服务器。
+
+## 五人分工
+
+`app.py` 负责启动、JSON 读写和表单校验，通常不需要改动。根据运行场景使用上方对应的启动命令；接口按文件分开：
+
+| 成员 | 文件 |
 | --- | --- |
-| `1.py` | 用户列表与搜索：`GET /` |
-| `2.py` | 新增用户：`POST /users` |
-| `3.py` | 编辑用户：`POST /users/<user_id>/edit` |
-| `4.py` | 删除用户：`POST /users/<user_id>/delete` |
+| 黄泽良 | `backend/1.py` |
+| 晨屹 | `backend/2.py` |
+| 华建 | `backend/3.py` |
+| 英儒 | `backend/4.py` |
+| 靖楠 | `test/` |
 
 各自修改对应文件即可；如果需要改动共同的数据格式或校验规则，再协商修改 `app.py`。
 
