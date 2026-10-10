@@ -1,0 +1,14 @@
+<aside class="sidebar">
+  <a class="brand" href="{{ url_for('dashboard') }}"><span class="brand-mark">N</span><span><strong>Northstar</strong><small>PEOPLE SPACE</small></span></a>
+  <div class="workspace-card"><span class="workspace-badge">N</span><span><strong>演示工作空间</strong><small>本地 JSON 数据</small></span><span>⌄</span></div>
+  <p class="nav-caption">工作空间</p>
+  <nav class="nav-menu" aria-label="主导航">
+    <a class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><span>▦</span>工作概览</a>
+    <a class="nav-item {% if active_page == 'users' %}active{% endif %}" href="{{ url_for('index') }}"><span>♧</span>用户管理</a>
+    <a class="nav-item {% if active_page == 'analytics' %}active{% endif %}" href="{{ url_for('analytics') }}"><span>▤</span>数据报表</a>
+    <a class="nav-item {% if active_page == 'settings' %}active{% endif %}" href="{{ url_for('settings') }}"><span>⚙</span>系统设置</a>
+  </nav>
+  <div class="sidebar-spacer"></div>
+  <div class="side-tip"><span class="tip-icon">✦</span><strong>团队保持同步</strong><p>清晰的成员信息，让协作始终在正确节奏中。</p></div>
+  <div class="profile"><span class="profile-avatar">管</span><span><strong>管理员</strong><small>工作空间所有者</small></span></div>
+</aside>

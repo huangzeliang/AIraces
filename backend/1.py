@@ -4,7 +4,7 @@ from flask import render_template, request
 
 
 def register(app, services):
-    @app.get("/")
+    @app.get("/users")
     def index():
         users = services.read_users()
         keyword = request.args.get("q", "").strip().lower()
@@ -19,11 +19,13 @@ def register(app, services):
         ]
         visible_users.sort(key=lambda user: user["created_at"], reverse=True)
         return render_template(
-            "index.html",
+            "pages/users.html",
             users=visible_users,
             total=len(users),
             active=sum(user["status"] == "启用" for user in users),
             admins=sum(user["role"] == "管理员" for user in users),
             keyword=request.args.get("q", "").strip(),
             status_filter=status_filter,
+            active_page="users",
+            page_name="用户管理",
         )

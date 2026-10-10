@@ -9,7 +9,7 @@ from importlib import import_module
 from pathlib import Path
 from types import SimpleNamespace
 
-from flask import Flask, request
+from flask import Flask, render_template, request
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -25,8 +25,8 @@ is_development = environment == "development"
 
 app = Flask(
     __name__,
-    template_folder=str(PROJECT_DIR / "templates"),
-    static_folder=str(PROJECT_DIR / "static"),
+    template_folder=str(PROJECT_DIR / "frontend" / "templates"),
+    static_folder=str(PROJECT_DIR / "frontend" / "static"),
 )
 app.secret_key = os.environ.get("SECRET_KEY", "local-demo-only-change-me")
 app.config["APP_ENV"] = environment
@@ -87,6 +87,32 @@ services = SimpleNamespace(
 # application and registering all routes always takes one command.
 for module_name in ("backend.1", "backend.2", "backend.3", "backend.4"):
     import_module(module_name).register(app, services)
+
+
+def page_context(active_page, page_name):
+    users = read_users()
+    return {
+        "active_page": active_page,
+        "page_name": page_name,
+        "total": len(users),
+        "active": sum(user["status"] == "启用" for user in users),
+        "admins": sum(user["role"] == "管理员" for user in users),
+    }
+
+
+@app.get("/")
+def dashboard():
+    return render_template("pages/dashboard.html", **page_context("dashboard", "工作概览"))
+
+
+@app.get("/analytics")
+def analytics():
+    return render_template("pages/analytics.html", **page_context("analytics", "数据报表"))
+
+
+@app.get("/settings")
+def settings():
+    return render_template("pages/settings.html", **page_context("settings", "系统设置"))
 
 
 if __name__ == "__main__":

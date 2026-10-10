@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+{% block title %}工作概览 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/dashboard.css') }}">{% endblock %}
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">WORKSPACE / OVERVIEW</p><h1>工作概览</h1><p class="subtitle">上午好，清晰掌握团队成员与工作空间的实时状态。</p></div><a class="button button-primary" href="{{ url_for('index') }}">管理用户 <span>→</span></a></section>
+<section class="overview-hero"><div><p>● TEAM PULSE</p><h2>今天，也是让协作<br>更顺畅的一天。</h2><span>已为你汇总本地工作空间的成员概况。</span></div><div class="hero-orb"><strong>{{ total }}</strong><small>TEAM MEMBERS</small></div></section>
+<section class="overview-grid"><article><span>♧</span><small>全部成员</small><strong>{{ total }}</strong><em>工作空间总人数</em></article><article><span>✓</span><small>活跃成员</small><strong>{{ active }}</strong><em>可正常使用</em></article><article><span>✦</span><small>管理员</small><strong>{{ admins }}</strong><em>拥有工作空间权限</em></article></section>
+<section class="quick-panel"><div><h2>快捷入口</h2><p>按页面维度组织团队日常工作。</p></div><div class="quick-links"><a href="{{ url_for('index') }}"><b>♧</b><span><strong>用户管理</strong><small>维护成员资料与权限</small></span>→</a><a href="{{ url_for('analytics') }}"><b>▤</b><span><strong>数据报表</strong><small>查看空间数据概览</small></span>→</a><a href="{{ url_for('settings') }}"><b>⚙</b><span><strong>系统设置</strong><small>调整工作台偏好</small></span>→</a></div></section>
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>{% endblock %}
