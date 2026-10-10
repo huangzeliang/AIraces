@@ -5,11 +5,11 @@ import os
 import re
 import tempfile
 import threading
-from datetime import datetime
+from importlib import import_module
 from pathlib import Path
-from uuid import uuid4
+from types import SimpleNamespace
 
-from flask import Flask, abort, flash, redirect, render_template, request, url_for
+from flask import Flask, request
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -65,80 +65,18 @@ def form_data():
     return {"name": name, "email": email, "phone": phone, "role": role, "status": status}, None
 
 
-@app.get("/")
-def index():
-    users = read_users()
-    keyword = request.args.get("q", "").strip().lower()
-    status_filter = request.args.get("status", "全部")
-    if status_filter not in ALLOWED_STATUSES | {"全部"}:
-        status_filter = "全部"
+services = SimpleNamespace(
+    read_users=read_users,
+    write_users=write_users,
+    form_data=form_data,
+    data_lock=DATA_LOCK,
+    allowed_statuses=ALLOWED_STATUSES,
+)
 
-    visible_users = [
-        user for user in users
-        if (not keyword or keyword in (user["name"] + " " + user["email"] + " " + user["phone"]).lower())
-        and (status_filter == "全部" or user["status"] == status_filter)
-    ]
-    visible_users.sort(key=lambda user: user["created_at"], reverse=True)
-    return render_template(
-        "index.html",
-        users=visible_users,
-        total=len(users),
-        active=sum(user["status"] == "启用" for user in users),
-        admins=sum(user["role"] == "管理员" for user in users),
-        keyword=request.args.get("q", "").strip(),
-        status_filter=status_filter,
-    )
-
-
-@app.post("/users")
-def create_user():
-    fields, error = form_data()
-    if error:
-        flash(error, "error")
-        return redirect(url_for("index"))
-
-    with DATA_LOCK:
-        users = read_users()
-        if any(user["email"] == fields["email"] for user in users):
-            flash("这个邮箱已被使用。", "error")
-            return redirect(url_for("index"))
-        users.append({"id": uuid4().hex, **fields, "created_at": datetime.now().strftime("%Y-%m-%d")})
-        write_users(users)
-    flash("用户已创建。", "success")
-    return redirect(url_for("index"))
-
-
-@app.post("/users/<user_id>/edit")
-def edit_user(user_id):
-    fields, error = form_data()
-    if error:
-        flash(error, "error")
-        return redirect(url_for("index"))
-
-    with DATA_LOCK:
-        users = read_users()
-        user = next((item for item in users if item["id"] == user_id), None)
-        if user is None:
-            abort(404)
-        if any(item["id"] != user_id and item["email"] == fields["email"] for item in users):
-            flash("这个邮箱已被使用。", "error")
-            return redirect(url_for("index"))
-        user.update(fields)
-        write_users(users)
-    flash("用户信息已更新。", "success")
-    return redirect(url_for("index"))
-
-
-@app.post("/users/<user_id>/delete")
-def delete_user(user_id):
-    with DATA_LOCK:
-        users = read_users()
-        remaining = [user for user in users if user["id"] != user_id]
-        if len(remaining) == len(users):
-            abort(404)
-        write_users(remaining)
-    flash("用户已删除。", "success")
-    return redirect(url_for("index"))
+# Each developer owns one route file. Keep shared setup here, so starting the
+# application and registering all routes always takes one command.
+for module_name in ("1", "2", "3", "4"):
+    import_module(module_name).register(app, services)
 
 
 if __name__ == "__main__":
