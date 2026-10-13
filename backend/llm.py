@@ -366,9 +366,8 @@ def llm_configured():
     return bool(os.environ.get("LLM_BASE_URL") and os.environ.get("LLM_API_KEY"))
 
 
-def _llm_parse(raw_text, now=None):
-    """调用大模型解析；任何异常或结构不合法都返回 None，由调用方兜底。"""
-    now = now or datetime.now().replace(microsecond=0)
+def _llm_chat_json(system_prompt, user_prompt, timeout=20):
+    """调用大模型并解析 JSON 返回；任何异常或非法 JSON 都返回 None，由调用方兜底。"""
     base_url = (os.environ.get("LLM_BASE_URL") or "").strip().rstrip("/")
     api_key = os.environ.get("LLM_API_KEY") or ""
     model = os.environ.get("LLM_MODEL", "gpt-4o-mini")
@@ -379,8 +378,8 @@ def _llm_parse(raw_text, now=None):
         "model": model,
         "temperature": 0.2,
         "messages": [
-            {"role": "system", "content": _llm_system_prompt(now)},
-            {"role": "user", "content": raw_text},
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
         ],
     }
     request = urllib.request.Request(
@@ -390,7 +389,7 @@ def _llm_parse(raw_text, now=None):
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             payload = json.loads(response.read().decode("utf-8"))
         content = payload["choices"][0]["message"]["content"]
     except (urllib.error.URLError, KeyError, IndexError, ValueError, OSError):
@@ -398,10 +397,15 @@ def _llm_parse(raw_text, now=None):
 
     content = re.sub(r"^```(?:json)?|```$", "", (content or "").strip(), flags=re.M).strip()
     try:
-        parsed = json.loads(content)
+        return json.loads(content)
     except ValueError:
         return None
-    return _validate_llm_payload(parsed)
+
+
+def _llm_parse(raw_text, now=None):
+    """调用大模型解析；任何异常或结构不合法都返回 None，由调用方兜底。"""
+    now = now or datetime.now().replace(microsecond=0)
+    return _validate_llm_payload(_llm_chat_json(_llm_system_prompt(now), raw_text))
 
 
 def _validate_llm_payload(parsed):
@@ -571,12 +575,10 @@ def _fmt_task(task):
         task.get("title", "未命名"), task.get("priority", "中"), due_text, task.get("status", ""))
 
 
-def handle_command(query, store, now=None):
-    """识别自然语言指令：命中返回结果或跳转目标，不命中给出可选项（不静默失败）。"""
-    now = now or datetime.now().replace(microsecond=0)
+def _rule_command(query, store, now=None):
+    """规则引擎：命中关键词返回结果或跳转目标，不命中给出可选项（不静默失败）。"""
     text = (query or "").strip()
-    if not text:
-        return {"ok": False, "message": "请输入要执行的指令。"}
+    now = now or datetime.now().replace(microsecond=0)
 
     open_tasks = [t for t in store.get("tasks", []) if t.get("status") not in ("已完成", "已取消")]
 
@@ -587,15 +589,6 @@ def handle_command(query, store, now=None):
     def redirect(title, lines, path, label):
         return {"ok": True, "matched": True, "kind": "redirect", "title": title,
                 "lines": lines, "link": {"path": path, "label": label}}
-
-    if re.search(r"最紧急|最急|优先做|先做哪|该做|待办", text):
-        ranked = sorted(open_tasks, key=lambda t: (
-            _PRIORITY_RANK.get(t.get("priority"), 1), t.get("due_at") or "9999"))[:3]
-        if ranked:
-            lines = [_fmt_task(t) for t in ranked]
-        else:
-            lines = ["当前没有未完成的任务，可以去录入一条新计划。"]
-        return answer("最紧急的未完成任务", lines, {"path": "/schedule", "label": "打开智能排期"})
 
     if re.search(r"今天|今日", text):
         today = now.date()
@@ -611,6 +604,15 @@ def handle_command(query, store, now=None):
         elif len(due_list) > 5:
             lines.append("……共 %d 项，展开见智能排期。" % len(due_list))
         return answer("今天该做什么（到期 / 逾期优先）", lines, {"path": "/schedule", "label": "打开智能排期"})
+
+    if re.search(r"最紧急|最急|优先做|先做哪|该做|待办", text):
+        ranked = sorted(open_tasks, key=lambda t: (
+            _PRIORITY_RANK.get(t.get("priority"), 1), t.get("due_at") or "9999"))[:3]
+        if ranked:
+            lines = [_fmt_task(t) for t in ranked]
+        else:
+            lines = ["当前没有未完成的任务，可以去录入一条新计划。"]
+        return answer("最紧急的未完成任务", lines, {"path": "/schedule", "label": "打开智能排期"})
 
     if re.search(r"延期|风险|超期|逾期", text):
         risky = [t for t in open_tasks if (t.get("delay_count") or 0) > 0
@@ -646,3 +648,159 @@ def handle_command(query, store, now=None):
                   "· 哪些任务有延期风险", "· 提醒概览", "· 新建计划 / 打开智能排期"],
         "options": ["显示最紧急的任务", "今天该做什么", "哪些任务有延期风险", "新建计划"],
     }
+
+
+# ---------------------------------------------------------------------------
+# 一句话办事 · 大模型路径（可选）：意图解析 + 基于本地真实数据作答
+# ---------------------------------------------------------------------------
+
+_COMMAND_LINK_PATHS = ("/plan/input", "/plan/confirm", "/schedule", "/dashboard", "/data", "/settings")
+_COMMAND_PATH_RE = re.compile(r"^/[A-Za-z0-9/?=&_.\-]*$")
+
+
+def _command_snapshot(store, now):
+    """把任务 / 提醒 / 计划压缩成紧凑快照，供模型引用（含数量与具体条目，均为真实数据）。"""
+    tasks = store.get("tasks", [])
+    open_tasks = [t for t in tasks if t.get("status") not in ("已完成", "已取消")]
+    open_tasks.sort(key=lambda t: (_PRIORITY_RANK.get(t.get("priority"), 1), t.get("due_at") or "9999"))
+
+    lines = ["任务总览：未完成 %d 个，已完成 %d 个，已取消 %d 个。" % (
+        len(open_tasks),
+        len([t for t in tasks if t.get("status") == "已完成"]),
+        len([t for t in tasks if t.get("status") == "已取消"]),
+    )]
+    lines.append("未完成任务（按优先级与截止时间排序，最多展示 40 个）：")
+    for task in open_tasks[:40]:
+        due = parse_dt(task.get("due_at"))
+        due_text = due.strftime("%m-%d %H:%M") if due else "未设置"
+        delay = " · 已延期%d次" % task["delay_count"] if (task.get("delay_count") or 0) > 0 else ""
+        lines.append("- 「%s」%s优先级 · 截止 %s · %s%s" % (
+            task.get("title", "未命名"), task.get("priority", "中"), due_text, task.get("status", ""), delay))
+    if not open_tasks:
+        lines.append("- （无）")
+
+    reminders = store.get("reminders", [])
+    unread = [r for r in reminders if r.get("status") == "未读"]
+    lines.append("")
+    lines.append("未读提醒：%d 条（共 %d 条）。" % (len(unread), len(reminders)))
+    for item in unread[:8]:
+        lines.append("- %s" % (item.get("content") or "")[:60])
+
+    plans = store.get("plans", [])
+    lines.append("")
+    lines.append("计划列表（最近 %d 个）：" % min(len(plans), 15))
+    for plan in plans[-15:]:
+        lines.append("- %s | %s | %s" % (
+            plan.get("plan_id"), (plan.get("goal") or "（未命名计划）")[:40], plan.get("status") or "待确认"))
+    if not plans:
+        lines.append("- （无）")
+    return "\n".join(lines)
+
+
+def _llm_command_system(now):
+    return (
+        "你是「智能计划管理」应用的一句话办事助手。根据【数据快照】解析用户意图并作答。\n"
+        "当前时间：%s（%s）。\n"
+        "只输出严格 JSON，格式：\n"
+        '{"kind": "answer | redirect | options", "title": "简短标题", "lines": ["结果条目"],'
+        ' "link": {"path": "页面路径", "label": "按钮文字"} 或 null, "options": ["可选指令"]}\n'
+        "要求：\n"
+        "1. 只能引用【数据快照】中的真实数据，禁止编造任务、数量或时间；涉及任务时写明任务名与截止时间；\n"
+        "2. kind=answer 用于数据类问题（今天该做什么、最紧急的任务、延期风险、提醒、计划概览、统计等）："
+        "title 不超过 20 字，lines 1-6 条、每条不超过 60 字；\n"
+        "3. kind=redirect 用于用户想打开某个页面：path 只能是 /plan/input、/plan/confirm、/schedule、"
+        "/dashboard、/data、/settings 之一（可带 ?plan_id= 查询参数）；\n"
+        "4. kind=options 用于无法满足的请求：说明能力边界，并给出 2-4 条 options 指令示例；\n"
+        "5. options 是用户可点击继续执行的指令（不超过 4 条，每条不超过 20 字），不需要时省略该字段；\n"
+        "6. 全部使用中文，不要 Markdown，不要输出 JSON 之外的任何内容。"
+    ) % (now.strftime("%Y-%m-%d %H:%M"), _WEEKDAY_FULL[now.weekday()])
+
+
+def _validate_command_payload(parsed):
+    """严格校验模型返回的指令结果；任何不合规都返回 None。"""
+    if not isinstance(parsed, dict):
+        return None
+    kind = parsed.get("kind")
+    if kind not in ("answer", "redirect", "options"):
+        return None
+    title = parsed.get("title")
+    if not isinstance(title, str) or not title.strip() or len(title.strip()) > 40:
+        return None
+    raw_lines = parsed.get("lines")
+    if not isinstance(raw_lines, list) or not raw_lines:
+        return None
+    lines = []
+    for line in raw_lines[:6]:
+        if not isinstance(line, str) or not line.strip():
+            return None
+        lines.append(line.strip()[:120])
+
+    link = None
+    raw_link = parsed.get("link")
+    if raw_link is not None:
+        if not isinstance(raw_link, dict):
+            return None
+        path = raw_link.get("path")
+        label = raw_link.get("label")
+        if not isinstance(path, str) or not isinstance(label, str) or not label.strip():
+            return None
+        path = path.strip()
+        if not any(path == item or path.startswith(item + "?") for item in _COMMAND_LINK_PATHS):
+            return None
+        if not _COMMAND_PATH_RE.match(path):
+            return None
+        link = {"path": path, "label": label.strip()[:20]}
+    if kind == "redirect" and not link:
+        return None
+
+    options = []
+    raw_options = parsed.get("options") or []
+    if not isinstance(raw_options, list):
+        return None
+    for item in raw_options[:4]:
+        if not isinstance(item, str) or not item.strip():
+            return None
+        options.append(item.strip()[:30])
+    return {"kind": kind, "title": title.strip()[:40], "lines": lines, "link": link, "options": options}
+
+
+def _llm_command(query, store, now):
+    """大模型解析指令意图；返回与规则引擎同构的结果，任何失败返回 None 由调用方兜底。"""
+    parsed = _llm_chat_json(
+        _llm_command_system(now),
+        "【数据快照】\n%s\n\n用户指令：%s" % (_command_snapshot(store, now), query),
+    )
+    checked = _validate_command_payload(parsed)
+    if not checked:
+        return None
+    result = {
+        "ok": True,
+        "matched": checked["kind"] != "options",
+        "kind": checked["kind"],
+        "title": checked["title"],
+        "lines": checked["lines"],
+        "note": "由大模型（%s）解析意图，结果基于本地真实数据。" % os.environ.get("LLM_MODEL", "gpt-4o-mini"),
+    }
+    if checked["link"]:
+        result["link"] = checked["link"]
+    if checked["options"]:
+        result["options"] = checked["options"]
+    return result
+
+
+def handle_command(query, store, now=None):
+    """一句话办事入口：配置了大模型则优先由其解析意图，失败自动兜底规则引擎。"""
+    now = now or datetime.now().replace(microsecond=0)
+    text = (query or "").strip()
+    if not text:
+        return {"ok": False, "message": "请输入要执行的指令。"}
+
+    llm_result = _llm_command(text, store, now) if llm_configured() else None
+    if llm_result:
+        return llm_result
+
+    result = _rule_command(text, store, now)
+    if llm_configured():
+        suffix = "（大模型调用失败或返回非结构化，已由规则引擎兜底）"
+        result["note"] = (result.get("note") + suffix) if result.get("note") else suffix
+    return result

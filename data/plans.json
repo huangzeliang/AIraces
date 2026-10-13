@@ -2726,9 +2726,9 @@
       "priority": "中",
       "estimate_minutes": 120,
       "due_at": "2026-10-19T18:00:00",
-      "scheduled_start_at": "",
-      "planned_finish_at": "",
-      "status": "待安排",
+      "scheduled_start_at": "2026-10-19T16:00:00",
+      "planned_finish_at": "2026-10-19T18:00:00",
+      "status": "待执行",
       "progress": 0,
       "depends_on": [],
       "delay_count": 0,
@@ -2736,7 +2736,7 @@
       "completed_at": "",
       "is_demo": false,
       "created_at": "2026-10-13T22:42:45",
-      "updated_at": "2026-10-13T22:42:45"
+      "updated_at": "2026-10-13T22:57:58"
     },
     {
       "task_id": "T100",
@@ -2748,9 +2748,9 @@
       "priority": "中",
       "estimate_minutes": 60,
       "due_at": "2026-10-14T18:00:00",
-      "scheduled_start_at": "",
-      "planned_finish_at": "",
-      "status": "待安排",
+      "scheduled_start_at": "2026-10-14T17:00:00",
+      "planned_finish_at": "2026-10-14T18:00:00",
+      "status": "待执行",
       "progress": 0,
       "depends_on": [],
       "delay_count": 0,
@@ -2758,7 +2758,7 @@
       "completed_at": "",
       "is_demo": false,
       "created_at": "2026-10-13T22:42:45",
-      "updated_at": "2026-10-13T22:42:45"
+      "updated_at": "2026-10-13T22:57:58"
     },
     {
       "task_id": "T101",
@@ -2770,9 +2770,9 @@
       "priority": "中",
       "estimate_minutes": 60,
       "due_at": "2026-10-17T18:00:00",
-      "scheduled_start_at": "",
-      "planned_finish_at": "",
-      "status": "待安排",
+      "scheduled_start_at": "2026-10-16T17:00:00",
+      "planned_finish_at": "2026-10-16T18:00:00",
+      "status": "待执行",
       "progress": 0,
       "depends_on": [],
       "delay_count": 0,
@@ -2780,7 +2780,7 @@
       "completed_at": "",
       "is_demo": false,
       "created_at": "2026-10-13T22:42:45",
-      "updated_at": "2026-10-13T22:42:45"
+      "updated_at": "2026-10-13T22:57:58"
     },
     {
       "task_id": "T102",
@@ -2792,9 +2792,9 @@
       "priority": "中",
       "estimate_minutes": 60,
       "due_at": "2026-10-16T18:00:00",
-      "scheduled_start_at": "",
-      "planned_finish_at": "",
-      "status": "待安排",
+      "scheduled_start_at": "2026-10-16T16:00:00",
+      "planned_finish_at": "2026-10-16T17:00:00",
+      "status": "待执行",
       "progress": 0,
       "depends_on": [],
       "delay_count": 0,
@@ -2802,7 +2802,7 @@
       "completed_at": "",
       "is_demo": false,
       "created_at": "2026-10-13T22:42:45",
-      "updated_at": "2026-10-13T22:42:45"
+      "updated_at": "2026-10-13T22:57:58"
     },
     {
       "task_id": "T103",
@@ -2814,9 +2814,9 @@
       "priority": "中",
       "estimate_minutes": 60,
       "due_at": "2026-10-19T18:00:00",
-      "scheduled_start_at": "",
-      "planned_finish_at": "",
-      "status": "待安排",
+      "scheduled_start_at": "2026-10-19T17:00:00",
+      "planned_finish_at": "2026-10-19T18:00:00",
+      "status": "待执行",
       "progress": 0,
       "depends_on": [],
       "delay_count": 0,
@@ -2824,7 +2824,7 @@
       "completed_at": "",
       "is_demo": false,
       "created_at": "2026-10-13T22:43:58",
-      "updated_at": "2026-10-13T22:43:58"
+      "updated_at": "2026-10-13T22:57:50"
     },
     {
       "task_id": "T104",
@@ -2836,9 +2836,9 @@
       "priority": "中",
       "estimate_minutes": 60,
       "due_at": "2026-10-21T18:00:00",
-      "scheduled_start_at": "",
-      "planned_finish_at": "",
-      "status": "待安排",
+      "scheduled_start_at": "2026-10-21T17:00:00",
+      "planned_finish_at": "2026-10-21T18:00:00",
+      "status": "待执行",
       "progress": 0,
       "depends_on": [],
       "delay_count": 0,
@@ -2846,7 +2846,7 @@
       "completed_at": "",
       "is_demo": false,
       "created_at": "2026-10-13T22:43:58",
-      "updated_at": "2026-10-13T22:43:58"
+      "updated_at": "2026-10-13T22:57:50"
     },
     {
       "task_id": "T105",
@@ -2858,9 +2858,9 @@
       "priority": "中",
       "estimate_minutes": 60,
       "due_at": "2026-10-23T18:00:00",
-      "scheduled_start_at": "",
-      "planned_finish_at": "",
-      "status": "待安排",
+      "scheduled_start_at": "2026-10-23T16:00:00",
+      "planned_finish_at": "2026-10-23T17:00:00",
+      "status": "待执行",
       "progress": 0,
       "depends_on": [],
       "delay_count": 0,
@@ -2868,7 +2868,7 @@
       "completed_at": "",
       "is_demo": false,
       "created_at": "2026-10-13T22:43:58",
-      "updated_at": "2026-10-13T22:43:58"
+      "updated_at": "2026-10-13T22:57:50"
     },
     {
       "task_id": "T106",
@@ -2880,9 +2880,9 @@
       "priority": "中",
       "estimate_minutes": 60,
       "due_at": "2026-10-24T18:00:00",
-      "scheduled_start_at": "",
-      "planned_finish_at": "",
-      "status": "待安排",
+      "scheduled_start_at": "2026-10-23T17:00:00",
+      "planned_finish_at": "2026-10-23T18:00:00",
+      "status": "待执行",
       "progress": 0,
       "depends_on": [],
       "delay_count": 0,
@@ -2890,7 +2890,7 @@
       "completed_at": "",
       "is_demo": false,
       "created_at": "2026-10-13T22:43:58",
-      "updated_at": "2026-10-13T22:43:58"
+      "updated_at": "2026-10-13T22:57:50"
     }
   ],
   "reminders": [
