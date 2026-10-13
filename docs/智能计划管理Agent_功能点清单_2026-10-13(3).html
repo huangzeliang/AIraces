@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f7ff">
+<title>智能计划管理 Agent · 功能点清单</title>
+<style>
+:root{--font:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;--bg:#f6f7ff;--surface:#fff;--side:#fff;--top:#ffffffeb;--text:#171a3b;--muted:#626d88;--subtle:#748099;--border:#dce0ef;--accent:#3d55ed;--accent-soft:#edf0ff;--focus:#efaa42;--green:#188a70;--green-soft:#def9ed;--orange:#d16b47;--purple:#9d62ef;--purple-soft:#f3eaff;--card-shadow:3px 3px 0 #e3e6f4;--hero:#F9E47E;--hero-2:#FF91A0;--radius:18px;
+--p0:#d92d3a;--p0bg:rgba(217,45,58,.07);--p1:#d16b47;--p1bg:rgba(209,107,71,.08);--p2:#3d55ed;--p2bg:rgba(61,85,237,.07);--p3:#748099;--p3bg:rgba(116,128,153,.09);}
+[data-theme="night"]{--font:Inter,"SF Pro Display","PingFang SC","Microsoft YaHei",system-ui,sans-serif;--bg:#080d1a;--surface:#111c2e;--side:#0b1322;--top:#0b1526eb;--text:#f1f6ff;--muted:#a1b0c6;--subtle:#8798b1;--border:#24344b;--accent:#4ce1cf;--accent-soft:#103d43;--focus:#3de0ce;--green:#57deaa;--green-soft:#15392d;--orange:#ffa96f;--purple:#b39bff;--purple-soft:#292344;--card-shadow:0 8px 24px #0003;--hero:#112B3B;--hero-2:#101B36;--radius:15px;
+--p0:#ff6b6b;--p0bg:rgba(255,107,107,.12);--p1:#ffa96f;--p1bg:rgba(255,169,111,.12);--p2:#4ce1cf;--p2bg:rgba(76,225,207,.12);--p3:#8798b1;--p3bg:rgba(135,152,177,.14);}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 var(--font);transition:background .25s,color .25s}
+a{color:var(--accent);text-decoration:none}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:4px}
+
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;height:62px;padding:0 22px;background:var(--top);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.breadcrumbs{font-size:14px;color:var(--muted)}
+.breadcrumbs span{margin:0 8px;color:var(--subtle)}
+.breadcrumbs strong{color:var(--text)}
+.top-actions{display:flex;align-items:center;gap:12px}
+.theme-toggle{display:flex;align-items:center;gap:7px;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-weight:700;transition:transform .15s,box-shadow .15s}
+.theme-toggle:hover{box-shadow:var(--card-shadow);transform:translateY(-1px)}
+.top-avatar{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--accent);color:#fff;font-weight:800}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 80px}
+
+.hero{margin:34px 0 26px;padding:38px 36px;border-radius:24px;background:linear-gradient(135deg,var(--hero),var(--hero-2));color:#171a3b;position:relative;overflow:hidden}
+[data-theme="night"] .hero{color:#eaf6ff}
+.hero h1{margin:0 0 10px;font-size:33px;letter-spacing:-.5px}
+.hero p{margin:0;max-width:760px;font-size:15px;font-weight:600;opacity:.88}
+.hero .pill{display:inline-block;margin-top:16px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.55);font-size:12px;font-weight:800;color:#171a3b}
+[data-theme="night"] .hero .pill{background:rgba(76,225,207,.18);color:#bff6ee}
+
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 26px}
+nav.toc a{padding:7px 14px;border:1px solid var(--border);border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);background:var(--surface);transition:.15s}
+nav.toc a:hover{color:var(--accent);border-color:var(--accent)}
+section{margin-bottom:46px;scroll-margin-top:80px}
+section>h2{display:flex;align-items:center;gap:10px;font-size:23px;margin:0 0 6px;letter-spacing:-.3px}
+section>h2 .no{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-size:15px;font-weight:900}
+section>.lead{margin:0 0 18px;color:var(--muted);font-size:14px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--card-shadow);padding:20px 22px}
+.card+h3{margin:26px 0 12px;font-size:17px}
+
+/* 统计卡 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--card-shadow);padding:16px 18px}
+.stat .label{font-size:12px;color:var(--muted);font-weight:700}
+.stat .num{font-size:31px;font-weight:900;margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.stat .desc{font-size:12px;color:var(--subtle);margin-top:2px}
+
+/* 表格 */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--subtle);font-size:11.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;background:var(--surface);position:sticky;top:0}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:var(--accent-soft)}
+td code{background:var(--accent-soft);color:var(--accent);padding:2px 7px;border-radius:6px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+td.id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;font-weight:700;white-space:nowrap}
+td.nav1{white-space:nowrap;color:var(--muted);font-size:12.5px}
+td.nav2{white-space:nowrap}
+td.fn{font-weight:700}
+tbody tr.grp td{background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.3px;padding:7px 12px}
+tbody tr.grp em{font-style:normal;font-weight:700;opacity:.7;margin-left:6px}
+tbody tr.grp:hover{background:var(--accent-soft)}
+.navmap{display:flex;flex-direction:column;gap:8px;margin:0 0 18px}
+.navmap .nm{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.navmap .nm1{min-width:84px;font-size:13px;font-weight:800}
+.navmap .nm2{font-size:12px;color:var(--accent);background:var(--accent-soft);border:1px solid var(--border);border-radius:999px;padding:2px 10px}
+td.time{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted)}
+td.risk{color:var(--muted);font-size:12.5px}
+tr.p0{background:var(--p0bg)}tr.p1{background:var(--p1bg)}tr.p2{background:var(--p2bg)}tr.p3{background:var(--p3bg)}
+tr.p0 td:first-child{box-shadow:inset 3px 0 0 var(--p0)}
+tr.p1 td:first-child{box-shadow:inset 3px 0 0 var(--p1)}
+tr.p2 td:first-child{box-shadow:inset 3px 0 0 var(--p2)}
+tr.p3 td:first-child{box-shadow:inset 3px 0 0 var(--p3)}
+
+.pri{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:900;border:1px solid currentColor}
+.pri.p0{color:var(--p0)}.pri.p1{color:var(--p1)}.pri.p2{color:var(--p2)}.pri.p3{color:var(--p3)}
+
+/* 筛选条 */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.filters button{padding:7px 14px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--muted);font-size:13px;font-weight:700;transition:.15s}
+.filters button:hover{border-color:var(--accent);color:var(--accent)}
+.filters button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.filters input{height:38px;padding:0 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-size:13px;min-width:190px;margin-left:auto}
+.filters input::placeholder{color:var(--subtle)}
+
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:800}
+.tag .dot{width:7px;height:7px;border-radius:50%}
+.tag.on{background:var(--green-soft);color:var(--green)}.tag.on .dot{background:var(--green)}
+.tag.off{background:rgba(209,107,71,.14);color:var(--orange)}.tag.off .dot{background:var(--orange)}
+.tag.warn{background:var(--purple-soft);color:var(--purple)}.tag.warn .dot{background:var(--purple)}
+
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:13px 18px;border-radius:0 12px 12px 0;font-size:13.5px;margin-top:14px}
+.callout.warn{border-color:var(--orange);background:rgba(209,107,71,.1)}
+.callout b{color:var(--text)}
+
+ul.plain{color:var(--muted);font-size:14px;line-height:1.9;margin:0;padding-left:20px}
+ul.plain li b,ul.plain li strong{color:var(--text)}
+
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:4px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid var(--border)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:860px){.two{grid-template-columns:1fr}.hero{padding:26px 20px}.hero h1{font-size:26px}.filters input{margin-left:0;width:100%}}
+footer{max-width:1180px;margin:0 auto;padding:24px;color:var(--subtle);font-size:12px;text-align:center;border-top:1px solid var(--border)}
+.note{font-size:12px;color:var(--subtle);margin-top:8px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="breadcrumbs">AI 编码极客挑战赛 <span>/</span> <strong>智能计划管理 Agent · 功能点清单</strong></div>
+  <div class="top-actions">
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="切换到夜晚模式">
+      <span id="theme-icon">☀</span><span id="theme-label">白天</span>
+    </button>
+    <span class="top-avatar">清</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>智能计划管理 Agent · 功能点清单</h1>
+    <p>把自然语言计划转化为可执行任务，自动拆解、排期、定时巡检、弹窗提醒，并随用户反馈动态调整。本清单按 2 小时 AI Coding 落地的 MVP 原则裁剪，分「可落地（三份分工）」与「不可落地（做 demo）」两大部分。</p>
+    <span class="pill">依据：《生成功能清单提示词 V1.1》· 题源：押题《智能计划管理 Agent》· 落地方案：Flask MPA（app.py 单入口）</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="label">功能点总数</div><div class="num" id="c-all">52</div><div class="desc">归一去重 · 3 个一级菜单 · 8 个二级菜单</div></div>
+    <div class="stat"><div class="label">P0 必做</div><div class="num" id="c-P0" style="color:var(--p0)">17</div><div class="desc">构成最小可用闭环</div></div>
+    <div class="stat"><div class="label">2h 可落地</div><div class="num" id="c-land" style="color:var(--green)">42</div><div class="desc">拆为 3 份并行工作清单</div></div>
+    <div class="stat"><div class="label">做 Demo</div><div class="num" id="c-demo" style="color:var(--purple)">10</div><div class="desc">2h 内不落地，演示呈现</div></div>
+  </div>
+
+  <nav class="toc">
+    <a href="#master">① 功能点总表</a>
+    <a href="#split">② 2h 落地 · 三份分工</a>
+    <a href="#demo">③ 2h 不可落地 · Demo</a>
+    <a href="#advice">④ AI Coding 与答辩建议</a>
+    <a href="#cover">⑤ 边界维度覆盖对照</a>
+  </nav>
+
+  <!-- ① 总表 -->
+  <section id="master">
+    <h2><span class="no">1</span>功能点总表</h2>
+    <p class="lead">列：优先级 | 功能ID | 一级菜单 | 二级菜单 | 功能点 | 描述 | 预估AI用时 | 风险点。<strong>一级 / 二级菜单与原型左侧导航一一对应</strong>，行按导航顺序分组；行底色按优先级区分，支持筛选与搜索。</p>
+
+    <div class="navmap">
+      <div class="nm"><span class="nm1">工作台</span><span class="nm2">驾驶舱</span><span class="nm2">任务列表</span><span class="nm2">提醒中心</span></div>
+      <div class="nm"><span class="nm1">计划流程</span><span class="nm2">计划录入</span><span class="nm2">提炼确认</span><span class="nm2">智能排期</span></div>
+      <div class="nm"><span class="nm1">数据与设置</span><span class="nm2">数据管理</span><span class="nm2">系统设置</span></div>
+    </div>
+
+    <div class="filters">
+      <button class="active" data-f="all">全部</button>
+      <button data-f="P0">P0 必做</button>
+      <button data-f="P1">P1 争取做</button>
+      <button data-f="P2">P2 锦上添花</button>
+      <button data-f="P3">P3 视情况做</button>
+      <button data-f="land">2h 可落地</button>
+      <button data-f="demo">做 Demo</button>
+      <input id="q" type="search" placeholder="搜索功能ID / 菜单 / 关键词…">
+    </div>
+
+    <div class="legend">
+      <span><i style="background:var(--p0bg);border-color:var(--p0)"></i>P0 必做 · 最小闭环</span>
+      <span><i style="background:var(--p1bg);border-color:var(--p1)"></i>P1 争取做 · 提升体验</span>
+      <span><i style="background:var(--p2bg);border-color:var(--p2)"></i>P2 锦上添花 · 展示深度</span>
+      <span><i style="background:var(--p3bg);border-color:var(--p3)"></i>P3 视情况做 · 时间不足舍弃</span>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tbl-wrap">
+      <table id="master">
+        <thead>
+          <tr><th>优先级</th><th>功能ID</th><th>一级菜单</th><th>二级菜单</th><th>功能点</th><th>描述</th><th>预估AI用时</th><th>风险点</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr class="grp"><td colspan="8">工作台 · 驾驶舱 <em>11 项</em></td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-601</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">核心KPI总览</td><td>任务总数 / 今日到期 / 完成率 / 延期数 卡片</td><td class="time">15min</td><td class="risk">指标口径需自洽</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-602</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">趋势折线图</td><td>任务完成趋势折线图</td><td class="time">15min</td><td class="risk">图表库依赖（须零依赖手写 SVG）</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-603</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">分布饼/柱图</td><td>按优先级 / 状态 / 菜单分布</td><td class="time">15min</td><td class="risk">同上</td></tr>
+          <tr class="p2" data-p="P2" data-g="land"><td><span class="pri p2">P2</span></td><td class="id">F-604</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">排行榜</td><td>最耗时 / 最常延期任务排行</td><td class="time">12min</td><td class="risk">样本少时无意义</td></tr>
+          <tr class="p2" data-p="P2" data-g="land"><td><span class="pri p2">P2</span></td><td class="id">F-701</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">指标定义</td><td>定义北极星（如"计划按时完成率"）</td><td class="time">10min</td><td class="risk">口径自洽</td></tr>
+          <tr class="p2" data-p="P2" data-g="land"><td><span class="pri p2">P2</span></td><td class="id">F-702</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">子指标拆解</td><td>拆为可执行子指标（完成 / 延期 / 使用频次…）</td><td class="time">20min</td><td class="risk">逻辑链完整</td></tr>
+          <tr class="p2" data-p="P2" data-g="demo"><td><span class="pri p2">P2</span></td><td class="id">F-703</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">拆解树可视化</td><td>层级卡片 + 连线呈现拆解树</td><td class="time">20min</td><td class="risk">布局复杂</td></tr>
+          <tr class="p2" data-p="P2" data-g="demo"><td><span class="pri p2">P2</span></td><td class="id">F-802</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">AI 周报/月报</td><td>自动生成周报 / 月报</td><td class="time">20min</td><td class="risk">生成长度控制</td></tr>
+          <tr class="p2" data-p="P2" data-g="demo"><td><span class="pri p2">P2</span></td><td class="id">F-803</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">智能推荐</td><td>推荐"下一步做什么"</td><td class="time">15min</td><td class="risk">推荐可解释性</td></tr>
+          <tr class="p3" data-p="P3" data-g="demo"><td><span class="pri p3">P3</span></td><td class="id">F-804</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">智能机器人</td><td>问答式机器人入口</td><td class="time">15min</td><td class="risk">对话状态管理</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-1102</td><td class="nav1">工作台</td><td class="nav2">驾驶舱</td><td class="fn">数据动画</td><td>数字滚动 / 图表入场动画</td><td class="time">12min</td><td class="risk">性能开销</td></tr>
+          <tr class="grp"><td colspan="8">工作台 · 任务列表 <em>9 项</em></td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-301</td><td class="nav1">工作台</td><td class="nav2">任务列表</td><td class="fn">任务列表</td><td>分组 / 状态筛选的任务列表</td><td class="time">12min</td><td class="risk">大数据量渲染</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-302</td><td class="nav1">工作台</td><td class="nav2">任务列表</td><td class="fn">完成任务</td><td>标记完成并回写状态</td><td class="time">8min</td><td class="risk">完成触发反馈闭环</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-303</td><td class="nav1">工作台</td><td class="nav2">任务列表</td><td class="fn">延期任务</td><td>延期并记录延期原因 / 次数</td><td class="time">8min</td><td class="risk">延期后需触发重排</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-304</td><td class="nav1">工作台</td><td class="nav2">任务列表</td><td class="fn">取消任务</td><td>取消任务（二次确认）</td><td class="time">8min</td><td class="risk">误操作</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-305</td><td class="nav1">工作台</td><td class="nav2">任务列表</td><td class="fn">进度更新</td><td>0–100% 或分档进度更新</td><td class="time">10min</td><td class="risk">进度口径不统一</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-306</td><td class="nav1">工作台</td><td class="nav2">任务列表</td><td class="fn">编辑 / 删除</td><td>编辑或删除任务</td><td class="time">10min</td><td class="risk">删除需二次确认</td></tr>
+          <tr class="p2" data-p="P2" data-g="land"><td><span class="pri p2">P2</span></td><td class="id">F-307</td><td class="nav1">工作台</td><td class="nav2">任务列表</td><td class="fn">状态日志</td><td>记录任务状态流转历史</td><td class="time">12min</td><td class="risk">日志膨胀</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-501</td><td class="nav1">工作台</td><td class="nav2">任务列表</td><td class="fn">反馈采集</td><td>采集完成 / 延期 / 取消反馈</td><td class="time">10min</td><td class="risk">反馈入口一致性</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-905</td><td class="nav1">工作台</td><td class="nav2">任务列表</td><td class="fn">操作风险</td><td>危险操作（删除 / 取消）二次确认</td><td class="time">8min</td><td class="risk">交互一致性</td></tr>
+          <tr class="grp"><td colspan="8">工作台 · 提醒中心 <em>7 项</em></td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-401</td><td class="nav1">工作台</td><td class="nav2">提醒中心</td><td class="fn">巡检机制</td><td>每 4 小时（可配）扫描待关注 / 临期任务</td><td class="time">20min</td><td class="risk">Flask 后台线程与 web 进程共存</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-402</td><td class="nav1">工作台</td><td class="nav2">提醒中心</td><td class="fn">临期识别</td><td>按截止时间 / 依赖识别需处理事项</td><td class="time">12min</td><td class="risk">时区与边界判定</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-403</td><td class="nav1">工作台</td><td class="nav2">提醒中心</td><td class="fn">提醒弹窗</td><td>页面内弹窗 / Toast 提醒</td><td class="time">12min</td><td class="risk">打断体验，需免打扰</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-404</td><td class="nav1">工作台</td><td class="nav2">提醒中心</td><td class="fn">提醒记录</td><td>提醒历史与已读 / 免打扰设置</td><td class="time">10min</td><td class="risk">状态同步</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-405</td><td class="nav1">工作台</td><td class="nav2">提醒中心</td><td class="fn">桌面通知</td><td>浏览器桌面通知（可选）</td><td class="time">10min</td><td class="risk">需用户授权</td></tr>
+          <tr class="p2" data-p="P2" data-g="demo"><td><span class="pri p2">P2</span></td><td class="id">F-503</td><td class="nav1">工作台</td><td class="nav2">提醒中心</td><td class="fn">习惯适配</td><td>结合用户习惯调整时间与提醒频率（进阶）</td><td class="time">15min</td><td class="risk">需历史数据积累</td></tr>
+          <tr class="p2" data-p="P2" data-g="demo"><td><span class="pri p2">P2</span></td><td class="id">F-903</td><td class="nav1">工作台</td><td class="nav2">提醒中心</td><td class="fn">风险警示通知</td><td>临期 / 逾期 / 依赖冲突 警示通知</td><td class="time">12min</td><td class="risk">误报</td></tr>
+          <tr class="grp"><td colspan="8">计划流程 · 计划录入 <em>3 项</em></td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-101</td><td class="nav1">计划流程</td><td class="nav2">计划录入</td><td class="fn">自然语言输入</td><td>多行文本输入框 + 示例引导（如"下周三前完成季度复盘"）</td><td class="time">10min</td><td class="risk">输入过长导致解析超时/截断</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-801</td><td class="nav1">计划流程</td><td class="nav2">计划录入</td><td class="fn">一句话办事</td><td>自然语言指令操作系统（如"显示本周最紧急任务"）</td><td class="time">20min</td><td class="risk">意图识别边界</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-805</td><td class="nav1">计划流程</td><td class="nav2">计划录入</td><td class="fn">依据说明</td><td>说明拆解 / 时间 / 提醒触发的依据（可解释）</td><td class="time">15min</td><td class="risk">评审关注点，务必保留</td></tr>
+          <tr class="grp"><td colspan="8">计划流程 · 提炼确认 <em>3 项</em></td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-102</td><td class="nav1">计划流程</td><td class="nav2">提炼确认</td><td class="fn">AI 结构化提炼</td><td>调用 LLM 将自然语言解析为目标 / 待办 / 关键时间（JSON）</td><td class="time">20min</td><td class="risk">非结构化输出不稳定，需 JSON 校验 + 兜底</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-103</td><td class="nav1">计划流程</td><td class="nav2">提炼确认</td><td class="fn">提炼结果展示</td><td>目标 / 待办 / 时间三栏卡片展示提炼结果</td><td class="time">12min</td><td class="risk">字段缺失时空态处理</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-104</td><td class="nav1">计划流程</td><td class="nav2">提炼确认</td><td class="fn">结果确认与修改</td><td>提炼结果可编辑后确认入库</td><td class="time">15min</td><td class="risk">编辑后与原文脱钩，需保留来源</td></tr>
+          <tr class="grp"><td colspan="8">计划流程 · 智能排期 <em>7 项</em></td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-201</td><td class="nav1">计划流程</td><td class="nav2">智能排期</td><td class="fn">AI 任务拆解</td><td>复杂任务拆为可执行子步骤（层级结构）</td><td class="time">20min</td><td class="risk">拆解粒度不一致，需约束提示词</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-202</td><td class="nav1">计划流程</td><td class="nav2">智能排期</td><td class="fn">属性建议</td><td>建议优先级 / 预计耗时 / 完成时间点</td><td class="time">15min</td><td class="risk">时间点估算合理性</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-203</td><td class="nav1">计划流程</td><td class="nav2">智能排期</td><td class="fn">排期生成</td><td>依据截止时间 + 可用时间生成可调执行安排</td><td class="time">25min</td><td class="risk">时间轴渲染耗时</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-204</td><td class="nav1">计划流程</td><td class="nav2">智能排期</td><td class="fn">排期手调</td><td>拖拽 / 表单调整排期并落库</td><td class="time">15min</td><td class="risk">前端状态与后端冲突</td></tr>
+          <tr class="p2" data-p="P2" data-g="demo"><td><span class="pri p2">P2</span></td><td class="id">F-205</td><td class="nav1">计划流程</td><td class="nav2">智能排期</td><td class="fn">依赖识别</td><td>识别任务间依赖，避免不合理安排（进阶）</td><td class="time">20min</td><td class="risk">LLM 依赖识别准确率低</td></tr>
+          <tr class="p2" data-p="P2" data-g="land"><td><span class="pri p2">P2</span></td><td class="id">F-206</td><td class="nav1">计划流程</td><td class="nav2">智能排期</td><td class="fn">重排建议</td><td>计划变化时自动给出重排建议</td><td class="time">15min</td><td class="risk">建议与用户预期不符</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-502</td><td class="nav1">计划流程</td><td class="nav2">智能排期</td><td class="fn">动态重排</td><td>依据反馈更新后续安排</td><td class="time">18min</td><td class="risk">调整逻辑与用户预期不符</td></tr>
+          <tr class="grp"><td colspan="8">数据与设置 · 数据管理 <em>7 项</em></td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-901</td><td class="nav1">数据与设置</td><td class="nav2">数据管理</td><td class="fn">异常数据标记</td><td>标记无法解析 / 时间冲突的异常数据</td><td class="time">12min</td><td class="risk">规则覆盖不全</td></tr>
+          <tr class="p3" data-p="P3" data-g="demo"><td><span class="pri p3">P3</span></td><td class="id">F-902</td><td class="nav1">数据与设置</td><td class="nav2">数据管理</td><td class="fn">补处理 / 补录</td><td>异常补处理与数据补录入口</td><td class="time">12min</td><td class="risk">流程拉长</td></tr>
+          <tr class="p2" data-p="P2" data-g="land"><td><span class="pri p2">P2</span></td><td class="id">F-904</td><td class="nav1">数据与设置</td><td class="nav2">数据管理</td><td class="fn">数据合规脱敏</td><td>敏感信息脱敏展示</td><td class="time">10min</td><td class="risk">脱敏规则覆盖</td></tr>
+          <tr class="p3" data-p="P3" data-g="land"><td><span class="pri p3">P3</span></td><td class="id">F-906</td><td class="nav1">数据与设置</td><td class="nav2">数据管理</td><td class="fn">性能风险</td><td>大数据量 / 长文本 性能提示</td><td class="time">10min</td><td class="risk">时间不足可舍弃</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-1001</td><td class="nav1">数据与设置</td><td class="nav2">数据管理</td><td class="fn">本地持久化</td><td>plans.json / users.json 读写闭环（读→校验→加锁写→刷新）</td><td class="time">12min</td><td class="risk">并发写冲突</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-1002</td><td class="nav1">数据与设置</td><td class="nav2">数据管理</td><td class="fn">数据导入</td><td>导入 CSV / Excel 计划</td><td class="time">15min</td><td class="risk">编码 / 表头兼容</td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-1003</td><td class="nav1">数据与设置</td><td class="nav2">数据管理</td><td class="fn">数据导出</td><td>导出 JSON / CSV / 明细</td><td class="time">12min</td><td class="risk">字段完整性</td></tr>
+          <tr class="grp"><td colspan="8">数据与设置 · 系统设置 <em>5 项</em></td></tr>
+          <tr class="p1" data-p="P1" data-g="land"><td><span class="pri p1">P1</span></td><td class="id">F-1004</td><td class="nav1">数据与设置</td><td class="nav2">系统设置</td><td class="fn">权限模拟</td><td>URL 参数 / localStorage 切管理员 / 普通用户视图</td><td class="time">12min</td><td class="risk">仅为演示，非真权限</td></tr>
+          <tr class="p2" data-p="P2" data-g="demo"><td><span class="pri p2">P2</span></td><td class="id">F-1005</td><td class="nav1">数据与设置</td><td class="nav2">系统设置</td><td class="fn">生态接入</td><td>一键接入企业微信 / 钉钉通知（配置占位，展示架构思维）</td><td class="time">10min</td><td class="risk">不真实生效</td></tr>
+          <tr class="p0" data-p="P0" data-g="land"><td><span class="pri p0">P0</span></td><td class="id">F-1101</td><td class="nav1">数据与设置</td><td class="nav2">系统设置</td><td class="fn">主题切换</td><td>暗黑 / 白天主题（复用 tokens.css + theme.js）</td><td class="time">8min</td><td class="risk">须遵守 Northstar 规范</td></tr>
+          <tr class="p2" data-p="P2" data-g="demo"><td><span class="pri p2">P2</span></td><td class="id">F-1103</td><td class="nav1">数据与设置</td><td class="nav2">系统设置</td><td class="fn">AI 吉祥物</td><td>SVG / Canvas 状态表情（空闲 / 繁忙 / 警告）</td><td class="time">15min</td><td class="risk">绘制工作量</td></tr>
+          <tr class="p3" data-p="P3" data-g="land"><td><span class="pri p3">P3</span></td><td class="id">F-1104</td><td class="nav1">数据与设置</td><td class="nav2">系统设置</td><td class="fn">快捷键 / 无障碍</td><td>键盘快捷键与焦点可见</td><td class="time">10min</td><td class="risk">时间不足可舍弃</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <p class="note">合计 52 项：P0 17 · P1 17 · P2 14 · P3 4。预估 AI 用时为"AI Coding 单点实现"参考值，非人工耗时。</p>
+  </section>
+
+  <!-- ② 三份分工 -->
+  <section id="split">
+    <h2><span class="no">2</span>2h 内可落地 · 三份并行工作清单</h2>
+    <p class="lead">按功能耦合度与文件归属切分，三人各拥一条业务线、各占独立页面与路由文件，尽量不产生代码冲突。</p>
+
+    <div class="callout">
+      <b>开工前 20min 三人共同锁定（之后冻结）：</b> <code>app.py</code>（路由注册 / 通用校验 / 线程锁 / 读写）、<code>layout.html</code>、<code>css/tokens.css</code>、<code>js/theme.js</code>、<code>components/</code>。约定：每人只在 <code>backend/</code> 下新增自己的路由模块并由 <code>app.py</code> 统一 import；只改自己 <code>pages/&lt;name&gt;.*</code> 与 <code>css|js/pages/&lt;name&gt;.*</code>。
+    </div>
+
+    <h3>工作清单 A · 计划线与解析线（核心链路，约 182min）</h3>
+    <p class="lead">对应原型导航：一级「计划流程」— 二级「计划录入 / 提炼确认 / 智能排期」</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>功能ID</th><th>优先级</th><th>二级菜单</th><th>功能点</th><th>用时</th><th>归属文件</th></tr></thead>
+        <tbody>
+          <tr><td class="id">F-101</td><td><span class="pri p0">P0</span></td><td class="nav2">计划录入</td><td class="fn">自然语言输入</td><td class="time">10</td><td><code>pages/plan_input.html · css|js/pages/plan_input.*</code></td></tr>
+          <tr><td class="id">F-102</td><td><span class="pri p0">P0</span></td><td class="nav2">提炼确认</td><td class="fn">AI 结构化提炼</td><td class="time">20</td><td><code>backend/plan.py</code></td></tr>
+          <tr><td class="id">F-103</td><td><span class="pri p0">P0</span></td><td class="nav2">提炼确认</td><td class="fn">提炼结果展示</td><td class="time">12</td><td><code>pages/plan_confirm.html</code></td></tr>
+          <tr><td class="id">F-104</td><td><span class="pri p0">P0</span></td><td class="nav2">提炼确认</td><td class="fn">结果确认与修改</td><td class="time">15</td><td><code>backend/plan.py · pages/plan_confirm.*</code></td></tr>
+          <tr><td class="id">F-201</td><td><span class="pri p0">P0</span></td><td class="nav2">智能排期</td><td class="fn">AI 任务拆解</td><td class="time">20</td><td><code>backend/plan.py</code></td></tr>
+          <tr><td class="id">F-202</td><td><span class="pri p0">P0</span></td><td class="nav2">智能排期</td><td class="fn">属性建议</td><td class="time">15</td><td><code>backend/plan.py</code></td></tr>
+          <tr><td class="id">F-203</td><td><span class="pri p0">P0</span></td><td class="nav2">智能排期</td><td class="fn">排期生成</td><td class="time">25</td><td><code>backend/schedule.py · pages/schedule.*</code></td></tr>
+          <tr><td class="id">F-204</td><td><span class="pri p1">P1</span></td><td class="nav2">智能排期</td><td class="fn">排期手调</td><td class="time">15</td><td><code>pages/schedule.js · backend/schedule.py</code></td></tr>
+          <tr><td class="id">F-206</td><td><span class="pri p2">P2</span></td><td class="nav2">智能排期</td><td class="fn">重排建议</td><td class="time">15</td><td><code>backend/schedule.py</code></td></tr>
+          <tr><td class="id">F-801</td><td><span class="pri p1">P1</span></td><td class="nav2">计划录入</td><td class="fn">一句话办事</td><td class="time">20</td><td><code>backend/plan.py · pages/plan_input.*</code></td></tr>
+          <tr><td class="id">F-805</td><td><span class="pri p1">P1</span></td><td class="nav2">计划录入</td><td class="fn">依据说明</td><td class="time">15</td><td><code>backend/plan.py · pages/plan_confirm.*</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <h3>工作清单 B · 执行线与巡检线（约 190min）</h3>
+    <p class="lead">对应原型导航：一级「工作台」— 二级「任务列表 / 提醒中心」</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>功能ID</th><th>优先级</th><th>二级菜单</th><th>功能点</th><th>用时</th><th>归属文件</th></tr></thead>
+        <tbody>
+          <tr><td class="id">F-301</td><td><span class="pri p0">P0</span></td><td class="nav2">任务列表</td><td class="fn">任务列表</td><td class="time">12</td><td><code>pages/tasks.*</code></td></tr>
+          <tr><td class="id">F-302</td><td><span class="pri p0">P0</span></td><td class="nav2">任务列表</td><td class="fn">完成任务</td><td class="time">8</td><td><code>backend/task_ops.py</code></td></tr>
+          <tr><td class="id">F-303</td><td><span class="pri p0">P0</span></td><td class="nav2">任务列表</td><td class="fn">延期任务</td><td class="time">8</td><td><code>backend/task_ops.py</code></td></tr>
+          <tr><td class="id">F-304</td><td><span class="pri p1">P1</span></td><td class="nav2">任务列表</td><td class="fn">取消任务</td><td class="time">8</td><td><code>backend/task_ops.py</code></td></tr>
+          <tr><td class="id">F-305</td><td><span class="pri p1">P1</span></td><td class="nav2">任务列表</td><td class="fn">进度更新</td><td class="time">10</td><td><code>backend/task_ops.py · pages/tasks.js</code></td></tr>
+          <tr><td class="id">F-306</td><td><span class="pri p1">P1</span></td><td class="nav2">任务列表</td><td class="fn">编辑 / 删除</td><td class="time">10</td><td><code>backend/task_ops.py</code></td></tr>
+          <tr><td class="id">F-307</td><td><span class="pri p2">P2</span></td><td class="nav2">任务列表</td><td class="fn">状态日志</td><td class="time">12</td><td><code>backend/task_ops.py</code></td></tr>
+          <tr><td class="id">F-401</td><td><span class="pri p0">P0</span></td><td class="nav2">提醒中心</td><td class="fn">巡检机制</td><td class="time">20</td><td><code>backend/scheduler.py</code></td></tr>
+          <tr><td class="id">F-402</td><td><span class="pri p0">P0</span></td><td class="nav2">提醒中心</td><td class="fn">临期识别</td><td class="time">12</td><td><code>backend/scheduler.py</code></td></tr>
+          <tr><td class="id">F-403</td><td><span class="pri p0">P0</span></td><td class="nav2">提醒中心</td><td class="fn">提醒弹窗</td><td class="time">12</td><td><code>pages/reminders.* · js/pages/reminders.js</code></td></tr>
+          <tr><td class="id">F-404</td><td><span class="pri p1">P1</span></td><td class="nav2">提醒中心</td><td class="fn">提醒记录</td><td class="time">10</td><td><code>backend/scheduler.py · pages/reminders.*</code></td></tr>
+          <tr><td class="id">F-405</td><td><span class="pri p1">P1</span></td><td class="nav2">提醒中心</td><td class="fn">桌面通知</td><td class="time">10</td><td><code>js/pages/reminders.js</code></td></tr>
+          <tr><td class="id">F-501</td><td><span class="pri p0">P0</span></td><td class="nav2">任务列表</td><td class="fn">反馈采集</td><td class="time">10</td><td><code>backend/feedback.py</code></td></tr>
+          <tr><td class="id">F-502</td><td><span class="pri p0">P0</span></td><td class="nav2">智能排期</td><td class="fn">动态重排</td><td class="time">18</td><td><code>backend/feedback.py · backend/schedule.py</code></td></tr>
+          <tr><td class="id">F-901</td><td><span class="pri p1">P1</span></td><td class="nav2">数据管理</td><td class="fn">异常数据标记</td><td class="time">12</td><td><code>backend/task_ops.py</code></td></tr>
+          <tr><td class="id">F-905</td><td><span class="pri p1">P1</span></td><td class="nav2">任务列表</td><td class="fn">操作风险</td><td class="time">8</td><td><code>pages/tasks.js</code></td></tr>
+          <tr><td class="id">F-906</td><td><span class="pri p3">P3</span></td><td class="nav2">数据管理</td><td class="fn">性能风险</td><td class="time">10</td><td><code>backend/task_ops.py</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+
+    <h3>工作清单 C · 看板 / 数据 / 体验线（约 168min）</h3>
+    <p class="lead">对应原型导航：一级「工作台 · 驾驶舱」+「数据与设置」— 二级「驾驶舱 / 数据管理 / 系统设置」</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>功能ID</th><th>优先级</th><th>二级菜单</th><th>功能点</th><th>用时</th><th>归属文件</th></tr></thead>
+        <tbody>
+          <tr><td class="id">F-601</td><td><span class="pri p1">P1</span></td><td class="nav2">驾驶舱</td><td class="fn">核心KPI总览</td><td class="time">15</td><td><code>pages/dashboard.* · backend/stats.py</code></td></tr>
+          <tr><td class="id">F-602</td><td><span class="pri p1">P1</span></td><td class="nav2">驾驶舱</td><td class="fn">趋势折线图</td><td class="time">15</td><td><code>pages/dashboard.js · backend/stats.py</code></td></tr>
+          <tr><td class="id">F-603</td><td><span class="pri p1">P1</span></td><td class="nav2">驾驶舱</td><td class="fn">分布饼/柱图</td><td class="time">15</td><td><code>pages/dashboard.js · backend/stats.py</code></td></tr>
+          <tr><td class="id">F-604</td><td><span class="pri p2">P2</span></td><td class="nav2">驾驶舱</td><td class="fn">排行榜</td><td class="time">12</td><td><code>backend/stats.py</code></td></tr>
+          <tr><td class="id">F-701</td><td><span class="pri p2">P2</span></td><td class="nav2">驾驶舱</td><td class="fn">指标定义</td><td class="time">10</td><td><code>backend/stats.py</code></td></tr>
+          <tr><td class="id">F-702</td><td><span class="pri p2">P2</span></td><td class="nav2">驾驶舱</td><td class="fn">子指标拆解</td><td class="time">20</td><td><code>backend/stats.py · pages/dashboard.*</code></td></tr>
+          <tr><td class="id">F-904</td><td><span class="pri p2">P2</span></td><td class="nav2">数据管理</td><td class="fn">数据合规脱敏</td><td class="time">10</td><td><code>backend/data_io.py</code></td></tr>
+          <tr><td class="id">F-1001</td><td><span class="pri p0">P0</span></td><td class="nav2">数据管理</td><td class="fn">本地持久化</td><td class="time">12</td><td><code>app.py · data/*.json</code></td></tr>
+          <tr><td class="id">F-1002</td><td><span class="pri p1">P1</span></td><td class="nav2">数据管理</td><td class="fn">数据导入</td><td class="time">15</td><td><code>pages/data_mgmt.* · backend/data_io.py</code></td></tr>
+          <tr><td class="id">F-1003</td><td><span class="pri p1">P1</span></td><td class="nav2">数据管理</td><td class="fn">数据导出</td><td class="time">12</td><td><code>backend/data_io.py</code></td></tr>
+          <tr><td class="id">F-1004</td><td><span class="pri p1">P1</span></td><td class="nav2">系统设置</td><td class="fn">权限模拟</td><td class="time">12</td><td><code>app.py · pages/settings.*</code></td></tr>
+          <tr><td class="id">F-1101</td><td><span class="pri p0">P0</span></td><td class="nav2">系统设置</td><td class="fn">主题切换</td><td class="time">8</td><td><code>css/tokens.css · js/theme.js · layout.html</code></td></tr>
+          <tr><td class="id">F-1102</td><td><span class="pri p1">P1</span></td><td class="nav2">驾驶舱</td><td class="fn">数据动画</td><td class="time">12</td><td><code>css/pages/dashboard.css · js/pages/dashboard.js</code></td></tr>
+          <tr><td class="id">F-1104</td><td><span class="pri p3">P3</span></td><td class="nav2">系统设置</td><td class="fn">快捷键 / 无障碍</td><td class="time">10</td><td><code>layout.html · js/theme.js</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <p class="note">用时单位 min。合计约 540min ÷ 3 人 ≈ 每条线 180min，与 2h 窗口基本吻合（按 AI Coding 并行推进）。A 线为核心链路，建议最先跑通端到端。</p>
+  </section>
+
+  <!-- ③ Demo -->
+  <section id="demo">
+    <h2><span class="no">3</span>2h 内不可落地 · Demo 清单</h2>
+    <p class="lead">以下 10 项 2h 内难以完整落地，改为"可演示"呈现——用静态页、mock 数据、预置样例或配置占位展示设计思路，答辩时讲清即可。</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>功能ID</th><th>优先级</th><th>二级菜单</th><th>功能点</th><th>Demo 呈现方式</th></tr></thead>
+        <tbody>
+          <tr><td class="id">F-205</td><td><span class="pri p2">P2</span></td><td class="nav2">智能排期</td><td class="fn">任务依赖关系识别</td><td>预置一张"依赖关系图"静态页 + 一条"会冲突的排期"样例，讲清进阶思路</td></tr>
+          <tr><td class="id">F-503</td><td><span class="pri p2">P2</span></td><td class="nav2">提醒中心</td><td class="fn">基于用户习惯调整</td><td>mock 一份"习惯画像"卡片（常用时段 / 平均完成时长），说明未来如何驱动提醒频率</td></tr>
+          <tr><td class="id">F-703</td><td><span class="pri p2">P2</span></td><td class="nav2">驾驶舱</td><td class="fn">北极星拆解树可视化</td><td>用 SVG 画一棵静态拆解树（按时完成率→完成/延期/使用频次），做成交互 hover</td></tr>
+          <tr><td class="id">F-802</td><td><span class="pri p2">P2</span></td><td class="nav2">驾驶舱</td><td class="fn">AI 周报 / 月报</td><td>预生成一份样例周报（文本 + 关键指标），页面按钮点击"生成"，演示不接实时 LLM</td></tr>
+          <tr><td class="id">F-803</td><td><span class="pri p2">P2</span></td><td class="nav2">驾驶舱</td><td class="fn">智能推荐</td><td>固定返回 3 条"下一步建议"卡片，附推荐理由文案</td></tr>
+          <tr><td class="id">F-804</td><td><span class="pri p3">P3</span></td><td class="nav2">驾驶舱</td><td class="fn">智能机器人</td><td>展示一个对话窗壳 + 预设 2 轮问答，作为架构预留入口</td></tr>
+          <tr><td class="id">F-902</td><td><span class="pri p3">P3</span></td><td class="nav2">数据管理</td><td class="fn">补处理 / 补录</td><td>异常任务卡片上的"补录"按钮，弹一个表单壳（不真写逻辑）</td></tr>
+          <tr><td class="id">F-903</td><td><span class="pri p2">P2</span></td><td class="nav2">提醒中心</td><td class="fn">风险引擎 / 警示</td><td>预置 2 条风险事件（临期 / 逾期）在提醒中心静态展示</td></tr>
+          <tr><td class="id">F-1005</td><td><span class="pri p2">P2</span></td><td class="nav2">系统设置</td><td class="fn">企业微信 / 钉钉接入</td><td>设置页放一个"通知渠道"开关 + Webhook 输入框（占位，不真发），展示生态架构思维</td></tr>
+          <tr><td class="id">F-1103</td><td><span class="pri p2">P2</span></td><td class="nav2">系统设置</td><td class="fn">AI 吉祥物</td><td>SVG 静态 3 表情（空闲 / 繁忙 / 警告），按钮切换演示状态映射</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ 建议 -->
+  <section id="advice">
+    <h2><span class="no">4</span>AI Coding 与答辩演示建议</h2>
+    <div class="two">
+      <div class="card">
+        <h3 style="margin-top:0">AI Coding 协作建议</h3>
+        <ul class="plain">
+          <li><b>先锁公共接口再并行</b>：<code>app.py</code>/<code>layout.html</code>/<code>tokens.css</code> 三人开工前统一，冻结后各自只改自己的页面与路由文件，避免冲突。</li>
+          <li><b>LLM 调用统一封装</b>：<code>backend/llm.py</code> 统一提示词 + JSON schema 校验 + 超时兜底；非结构化输出用规则/正则二次兜底。</li>
+          <li><b>巡检与写盘加锁</b>：后台线程 + 全局锁写 JSON，沿用"读取→校验→加锁写→刷新"闭环，防止并发写坏数据。</li>
+          <li><b>零依赖图表</b>：遵守 UI 规范禁外部库，折线/饼图用原生 SVG 手写。</li>
+          <li><b>预留 mock 开关</b>：无网络/无 Key 时用本地样例数据，保证演示不崩。</li>
+          <li><b>每页自检</b>：改完在白天/夜晚两主题各截一次图，核对对比度、表格可读性、窄屏布局。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">答辩演示建议</h3>
+        <ul class="plain">
+          <li><b>演示动线（对应题目"完整呈现"）</b>：输入计划 → 自动拆解 → 安排时间 → 触发巡检 → 弹窗提醒 → 反馈延期 → 动态重排。</li>
+          <li><b>准备一条"事故剧本"</b>：故意让一个任务延期，现场展示"风险警示 + 自动重排"。</li>
+          <li><b>紧扣 5 大评审关注点</b>：拆解准确性、排期合理性、提醒及时性、交互体验、完整度——每条都点一句证据。</li>
+          <li><b>用"依据说明"加分</b>：主动说明"为什么这样拆 / 排 / 提醒"，回应可解释性。</li>
+          <li><b>30 秒体验彩蛋</b>：双主题切换 + 数据动画 + 吉祥物状态，快速拉体验分。</li>
+          <li><b>讲清 Agent 工作方式</b>：LLM 解析 → 规则排期 → 定时器巡检 → 反馈闭环，一句话说透架构。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 覆盖对照 -->
+  <section id="cover">
+    <h2><span class="no">5</span>边界维度覆盖对照（对提示词 7 大维度）</h2>
+    <p class="lead">证明"功能点边界场景闭环、维度齐全"，每条维度均有功能点落点，答辩可直接引用。</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>提示词维度</th><th>落点功能ID</th></tr></thead>
+        <tbody>
+          <tr><td>数据流闭环（产生→校验→存储→加工→可视化→编辑删除→异常标记→补录→导出→权限→脱敏）</td><td class="id">F-101/102 · F-102 · F-1001 · F-201/202 · F-601/602/603 · F-306 · F-901 · F-902 · F-1003 · F-1004 · F-904</td></tr>
+          <tr><td>客户/计划生命周期闭环（进入→执行→完成或退出）</td><td class="id">F-101 → F-301/302/303/304/305（完成 / 延期 / 取消 / 进度）</td></tr>
+          <tr><td>赋能运营 · 数据驾驶舱</td><td class="id">F-601（任务总数 / 今日到期 / 完成率 / 延期数）</td></tr>
+          <tr><td>赋能运营 · 关键指标看板</td><td class="id">F-602（趋势折线）· F-603（分布饼/柱）· F-604（排行榜）</td></tr>
+          <tr><td>赋能运营 · 北极星体系拆解看板</td><td class="id">F-701（指标定义）· F-702（子指标拆解）· F-703（拆解树）</td></tr>
+          <tr><td>AI 特色小功能</td><td class="id">F-801（一句话办事）· F-802（AI 周报）· F-803（智能推荐）· F-804（机器人）· F-805（依据说明）</td></tr>
+          <tr><td>风险警示（通知 / 补处理 / 合规 / 操作 / 性能）</td><td class="id">F-903 · F-902 · F-904 · F-905 · F-906</td></tr>
+          <tr><td>与现有系统生态融合</td><td class="id">F-1002（导入 CSV/Excel）· F-1005（企微 / 钉钉配置占位）</td></tr>
+          <tr><td>创意功能 / 情绪价值</td><td class="id">F-1101（主题切换）· F-1102（数据动画）· F-1103（AI 吉祥物）· F-1104（快捷键无障碍）</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+    <div class="callout warn">
+      <b>取舍提示：</b>P0 只保"输入→拆解→排期→巡检→提醒→反馈"最小闭环；P1 提升体验；P2/P3 用于展示深度与架构思维。若 2h 紧张，优先砍 P3（F-804/F-902/F-906/F-1104）与 demo 项，P0 一项都不能少。
+    </div>
+  </section>
+
+</div>
+
+<footer>智能计划管理 Agent · 功能点清单 · 依据《生成功能清单提示词 V1.1》生成 · 单文件 HTML 可直接双击打开</footer>
+
+<script>
+// 主题切换（复刻 theme.js：localStorage 键 northstar-theme）
+const themeToggle = document.querySelector('#theme-toggle');
+const themeLabel = document.querySelector('#theme-label');
+const themeIcon = document.querySelector('#theme-icon');
+function applyTheme(theme){
+  const isNight = theme === 'night';
+  document.documentElement.dataset.theme = isNight ? 'night' : 'day';
+  document.querySelector('meta[name="theme-color"]').content = isNight ? '#080d1a' : '#f6f7ff';
+  themeToggle.setAttribute('aria-pressed', String(isNight));
+  themeToggle.setAttribute('aria-label', isNight ? '切换到白天模式' : '切换到夜晚模式');
+  themeLabel.textContent = isNight ? '夜晚' : '白天';
+  themeIcon.textContent = isNight ? '☾' : '☀';
+}
+applyTheme(localStorage.getItem('northstar-theme') === 'night' ? 'night' : 'day');
+themeToggle.addEventListener('click', () => {
+  const next = document.documentElement.dataset.theme === 'night' ? 'day' : 'night';
+  localStorage.setItem('northstar-theme', next);
+  applyTheme(next);
+});
+
+// 总表筛选 + 搜索
+const rows = Array.from(document.querySelectorAll('#master tbody tr:not(.grp)'));
+const grps = Array.from(document.querySelectorAll('#master tbody tr.grp'));
+const btns = Array.from(document.querySelectorAll('.filters button'));
+const q = document.querySelector('#q');
+let activeF = 'all';
+function applyFilter(){
+  const kw = q.value.trim().toLowerCase();
+  rows.forEach(r=>{
+    const okF = activeF === 'all' || r.dataset.p === activeF || r.dataset.g === activeF;
+    const okQ = !kw || r.textContent.toLowerCase().includes(kw);
+    r.style.display = (okF && okQ) ? '' : 'none';
+  });
+  grps.forEach(g=>{
+    let el = g.nextElementSibling, show = false;
+    while (el && !el.classList.contains('grp')) {
+      if (el.style.display !== 'none') { show = true; break; }
+      el = el.nextElementSibling;
+    }
+    g.style.display = show ? '' : 'none';
+  });
+}
+btns.forEach(b=>b.addEventListener('click', ()=>{
+  btns.forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  activeF = b.dataset.f;
+  applyFilter();
+}));
+q.addEventListener('input', applyFilter);
+
+// 统计
+const cnt = p => rows.filter(r=>r.dataset.p===p).length;
+const cg  = g => rows.filter(r=>r.dataset.g===g).length;
+document.querySelector('#c-all').textContent = rows.length;
+document.querySelector('#c-P0').textContent = cnt('P0');
+document.querySelector('#c-land').textContent = cg('land');
+document.querySelector('#c-demo').textContent = cg('demo');
+</script>
+</body>
+</html>
