@@ -118,6 +118,117 @@
       ],
       "created_at": "2026-10-13T22:19:47",
       "confirmed_at": "2026-10-13T22:20:11"
+    },
+    {
+      "plan_id": "P20261013004",
+      "user_id": "U001",
+      "raw_text": "筹备年度总结会：先汇总各团队的年度经营数据，再整理成汇报材料；下周完成初稿并组织预审，月底前定稿发布。",
+      "goal": "筹备年度总结会",
+      "status": "已确认",
+      "parse_engine": "大模型",
+      "basis": [
+        {
+          "item": "解析引擎",
+          "detail": "大模型（deepseek-flash），返回结果已通过 JSON 结构校验。"
+        },
+        {
+          "item": "目标",
+          "detail": "由模型从原文提炼，共 7 字"
+        },
+        {
+          "item": "待办",
+          "detail": "由模型拆分 6 条：汇总各团队的年度经营数据、整理汇总数据，梳理汇报逻、完成年度总结会汇报材料初、组织预审会，邀请相关负责、根据预审意见修订汇报材料、发布定稿并下发会议材料，"
+        },
+        {
+          "item": "关键时间",
+          "detail": "「完成年度总结会汇报材料初稿」← 模型返回时间 10-23 18:00；「组织预审会，邀请相关负责人评」← 模型返回时间 10-23 18:00；「根据预审意见修订汇报材料并定」← 模型返回时间 10-31 18:00；「发布定稿并下发会议材料，完成」← 模型返回时间 10-31 18:00；全篇时间「月底」→ 10-31 18:00（作为 2 条待办的统一截止：汇总各团队的年度经营数据，统、整理汇总数据，梳理汇报逻辑与）"
+        }
+      ],
+      "created_at": "2026-10-13T22:32:54",
+      "confirmed_at": "2026-10-13T22:33:25"
+    },
+    {
+      "plan_id": "P20261013003",
+      "user_id": "U001",
+      "raw_text": "下周先写一个需求，然后完成一个项目，然后再表演一次节目，最后再打一场桌游。",
+      "goal": "下周依次完成写需求、做项目、表演节目和打桌游。",
+      "status": "待确认",
+      "parse_engine": "大模型",
+      "basis": [
+        {
+          "item": "解析引擎",
+          "detail": "大模型（deepseek-flash），返回结果已通过 JSON 结构校验。"
+        },
+        {
+          "item": "目标",
+          "detail": "由模型从原文提炼，共 23 字"
+        },
+        {
+          "item": "待办",
+          "detail": "由模型拆分 4 条：写一个需求、完成一个项目、表演一次节目、打一场桌游"
+        },
+        {
+          "item": "关键时间",
+          "detail": "「写一个需求」← 模型返回时间 10-25 18:00；「完成一个项目」← 模型返回时间 10-25 18:00；「表演一次节目」← 模型返回时间 10-25 18:00；「打一场桌游」← 模型返回时间 10-25 18:00"
+        }
+      ],
+      "created_at": "2026-10-13T22:39:16"
+    },
+    {
+      "plan_id": "P20261013005",
+      "user_id": "U001",
+      "raw_text": "下周一我要写一个需求，周三我要打一场比赛，周六周日我要玩一场桌游，周五我要表演节目。",
+      "goal": "安排下周的需求撰写、比赛、桌游与节目表演",
+      "status": "已确认",
+      "parse_engine": "大模型",
+      "basis": [
+        {
+          "item": "解析引擎",
+          "detail": "大模型（deepseek-flash），返回结果已通过 JSON 结构校验。"
+        },
+        {
+          "item": "目标",
+          "detail": "由模型从原文提炼，共 20 字"
+        },
+        {
+          "item": "待办",
+          "detail": "由模型拆分 4 条：撰写需求文档、参加比赛、参加桌游活动、表演节目"
+        },
+        {
+          "item": "关键时间",
+          "detail": "「撰写需求文档」← 模型返回时间 10-19 18:00；「参加比赛」← 模型返回时间 10-14 18:00；「参加桌游活动」← 模型返回时间 10-17 18:00；「表演节目」← 模型返回时间 10-16 18:00"
+        }
+      ],
+      "created_at": "2026-10-13T22:42:13",
+      "confirmed_at": "2026-10-13T22:42:45"
+    },
+    {
+      "plan_id": "P20261013006",
+      "user_id": "U001",
+      "raw_text": "下周周一我要写一个需求，下周周三我要打一场比赛，下周的周五我要表演节目，下周周六我要打桌游。",
+      "goal": "下周完成写需求、比赛、表演节目和打桌游等安排",
+      "status": "已确认",
+      "parse_engine": "大模型",
+      "basis": [
+        {
+          "item": "解析引擎",
+          "detail": "大模型（deepseek-flash），返回结果已通过 JSON 结构校验。"
+        },
+        {
+          "item": "目标",
+          "detail": "由模型从原文提炼，共 22 字"
+        },
+        {
+          "item": "待办",
+          "detail": "由模型拆分 4 条：写一个需求、打一场比赛、表演节目、打桌游"
+        },
+        {
+          "item": "关键时间",
+          "detail": "「写一个需求」← 模型返回时间 10-19 18:00；「打一场比赛」← 模型返回时间 10-21 18:00；「表演节目」← 模型返回时间 10-23 18:00；「打桌游」← 模型返回时间 10-24 18:00"
+        }
+      ],
+      "created_at": "2026-10-13T22:43:50",
+      "confirmed_at": "2026-10-13T22:43:58"
     }
   ],
   "todos": [
@@ -324,6 +435,114 @@
       "plan_id": "P20261013002",
       "content": "完成我的工作总结",
       "key_time": ""
+    },
+    {
+      "todo_id": "D041",
+      "plan_id": "P20261013004",
+      "content": "汇总各团队的年度经营数据，统一统计口径与时间范围",
+      "key_time": "2026-10-31T18:00:00"
+    },
+    {
+      "todo_id": "D042",
+      "plan_id": "P20261013004",
+      "content": "整理汇总数据，梳理汇报逻辑与材料框架",
+      "key_time": "2026-10-31T18:00:00"
+    },
+    {
+      "todo_id": "D043",
+      "plan_id": "P20261013004",
+      "content": "完成年度总结会汇报材料初稿",
+      "key_time": "2026-10-23T18:00:00"
+    },
+    {
+      "todo_id": "D044",
+      "plan_id": "P20261013004",
+      "content": "组织预审会，邀请相关负责人评审初稿并收集意见",
+      "key_time": "2026-10-23T18:00:00"
+    },
+    {
+      "todo_id": "D045",
+      "plan_id": "P20261013004",
+      "content": "根据预审意见修订汇报材料并定稿",
+      "key_time": "2026-10-31T18:00:00"
+    },
+    {
+      "todo_id": "D046",
+      "plan_id": "P20261013004",
+      "content": "发布定稿并下发会议材料，完成年度总结会筹备",
+      "key_time": "2026-10-31T18:00:00"
+    },
+    {
+      "todo_id": "D035",
+      "plan_id": "P20261013003",
+      "content": "写一个需求",
+      "key_time": "2026-10-25T18:00:00"
+    },
+    {
+      "todo_id": "D036",
+      "plan_id": "P20261013003",
+      "content": "完成一个项目",
+      "key_time": "2026-10-25T18:00:00"
+    },
+    {
+      "todo_id": "D037",
+      "plan_id": "P20261013003",
+      "content": "表演一次节目",
+      "key_time": "2026-10-25T18:00:00"
+    },
+    {
+      "todo_id": "D038",
+      "plan_id": "P20261013003",
+      "content": "打一场桌游",
+      "key_time": "2026-10-25T18:00:00"
+    },
+    {
+      "todo_id": "D039",
+      "plan_id": "P20261013005",
+      "content": "撰写需求文档",
+      "key_time": "2026-10-19T18:00:00"
+    },
+    {
+      "todo_id": "D040",
+      "plan_id": "P20261013005",
+      "content": "参加比赛",
+      "key_time": "2026-10-14T18:00:00"
+    },
+    {
+      "todo_id": "D047",
+      "plan_id": "P20261013005",
+      "content": "参加桌游活动",
+      "key_time": "2026-10-17T18:00:00"
+    },
+    {
+      "todo_id": "D048",
+      "plan_id": "P20261013005",
+      "content": "表演节目",
+      "key_time": "2026-10-16T18:00:00"
+    },
+    {
+      "todo_id": "D049",
+      "plan_id": "P20261013006",
+      "content": "写一个需求",
+      "key_time": "2026-10-19T18:00:00"
+    },
+    {
+      "todo_id": "D050",
+      "plan_id": "P20261013006",
+      "content": "打一场比赛",
+      "key_time": "2026-10-21T18:00:00"
+    },
+    {
+      "todo_id": "D051",
+      "plan_id": "P20261013006",
+      "content": "表演节目",
+      "key_time": "2026-10-23T18:00:00"
+    },
+    {
+      "todo_id": "D052",
+      "plan_id": "P20261013006",
+      "content": "打桌游",
+      "key_time": "2026-10-24T18:00:00"
     }
   ],
   "tasks": [
@@ -2232,6 +2451,446 @@
       "is_demo": false,
       "created_at": "2026-10-13T22:20:11",
       "updated_at": "2026-10-13T22:20:11"
+    },
+    {
+      "task_id": "T087",
+      "plan_id": "P20261013004",
+      "todo_id": "D041",
+      "parent_task_id": "",
+      "title": "汇总各团队的年度经营数据",
+      "detail": "由待办拆解：汇总各团队的年度经营数据，统一统计口径与时间范围",
+      "priority": "中",
+      "estimate_minutes": 120,
+      "due_at": "2026-10-31T18:00:00",
+      "scheduled_start_at": "2026-10-29T14:00:00",
+      "planned_finish_at": "2026-10-29T16:00:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T088",
+      "plan_id": "P20261013004",
+      "todo_id": "D041",
+      "parent_task_id": "",
+      "title": "统一统计口径与时间范围",
+      "detail": "由待办拆解：汇总各团队的年度经营数据，统一统计口径与时间范围",
+      "priority": "中",
+      "estimate_minutes": 120,
+      "due_at": "2026-10-31T18:00:00",
+      "scheduled_start_at": "2026-10-29T16:00:00",
+      "planned_finish_at": "2026-10-29T18:00:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T089",
+      "plan_id": "P20261013004",
+      "todo_id": "D042",
+      "parent_task_id": "",
+      "title": "整理汇总数据",
+      "detail": "由待办拆解：整理汇总数据，梳理汇报逻辑与材料框架",
+      "priority": "中",
+      "estimate_minutes": 120,
+      "due_at": "2026-10-31T18:00:00",
+      "scheduled_start_at": "2026-10-30T09:30:00",
+      "planned_finish_at": "2026-10-30T11:30:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T090",
+      "plan_id": "P20261013004",
+      "todo_id": "D042",
+      "parent_task_id": "",
+      "title": "梳理汇报逻辑与材料框架",
+      "detail": "由待办拆解：整理汇总数据，梳理汇报逻辑与材料框架",
+      "priority": "中",
+      "estimate_minutes": 90,
+      "due_at": "2026-10-31T18:00:00",
+      "scheduled_start_at": "2026-10-30T11:30:00",
+      "planned_finish_at": "2026-10-30T13:00:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T091",
+      "plan_id": "P20261013004",
+      "todo_id": "D043",
+      "parent_task_id": "",
+      "title": "完成年度总结会汇报材料初稿",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 90,
+      "due_at": "2026-10-23T18:00:00",
+      "scheduled_start_at": "2026-10-23T13:00:00",
+      "planned_finish_at": "2026-10-23T14:30:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T092",
+      "plan_id": "P20261013004",
+      "todo_id": "D044",
+      "parent_task_id": "",
+      "title": "组织预审会",
+      "detail": "由待办拆解：组织预审会，邀请相关负责人评审初稿并收集意见",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-23T18:00:00",
+      "scheduled_start_at": "2026-10-23T14:30:00",
+      "planned_finish_at": "2026-10-23T15:30:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T093",
+      "plan_id": "P20261013004",
+      "todo_id": "D044",
+      "parent_task_id": "",
+      "title": "邀请相关负责人评审初稿",
+      "detail": "由待办拆解：组织预审会，邀请相关负责人评审初稿并收集意见",
+      "priority": "中",
+      "estimate_minutes": 90,
+      "due_at": "2026-10-23T18:00:00",
+      "scheduled_start_at": "2026-10-23T15:30:00",
+      "planned_finish_at": "2026-10-23T17:00:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T094",
+      "plan_id": "P20261013004",
+      "todo_id": "D044",
+      "parent_task_id": "",
+      "title": "收集意见",
+      "detail": "由待办拆解：组织预审会，邀请相关负责人评审初稿并收集意见",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-23T18:00:00",
+      "scheduled_start_at": "2026-10-23T17:00:00",
+      "planned_finish_at": "2026-10-23T18:00:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T095",
+      "plan_id": "P20261013004",
+      "todo_id": "D045",
+      "parent_task_id": "",
+      "title": "根据预审意见修订汇报材料",
+      "detail": "由待办拆解：根据预审意见修订汇报材料并定稿",
+      "priority": "中",
+      "estimate_minutes": 90,
+      "due_at": "2026-10-31T18:00:00",
+      "scheduled_start_at": "2026-10-30T13:00:00",
+      "planned_finish_at": "2026-10-30T14:30:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T096",
+      "plan_id": "P20261013004",
+      "todo_id": "D046",
+      "parent_task_id": "",
+      "title": "发布定稿",
+      "detail": "由待办拆解：发布定稿并下发会议材料，完成年度总结会筹备",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-31T18:00:00",
+      "scheduled_start_at": "2026-10-30T14:30:00",
+      "planned_finish_at": "2026-10-30T15:30:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T097",
+      "plan_id": "P20261013004",
+      "todo_id": "D046",
+      "parent_task_id": "",
+      "title": "下发会议材料",
+      "detail": "由待办拆解：发布定稿并下发会议材料，完成年度总结会筹备",
+      "priority": "中",
+      "estimate_minutes": 90,
+      "due_at": "2026-10-31T18:00:00",
+      "scheduled_start_at": "2026-10-30T15:30:00",
+      "planned_finish_at": "2026-10-30T17:00:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T098",
+      "plan_id": "P20261013004",
+      "todo_id": "D046",
+      "parent_task_id": "",
+      "title": "完成年度总结会筹备",
+      "detail": "由待办拆解：发布定稿并下发会议材料，完成年度总结会筹备",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-31T18:00:00",
+      "scheduled_start_at": "2026-10-30T17:00:00",
+      "planned_finish_at": "2026-10-30T18:00:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:33:25",
+      "updated_at": "2026-10-13T22:34:44"
+    },
+    {
+      "task_id": "T099",
+      "plan_id": "P20261013005",
+      "todo_id": "D039",
+      "parent_task_id": "",
+      "title": "撰写需求文档",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 120,
+      "due_at": "2026-10-19T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:42:45",
+      "updated_at": "2026-10-13T22:42:45"
+    },
+    {
+      "task_id": "T100",
+      "plan_id": "P20261013005",
+      "todo_id": "D040",
+      "parent_task_id": "",
+      "title": "参加比赛",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-14T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:42:45",
+      "updated_at": "2026-10-13T22:42:45"
+    },
+    {
+      "task_id": "T101",
+      "plan_id": "P20261013005",
+      "todo_id": "D047",
+      "parent_task_id": "",
+      "title": "参加桌游活动",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-17T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:42:45",
+      "updated_at": "2026-10-13T22:42:45"
+    },
+    {
+      "task_id": "T102",
+      "plan_id": "P20261013005",
+      "todo_id": "D048",
+      "parent_task_id": "",
+      "title": "表演节目",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-16T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:42:45",
+      "updated_at": "2026-10-13T22:42:45"
+    },
+    {
+      "task_id": "T103",
+      "plan_id": "P20261013006",
+      "todo_id": "D049",
+      "parent_task_id": "",
+      "title": "写一个需求",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-19T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:43:58",
+      "updated_at": "2026-10-13T22:43:58"
+    },
+    {
+      "task_id": "T104",
+      "plan_id": "P20261013006",
+      "todo_id": "D050",
+      "parent_task_id": "",
+      "title": "打一场比赛",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-21T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:43:58",
+      "updated_at": "2026-10-13T22:43:58"
+    },
+    {
+      "task_id": "T105",
+      "plan_id": "P20261013006",
+      "todo_id": "D051",
+      "parent_task_id": "",
+      "title": "表演节目",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-23T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:43:58",
+      "updated_at": "2026-10-13T22:43:58"
+    },
+    {
+      "task_id": "T106",
+      "plan_id": "P20261013006",
+      "todo_id": "D052",
+      "parent_task_id": "",
+      "title": "打桌游",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-24T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:43:58",
+      "updated_at": "2026-10-13T22:43:58"
     }
   ],
   "reminders": [

@@ -24,6 +24,11 @@ VISIBLE_STATUSES = ("待安排", "待执行", "进行中", "已延期")
 GAP_MINUTES = 15
 PLAN_WIDTH_DAYS_LIMIT = 45
 
+# 可用时间（Q-06 待确认，先按工作时段 09:00-18:00、周一至周五实现；超长任务不限制）
+WORK_START_HOUR = 9
+WORK_END_HOUR = 18
+_WORK_SPAN_MINUTES = (WORK_END_HOUR - WORK_START_HOUR) * 60
+
 CSV_COLUMNS = [
     ("任务ID", "task_id"),
     ("任务标题", "title"),
@@ -74,29 +79,59 @@ def _overlap(start_a, finish_a, start_b, finish_b):
     return start_a < finish_b and start_b < finish_a
 
 
+def _within_work_window(start, finish, estimate):
+    """任务区间是否完全落在工作日 09:00-18:00 内；超过单日工时上限的长任务不做限制。"""
+    if estimate > _WORK_SPAN_MINUTES:
+        return True
+    return (start.weekday() < 5 and finish.weekday() < 5
+            and start.date() == finish.date()
+            and start.hour >= WORK_START_HOUR
+            and (finish.hour < WORK_END_HOUR or (finish.hour == WORK_END_HOUR and finish.minute == 0)))
+
+
+def _next_work_moment(moment):
+    """把时刻推进到工作时段内（工作日 09:00 起）。"""
+    moment = moment.replace(second=0, microsecond=0)
+    for _ in range(30):
+        if moment.weekday() >= 5:
+            moment = (moment + timedelta(days=1)).replace(hour=WORK_START_HOUR, minute=0)
+            continue
+        if moment.hour < WORK_START_HOUR:
+            return moment.replace(hour=WORK_START_HOUR, minute=0)
+        if moment.hour >= WORK_END_HOUR:
+            moment = (moment + timedelta(days=1)).replace(hour=WORK_START_HOUR, minute=0)
+            continue
+        return moment
+    return moment
+
+
 def _prev_free_slot(due, estimate, floor, occupied):
-    """从 due 向前找 [start, finish) 空档；找不到返回 None。"""
-    finish = due
-    for _ in range(400):
-        start = finish - timedelta(minutes=estimate)
-        if start < floor:
+    """从 due 向前逐格扫描，找一段落在工作时段、不早于 floor 且不与其他安排重叠的区间。"""
+    candidate = _ceil_to(due)
+    step = timedelta(minutes=GAP_MINUTES)
+    limit = floor - timedelta(days=1)
+    for _ in range(8000):
+        start = candidate - timedelta(minutes=estimate)
+        if start < limit:
             return None
-        blockers = [a for a, b, _ in occupied if _overlap(start, finish, a, b)]
-        if not blockers:
-            return start, finish
-        finish = min(blockers) - timedelta(minutes=GAP_MINUTES)
+        if (start >= floor and _within_work_window(start, candidate, estimate)
+                and not any(_overlap(start, candidate, a, b) for a, b, _ in occupied)):
+            return start, candidate
+        candidate = candidate - step
     return None
 
 
 def _next_free_slot(cursor, estimate, occupied):
-    """从 cursor 向后找最近可用空档。"""
-    for _ in range(400):
-        finish = cursor + timedelta(minutes=estimate)
-        blockers = [b for a, b, _ in occupied if _overlap(cursor, finish, a, b)]
-        if not blockers:
-            return cursor, finish
-        cursor = _ceil_to(min(blockers) + timedelta(minutes=GAP_MINUTES))
-    return cursor, cursor + timedelta(minutes=estimate)
+    """从 cursor 向后找最近可用区间（同样受工作时段约束）。"""
+    candidate = _next_work_moment(_ceil_to(cursor))
+    step = timedelta(minutes=GAP_MINUTES)
+    for _ in range(8000):
+        finish = candidate + timedelta(minutes=estimate)
+        if (_within_work_window(candidate, finish, estimate)
+                and not any(_overlap(candidate, finish, a, b) for a, b, _ in occupied)):
+            return candidate, finish
+        candidate = candidate + step
+    return candidate, candidate + timedelta(minutes=estimate)
 
 
 def _task_dt(task, field):
@@ -121,11 +156,7 @@ def _resolve_rows(tasks, now):
         estimate = _minutes(task)
         slot = _prev_free_slot(due, estimate, floor, occupied)
         if slot is None:
-            cursor = floor
-            for a, b, _ in occupied:
-                if b > cursor and a <= cursor:
-                    cursor = _ceil_to(b + timedelta(minutes=GAP_MINUTES))
-            slot = _next_free_slot(cursor, estimate, occupied)
+            slot = _next_free_slot(floor, estimate, occupied)
         start, finish = slot
         occupied.append((start, finish, task.get("task_id")))
         rows.append({"task": task, "start": start, "finish": finish, "generated": True})
@@ -351,7 +382,7 @@ def _dep_title_map(store):
 def _basis_lines(settings, rows):
     interval = settings.get("reminder_interval_minutes") or 240
     lines = [
-        "排期生成：待安排任务按截止时间倒推（由晚到早、避让既有安排，项间留 %d 分钟缓冲）；倒推空间不足时顺排到最近可用空档。" % GAP_MINUTES,
+        "排期生成：待安排任务按截止时间倒推，安排在可用时间（工作日 09:00–18:00）内，避让既有安排，项间留 %d 分钟缓冲；倒推空间不足时顺排到最近可用时段。" % GAP_MINUTES,
         "冲突判定：同一计划内任务时间段重叠、依赖未满足或依赖成环 → 标记冲突并阻断保存；计划完成晚于截止时间 → 标记「超期」（不阻断保存，交由重排建议处理）。",
         "提醒依据：后台巡检每 %s 分钟扫描一次（系统设置可修改），命中临期 / 逾期 / 依赖冲突即生成提醒。" % interval,
     ]

@@ -2,8 +2,9 @@
 
 两种引擎，同一套输出契约：
 - 规则引擎（默认，本地兜底）：按句读拆分 + 中文时间表达识别 + 动词估算，离线可用、结果稳定；
-- 大模型（可选）：配置环境变量 LLM_BASE_URL / LLM_API_KEY / LLM_MODEL（OpenAI 兼容接口）后自动优先调用，
-  返回结果必须通过 JSON 结构校验；任何失败都不落半成品，自动兜底为规则引擎并在依据说明中标注。
+- 大模型（可选）：配置环境变量或项目根目录 .env（LLM_BASE_URL / LLM_API_KEY / LLM_MODEL，OpenAI 兼容接口）
+  后自动优先调用，返回结果必须通过 JSON 结构校验；模型漏提的时间由规则引擎补全；
+  任何失败都不落半成品，自动兜底为规则引擎并在依据说明中标注。
 
 输出契约（parse_plan）：
     {"goal": str, "todos": [{"content": str, "key_time": ISO8601 或 ""}],
@@ -16,6 +17,37 @@ import re
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta
+from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# 可选配置：项目根目录 .env（KEY=VALUE，仅读取、不覆盖已有环境变量）
+# 用于免命令行注入大模型配置，例如 DeepSeek：
+#   LLM_BASE_URL=https://api.deepseek.com
+#   LLM_API_KEY=sk-xxxx
+#   LLM_MODEL=deepseek-flash
+# ---------------------------------------------------------------------------
+
+
+def _load_env_file():
+    path = Path(__file__).resolve().parent.parent / ".env"
+    if not path.exists():
+        return
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and value and key not in os.environ:
+            os.environ[key] = value
+
+
+_load_env_file()
 
 # ---------------------------------------------------------------------------
 # 通用时间工具
@@ -24,7 +56,7 @@ from datetime import datetime, timedelta
 _WEEKDAY_CN = {"一": 0, "二": 1, "三": 2, "四": 3, "五": 4, "六": 5, "日": 6, "天": 6}
 _CN_NUM = {"一": 1, "两": 2, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
 
-_CONNECTIVE_PREFIX = re.compile(r"^\s*(然后|接着|随后|其次|另外|同时|最后|以及|并且|再|先|并)[，,、]?\s*")
+_CONNECTIVE_PREFIX = re.compile(r"^\s*(然后|接着|随后|其次|另外|同时|最后|以及|并且|再|先|并|我想|我要)[，,、]?\s*")
 _TRAILING_PUNCT = re.compile(r"[\s。；;，,、！!？?：:]+$")
 
 
@@ -92,6 +124,8 @@ def _detect_time_candidates(text, now):
          lambda m, n: (_at(_week_start(n) + timedelta(days=7 + _WEEKDAY_CN[m.group(1)])), m.group(0)), 1)
     push(r"下周(?=前|内|之前)",
          lambda m, n: (_at(_week_start(n) + timedelta(days=13)), m.group(0)), 2)
+    push(r"下周",
+         lambda m, n: (_at(_week_start(n) + timedelta(days=13)), "下周（按下周日内计）"), 4)
     push(r"(?:本周|这周|周|星期)([一二三四五六日天])", _resolve_this_weekday, 3)
     push(r"月底|月末",
          lambda m, n: (_at(_last_day_of_month(n)), m.group(0)), 2)
@@ -310,20 +344,31 @@ def _rule_parse(raw_text, now):
 # 大模型解析（可选）：OpenAI 兼容接口，返回结果必须通过结构校验
 # ---------------------------------------------------------------------------
 
-_LLM_SYSTEM_PROMPT = (
-    "你是智能计划管理助手。把用户的一段自然语言计划解析为严格 JSON，不要输出任何解释。"
-    '格式：{"goal": "总目标，不超过200字", '
-    '"todos": [{"content": "待办内容，动词开头，不超过120字", "key_time": "ISO8601 时间或空字符串"}]}'
-    "。待办拆分为 1-8 条；无法确定的时间用空字符串。"
-)
+_WEEKDAY_FULL = ("周一", "周二", "周三", "周四", "周五", "周六", "周日")
+
+
+def _llm_system_prompt(now):
+    return (
+        "你是智能计划管理助手。当前时间：%s（%s）。\n"
+        "把用户的一段自然语言计划解析为严格 JSON，不要输出任何解释，格式：\n"
+        '{"goal": "总目标", "todos": [{"content": "待办内容", "key_time": "ISO8601 或空字符串"}]}\n'
+        "要求：\n"
+        "1. goal：若原文含「：」，取冒号前的总述短语；否则概括为一句话；不超过 200 字。\n"
+        "2. todos：拆分为 1-8 条可执行待办，动词开头，每条不超过 120 字。\n"
+        "3. key_time：把「下周X / 月底 / 明天下午 / X月X日 / N天内」等时间表达换算为 ISO8601"
+        "（如 2026-10-21T18:00:00，默认 18:00；按当前时间推算）；仅出现在总述中的时间，"
+        "可作为全部待办的统一截止时间重复填入；确实没有任何时间信息才用空字符串。\n"
+        "只输出 JSON。"
+    ) % (now.strftime("%Y-%m-%d %H:%M"), _WEEKDAY_FULL[now.weekday()])
 
 
 def llm_configured():
     return bool(os.environ.get("LLM_BASE_URL") and os.environ.get("LLM_API_KEY"))
 
 
-def _llm_parse(raw_text):
+def _llm_parse(raw_text, now=None):
     """调用大模型解析；任何异常或结构不合法都返回 None，由调用方兜底。"""
+    now = now or datetime.now().replace(microsecond=0)
     base_url = (os.environ.get("LLM_BASE_URL") or "").strip().rstrip("/")
     api_key = os.environ.get("LLM_API_KEY") or ""
     model = os.environ.get("LLM_MODEL", "gpt-4o-mini")
@@ -334,7 +379,7 @@ def _llm_parse(raw_text):
         "model": model,
         "temperature": 0.2,
         "messages": [
-            {"role": "system", "content": _LLM_SYSTEM_PROMPT},
+            {"role": "system", "content": _llm_system_prompt(now)},
             {"role": "user", "content": raw_text},
         ],
     }
@@ -389,25 +434,56 @@ def _validate_llm_payload(parsed):
 # 对外：解析计划
 # ---------------------------------------------------------------------------
 
+def _fill_missing_times(todos, raw_text, now):
+    """模型漏提时间时的规则兜底：先按条识别，再回看全篇；返回依据说明条目。"""
+    notes = []
+    for todo in todos:
+        if todo["key_time"]:
+            moment = parse_dt(todo["key_time"])
+            if moment:
+                notes.append("「%s」← 模型返回时间 %s" % (todo["content"][:14], moment.strftime("%m-%d %H:%M")))
+
+    missing = [t for t in todos if not t["key_time"]]
+    if not missing:
+        return notes
+
+    global_moment, global_label, _ = detect_key_time(raw_text, now)
+    global_applied = []
+    for todo in missing:
+        moment, label, span = detect_key_time(todo["content"], now)
+        moment, span = _apply_hour_word(todo["content"], span, moment)
+        if moment:
+            todo["key_time"] = iso(moment)
+            notes.append("「%s」← 规则引擎补全「%s」→ %s" % (
+                todo["content"][:14], label, moment.strftime("%m-%d %H:%M")))
+        elif global_moment:
+            todo["key_time"] = iso(global_moment)
+            global_applied.append(todo["content"][:14])
+    if global_applied:
+        notes.append("全篇时间「%s」→ %s（作为 %d 条待办的统一截止：%s）" % (
+            global_label, global_moment.strftime("%m-%d %H:%M"), len(global_applied), "、".join(global_applied)))
+    return notes
+
+
 def parse_plan(raw_text, now=None):
     now = now or datetime.now().replace(microsecond=0)
 
-    llm_result = _llm_parse(raw_text) if llm_configured() else None
+    llm_result = _llm_parse(raw_text, now) if llm_configured() else None
     if llm_result:
         todos = llm_result["todos"]
+        notes = _fill_missing_times(todos, raw_text, now)
         basis = [
             {"item": "解析引擎", "detail": "大模型（%s），返回结果已通过 JSON 结构校验。" % os.environ.get("LLM_MODEL", "gpt-4o-mini")},
             {"item": "目标", "detail": "由模型从原文提炼，共 %d 字" % len(llm_result["goal"])},
             {"item": "待办", "detail": "由模型拆分 %d 条：%s" % (len(todos), "、".join(t["content"][:12] for t in todos))},
         ]
-        notes = ["「%s」→ %s" % (t["content"][:14], parse_dt(t["key_time"]).strftime("%m-%d %H:%M"))
-                 for t in todos if t["key_time"]]
-        basis.append({"item": "关键时间", "detail": "；".join(notes) if notes else "模型未返回明确时间，确认后将使用计划默认截止时间（7 天后的 18:00）。"})
+        basis.append({"item": "关键时间", "detail": "；".join(notes) if notes else
+                      "原文未包含可识别的时间表达；确认后将使用计划默认截止时间（7 天后的 18:00）。"})
         return {"goal": llm_result["goal"], "todos": todos, "basis": basis, "engine": "大模型"}
 
     result = _rule_parse(raw_text, now)
     if llm_configured() and llm_result is None:
-        engine = "规则引擎（大模型返回非结构化，已自动兜底）"
+        engine = "规则引擎（大模型调用失败或返回非结构化，已自动兜底）"
     else:
         engine = "规则引擎（本地兜底，未配置大模型）"
     result["basis"].insert(0, {"item": "解析引擎", "detail": engine})
