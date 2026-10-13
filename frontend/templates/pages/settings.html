@@ -2,7 +2,163 @@
 {% block title %}系统设置 · Northstar{% endblock %}
 {% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/settings.css') }}">{% endblock %}
 {% block content %}
-<section class="page-heading"><div><p class="eyebrow">SYSTEM / PREFERENCES</p><h1>系统设置</h1><p class="subtitle">根据团队习惯，调整这份工作台的显示与提示偏好。</p></div></section>
-<section class="settings-panel"><div class="settings-title"><h2>工作台偏好</h2><p>本页开关仅用于展示前端交互，会保存在当前浏览器。</p></div><div class="setting-row"><span><strong>桌面通知</strong><small>成员状态变化时显示提示</small></span><button class="switch on" type="button" aria-pressed="true"></button></div><div class="setting-row"><span><strong>紧凑表格</strong><small>在用户列表中显示更多记录</small></span><button class="switch" type="button" aria-pressed="false"></button></div><div class="setting-row"><span><strong>交互动画</strong><small>保留轻量、自然的界面过渡</small></span><button class="switch on" type="button" aria-pressed="true"></button></div></section>
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">DATA &amp; SETTINGS / SETTINGS</p>
+    <h1>系统设置</h1>
+    <p class="subtitle">主题、视图角色、巡检间隔、免打扰与通知渠道的集中配置，是全局行为的控制台。</p>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<form method="post" action="{{ url_for('save_settings') }}" id="settings-form">
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div><h2>外观与身份</h2><p>主题即时生效并记忆；显示名用于侧栏与顶栏展示</p></div>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <span class="field-label">主题</span>
+        <label class="switch switch-wide">
+          <input type="checkbox" id="settings-theme" {% if settings.theme == 'night' %}checked{% endif %}>
+          <span class="switch-track" aria-hidden="true"></span>
+          <span class="switch-text" id="theme-text">{{ '夜晚' if settings.theme == 'night' else '白天' }}</span>
+        </label>
+        <input type="hidden" name="theme" id="theme-value" value="{{ settings.theme }}">
+        <small class="field-hint">与顶栏主题按钮共用同一套逻辑，保存在 localStorage 的 northstar-theme</small>
+      </div>
+      <div class="field">
+        <span class="field-label">显示名</span>
+        <input name="display_name" value="{{ settings.display_name }}" maxlength="30" required>
+        <small class="field-hint">不能为空，最多 30 个字符</small>
+      </div>
+      <div class="field">
+        <span class="field-label">视图角色</span>
+        <select name="view_role" id="role-select">
+          {% for role in role_options %}
+          <option value="{{ role }}" {% if settings.view_role == role %}selected{% endif %}>{{ role }}</option>
+          {% endfor %}
+        </select>
+        <small class="field-hint">普通用户隐藏管理操作；仅演示，非真实鉴权</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div><h2>提醒与巡检</h2><p>巡检间隔作用于后台线程；免打扰时段内不弹窗，但照常记录进提醒中心</p></div>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <span class="field-label">巡检间隔（分钟）</span>
+        <input type="number" name="reminder_interval_minutes" min="1" step="1" value="{{ settings.reminder_interval_minutes }}" required>
+        <small class="field-hint">必须为大于 0 的整数</small>
+      </div>
+      <div class="field">
+        <span class="field-label">免打扰开始</span>
+        <input type="time" name="dnd_start" value="{{ settings.dnd_start }}">
+      </div>
+      <div class="field">
+        <span class="field-label">免打扰结束</span>
+        <input type="time" name="dnd_end" value="{{ settings.dnd_end }}">
+        <small class="field-hint">开始时间不能晚于结束时间</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div><h2>通知渠道</h2><p>开关与 Webhook 为配置占位，演示环境不真实投递</p></div>
+      <span class="badge-demo">进阶 · 演示级</span>
+    </div>
+    <div class="channel-list">
+      {% for key, name, desc in channel_defs %}
+      {% set channel = settings.channels[loop.index0] %}
+      <article class="channel-row">
+        <label class="switch">
+          <input type="checkbox" name="channel_{{ key }}" {% if channel.enabled %}checked{% endif %}>
+          <span class="switch-track" aria-hidden="true"></span>
+        </label>
+        <div class="channel-info"><strong>{{ name }}</strong><small>{{ desc }}</small></div>
+        <input class="channel-webhook" name="webhook_{{ key }}" value="{{ channel.webhook_url }}"
+               placeholder="Webhook 地址（选填）" aria-label="{{ name }}的 Webhook 地址">
+        <button class="button button-secondary test-channel" type="button" data-name="{{ name }}">测试发送</button>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="settings-actions">
+    <button class="button button-primary" type="submit">保存设置</button>
+    <a class="button button-secondary" href="{{ url_for('export_settings') }}">导出配置</a>
+    <span class="action-hint" id="save-hint" role="status"></span>
+  </div>
+</form>
+
+<form class="admin-zone admin-only" method="post" action="{{ url_for('reset_settings') }}"
+      onsubmit="return confirm('确定恢复默认设置吗？当前配置会被覆盖，此操作不可撤销。')">
+  <div>
+    <strong>恢复默认</strong>
+    <small>把主题、角色、巡检间隔、免打扰与渠道全部重置为初始值</small>
+  </div>
+  <button class="button button-danger" type="submit">恢复默认</button>
+</form>
+
+<section class="panel">
+  <div class="panel-heading"><div><h2>快捷键与无障碍</h2><p>焦点始终可见（3px 描边）；按 Esc 可关闭弹窗</p></div></div>
+  <details class="shortcut-details">
+    <summary>查看快捷键列表</summary>
+    <dl class="shortcut-list">
+      {% for key, desc in shortcuts %}
+      <div><dt><kbd>{{ key }}</kbd></dt><dd>{{ desc }}</dd></div>
+      {% endfor %}
+    </dl>
+  </details>
+</section>
+
+<section class="panel mascot-panel">
+  <div class="panel-heading">
+    <div><h2>AI 吉祥物</h2><p>随系统状态切换表情，提供情绪价值</p></div>
+    <span class="badge-demo">演示级</span>
+  </div>
+  <div class="mascot-stage">
+    <div class="mascot" id="mascot" data-state="idle">
+      <svg viewBox="0 0 160 160" aria-hidden="true">
+        <path d="M80 18 V34" class="mascot-antenna"></path>
+        <circle cx="80" cy="14" r="7" class="mascot-antenna-dot"></circle>
+        <rect x="30" y="34" width="100" height="88" rx="26" class="mascot-body"></rect>
+        <g class="face face-idle">
+          <circle cx="62" cy="70" r="7" class="mascot-eye"></circle>
+          <circle cx="98" cy="70" r="7" class="mascot-eye"></circle>
+          <path d="M64 94 Q80 104 96 94" class="mascot-mouth"></path>
+        </g>
+        <g class="face face-busy">
+          <path d="M54 70 L70 70" class="mascot-line"></path>
+          <path d="M90 70 L106 70" class="mascot-line"></path>
+          <rect x="66" y="92" width="28" height="8" rx="4" class="mascot-line-fill"></rect>
+        </g>
+        <g class="face face-warn">
+          <path d="M54 62 L70 70" class="mascot-line"></path>
+          <path d="M106 62 L90 70" class="mascot-line"></path>
+          <path d="M66 96 Q80 88 94 96" class="mascot-mouth"></path>
+        </g>
+      </svg>
+    </div>
+    <div class="mascot-side">
+      <div class="mascot-controls">
+        <button class="button button-secondary" type="button" data-mascot="idle">空闲</button>
+        <button class="button button-secondary" type="button" data-mascot="busy">繁忙</button>
+        <button class="button button-secondary" type="button" data-mascot="warn">警告</button>
+      </div>
+      <p class="mascot-caption" id="mascot-caption" aria-live="polite">空闲 · 一切正常</p>
+    </div>
+  </div>
+</section>
+
 {% endblock %}
 {% block page_js %}<script src="{{ url_for('static', filename='js/pages/settings.js') }}"></script>{% endblock %}
