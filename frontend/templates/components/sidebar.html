@@ -11,9 +11,9 @@
 
   <p class="nav-caption">计划流程</p>
   <nav class="nav-menu" aria-label="计划流程">
-    <span class="nav-item is-pending" aria-disabled="true"><span>✎</span>计划录入<em class="nav-badge">待接入</em></span>
-    <span class="nav-item is-pending" aria-disabled="true"><span>✓</span>提炼确认<em class="nav-badge">待接入</em></span>
-    <span class="nav-item is-pending" aria-disabled="true"><span>▤</span>智能排期<em class="nav-badge">待接入</em></span>
+    <a class="nav-item {% if active_page == 'plan_input' %}active{% endif %}" href="{{ url_for('plan_input') }}"><span>✎</span>计划录入</a>
+    <a class="nav-item {% if active_page == 'plan_confirm' %}active{% endif %}" href="{{ url_for('plan_confirm') }}"><span>✓</span>提炼确认</a>
+    <a class="nav-item {% if active_page == 'schedule' %}active{% endif %}" href="{{ url_for('schedule') }}"><span>▤</span>智能排期</a>
   </nav>
 
   <p class="nav-caption">数据与设置</p>

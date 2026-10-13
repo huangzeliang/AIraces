@@ -62,6 +62,62 @@
       "raw_text": "团队周会与计划管理：每周把各条线的计划收上来，排出优先级，汇总上周完成情况后输出周报。",
       "goal": "形成每周固定的计划编排与周报输出节奏",
       "created_at": "2026-10-10T08:40:00"
+    },
+    {
+      "plan_id": "P20261013001",
+      "user_id": "U001",
+      "raw_text": "下周完成项目立项，先整理立项材料，再组织评审会。最后写会议纪要。",
+      "goal": "下周完成项目立项，先整理立项材料，再组织评审会",
+      "status": "已确认",
+      "parse_engine": "规则引擎（本地兜底，未配置大模型）",
+      "basis": [
+        {
+          "item": "解析引擎",
+          "detail": "规则引擎（本地兜底，未配置大模型）"
+        },
+        {
+          "item": "目标",
+          "detail": "取自首句，共 23 字"
+        },
+        {
+          "item": "待办",
+          "detail": "按句读拆分 4 条：下周完成项目立项、整理立项材料、组织评审会、写会议纪要"
+        },
+        {
+          "item": "关键时间",
+          "detail": "未识别到明确时间表达，确认后将使用计划默认截止时间（7 天后的 18:00）。"
+        }
+      ],
+      "created_at": "2026-10-13T22:18:05",
+      "confirmed_at": "2026-10-13T22:18:32"
+    },
+    {
+      "plan_id": "P20261013002",
+      "user_id": "U001",
+      "raw_text": "我想下周先健身两次，然后再完成一个练琴，最后再完成我的工作总结。",
+      "goal": "我想下周先健身两次，然后再完成一个练琴，最后再完成我的工作总结",
+      "status": "已确认",
+      "parse_engine": "规则引擎（本地兜底，未配置大模型）",
+      "basis": [
+        {
+          "item": "解析引擎",
+          "detail": "规则引擎（本地兜底，未配置大模型）"
+        },
+        {
+          "item": "目标",
+          "detail": "取自首句，共 31 字"
+        },
+        {
+          "item": "待办",
+          "detail": "按句读拆分 3 条：我想下周先健身两次、完成一个练琴、完成我的工作总结"
+        },
+        {
+          "item": "关键时间",
+          "detail": "未识别到明确时间表达，确认后将使用计划默认截止时间（7 天后的 18:00）。"
+        }
+      ],
+      "created_at": "2026-10-13T22:19:47",
+      "confirmed_at": "2026-10-13T22:20:11"
     }
   ],
   "todos": [
@@ -226,6 +282,48 @@
       "plan_id": "P20260921001",
       "content": "归档历史变更并清理遗留问题",
       "key_time": "2026-08-26T18:00:00"
+    },
+    {
+      "todo_id": "D028",
+      "plan_id": "P20261013001",
+      "content": "下周完成项目立项",
+      "key_time": ""
+    },
+    {
+      "todo_id": "D029",
+      "plan_id": "P20261013001",
+      "content": "整理立项材料",
+      "key_time": ""
+    },
+    {
+      "todo_id": "D030",
+      "plan_id": "P20261013001",
+      "content": "组织评审会",
+      "key_time": ""
+    },
+    {
+      "todo_id": "D031",
+      "plan_id": "P20261013001",
+      "content": "写会议纪要",
+      "key_time": ""
+    },
+    {
+      "todo_id": "D032",
+      "plan_id": "P20261013002",
+      "content": "我想下周先健身两次",
+      "key_time": ""
+    },
+    {
+      "todo_id": "D033",
+      "plan_id": "P20261013002",
+      "content": "完成一个练琴",
+      "key_time": ""
+    },
+    {
+      "todo_id": "D034",
+      "plan_id": "P20261013002",
+      "content": "完成我的工作总结",
+      "key_time": ""
     }
   ],
   "tasks": [
@@ -1980,6 +2078,160 @@
       "is_demo": false,
       "created_at": "2026-10-05T08:00:00",
       "updated_at": "2026-10-12T12:28:11"
+    },
+    {
+      "task_id": "T080",
+      "plan_id": "P20261013001",
+      "todo_id": "D028",
+      "parent_task_id": "",
+      "title": "下周完成项目立项",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-20T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:18:32",
+      "updated_at": "2026-10-13T22:18:32"
+    },
+    {
+      "task_id": "T081",
+      "plan_id": "P20261013001",
+      "todo_id": "D029",
+      "parent_task_id": "",
+      "title": "整理立项材料",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 120,
+      "due_at": "2026-10-20T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:18:32",
+      "updated_at": "2026-10-13T22:18:32"
+    },
+    {
+      "task_id": "T082",
+      "plan_id": "P20261013001",
+      "todo_id": "D030",
+      "parent_task_id": "",
+      "title": "组织评审会",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 90,
+      "due_at": "2026-10-20T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:18:32",
+      "updated_at": "2026-10-13T22:18:32"
+    },
+    {
+      "task_id": "T083",
+      "plan_id": "P20261013001",
+      "todo_id": "D031",
+      "parent_task_id": "",
+      "title": "写会议纪要",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 90,
+      "due_at": "2026-10-20T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:18:32",
+      "updated_at": "2026-10-13T22:18:32"
+    },
+    {
+      "task_id": "T084",
+      "plan_id": "P20261013002",
+      "todo_id": "D032",
+      "parent_task_id": "",
+      "title": "我想下周先健身两次",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-20T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:20:11",
+      "updated_at": "2026-10-13T22:20:11"
+    },
+    {
+      "task_id": "T085",
+      "plan_id": "P20261013002",
+      "todo_id": "D033",
+      "parent_task_id": "",
+      "title": "完成一个练琴",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-20T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:20:11",
+      "updated_at": "2026-10-13T22:20:11"
+    },
+    {
+      "task_id": "T086",
+      "plan_id": "P20261013002",
+      "todo_id": "D034",
+      "parent_task_id": "",
+      "title": "完成我的工作总结",
+      "detail": "",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-20T18:00:00",
+      "scheduled_start_at": "",
+      "planned_finish_at": "",
+      "status": "待安排",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-13T22:20:11",
+      "updated_at": "2026-10-13T22:20:11"
     }
   ],
   "reminders": [

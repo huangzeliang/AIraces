@@ -172,6 +172,8 @@ services = SimpleNamespace(
 # 每条业务线各占一个路由模块；在此统一注册，启动始终只有一条命令。
 for module_name in (
     "backend.1", "backend.2", "backend.3", "backend.4",   # 旧演示：用户管理
+    "backend.plan",                                        # A1/A2 计划录入与提炼确认
+    "backend.schedule",                                    # A3 智能排期
     "backend.stats",                                       # C1 驾驶舱
     "backend.data_io",                                     # C2 数据管理
     "backend.settings_io",                                 # C3 系统设置

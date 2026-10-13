@@ -1,0 +1,87 @@
+/* 提炼确认（A2）页面专属样式 —— 只使用 tokens.css 的语义变量，双主题自动适配 */
+
+/* ---------- 通用 ---------- */
+.button-secondary{background:var(--surface);border-color:var(--border);color:var(--text)}
+.button-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.notice{padding:11px 15px;border-radius:14px;font-size:12px;font-weight:700;margin-bottom:16px;border:1px solid transparent}
+.notice.success{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.notice.error{background:var(--danger-soft);color:var(--danger);border-color:var(--danger)}
+.notice.info{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.panel{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--surface);box-shadow:var(--card-shadow);padding:20px}
+.panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.panel-heading h2{font-size:15px;margin:0}
+.panel-heading p{margin:4px 0 0;font-size:11px;color:var(--muted)}
+.count-chip{padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:900;white-space:nowrap}
+
+/* ---------- 状态徽章与空态 ---------- */
+.state-badge{padding:6px 14px;border-radius:999px;font-size:12px;font-weight:900}
+.state-badge.is-pending{background:var(--orange-soft);color:var(--orange)}
+.state-badge.is-done{background:var(--green-soft);color:var(--green)}
+.empty-state{text-align:center;padding:56px 24px}
+.empty-icon{font-size:34px;margin:0;color:var(--accent)}
+.empty-state h2{margin:12px 0 6px;font-size:18px}
+.empty-state p{margin:0 0 20px;color:var(--muted);font-size:12px}
+
+/* ---------- 来源原文 ---------- */
+.source-fold{border:1px dashed var(--border);border-radius:14px;padding:12px 16px;margin-bottom:16px;background:var(--surface)}
+.source-fold summary{cursor:pointer;font-size:12px;font-weight:800;color:var(--accent)}
+.source-fold p{margin:10px 0 2px;font-size:12.5px;line-height:1.9;color:var(--muted)}
+
+/* ---------- 三栏 ---------- */
+.confirm-grid{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.25fr) minmax(0,0.85fr);gap:16px;align-items:start}
+
+.field{display:grid;gap:7px;margin-top:4px}
+.field-label{font-size:11.5px;font-weight:800;color:var(--muted)}
+.field input{height:40px;padding:0 12px;border-radius:var(--radius-control);border:1px solid var(--border);background:var(--bg);color:var(--text)}
+.field input.is-invalid,.todo-content.is-invalid{border-color:var(--danger);box-shadow:0 0 0 3px var(--danger-soft)}
+.field-error{margin:9px 0 0;font-size:11.5px;font-weight:700;color:var(--danger)}
+
+.plan-meta{margin:16px 0 0;padding:12px 14px;border-radius:14px;background:var(--bg);display:grid;gap:8px}
+.plan-meta div{display:flex;justify-content:space-between;gap:10px;font-size:11.5px}
+.plan-meta dt{color:var(--subtle);font-weight:700}
+.plan-meta dd{margin:0;font-weight:800;word-break:break-all;text-align:right}
+
+/* ---------- 待办行 ---------- */
+.todo-list{display:grid;gap:9px}
+.todo-row{display:grid;grid-template-columns:26px minmax(0,1fr) 30px;gap:9px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:14px;background:var(--bg)}
+.todo-index{width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:900}
+.todo-fields{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:8px}
+.todo-content,.todo-time{height:38px;padding:0 11px;border-radius:11px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12px;min-width:0}
+.todo-remove{width:30px;height:30px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--muted);font-size:12px;line-height:1}
+.todo-remove:hover{border-color:var(--danger);color:var(--danger)}
+.todo-remove[disabled]{opacity:.35;cursor:not-allowed}
+.todo-remove[disabled]:hover{border-color:var(--border);color:var(--muted)}
+.todos-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap}
+.todos-actions .button{height:36px;font-size:11px}
+.todos-hint{font-size:11px;color:var(--subtle)}
+
+/* ---------- 关键时间 ---------- */
+.time-list{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.time-list li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--bg)}
+.time-dot{width:9px;height:9px;margin-top:5px;border-radius:50%;background:var(--accent);flex:none}
+.time-list strong{display:block;font-size:13px;font-variant-numeric:tabular-nums}
+.time-list small{font-size:10.5px;color:var(--muted);display:block;margin-top:2px;line-height:1.5}
+.times-empty{margin:0;font-size:11.5px;color:var(--muted);line-height:1.8;padding:11px 13px;border-radius:12px;background:var(--bg)}
+
+/* ---------- 依据 ---------- */
+.basis-fold{margin-top:16px;border-top:1px dashed var(--border);padding-top:12px}
+.basis-fold summary{cursor:pointer;font-size:12px;font-weight:800;color:var(--accent)}
+.basis-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+.basis-list li{display:grid;gap:2px;padding:9px 12px;border-radius:12px;background:var(--bg);font-size:11.5px;line-height:1.7}
+.basis-list b{color:var(--accent);font-size:10.5px;letter-spacing:.4px}
+.basis-list span{color:var(--muted)}
+
+/* ---------- 底部操作 ---------- */
+.confirm-actions{display:flex;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.confirm-actions .button-primary[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+.confirm-hint{font-size:11.5px;color:var(--subtle)}
+
+/* ---------- 响应式 ---------- */
+@media(max-width:1180px){
+  .confirm-grid{grid-template-columns:minmax(0,1fr)}
+  .todo-fields{grid-template-columns:minmax(0,1fr)}
+}
+@media(prefers-reduced-motion:reduce){
+  .button,.todo-remove{transition:none}
+}

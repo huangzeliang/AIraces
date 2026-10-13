@@ -1,0 +1,119 @@
+{% extends 'layout.html' %}
+{% block title %}提炼确认 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/plan_confirm.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">PLAN FLOW / CONFIRM</p>
+    <h1>提炼确认</h1>
+    <p class="subtitle">核对并修订 AI 提炼的目标 / 待办 / 关键时间；确认后自动拆解为任务并进入智能排期。</p>
+  </div>
+  {% if plan %}<span class="state-badge {{ 'is-pending' if plan_status == '待确认' else 'is-done' }}">{{ plan_status }}</span>{% endif %}
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+{% if not plan %}
+<section class="panel empty-state">
+  <p class="empty-icon" aria-hidden="true">✓</p>
+  <h2>没有待确认的计划</h2>
+  <p>先在「计划录入」输入一段自然语言描述，解析完成后会回到本页核对提炼结果。</p>
+  <a class="button button-primary" href="{{ url_for('plan_input') }}">去录入计划</a>
+</section>
+{% else %}
+
+{% if plan_status == '已确认' %}
+<div class="notice info" role="status">该计划已确认过。再次确认只会为缺少任务的待办补充拆解，已存在的任务不会重复创建。</div>
+{% endif %}
+
+<form method="post" action="{{ url_for('plan_confirm_submit') }}" id="confirm-form" novalidate>
+  <input type="hidden" name="plan_id" value="{{ plan.plan_id }}">
+  <input type="hidden" name="todos" id="todos-json" value="">
+
+  <details class="source-fold">
+    <summary>查看来源原文（{{ plan.raw_text | length }} 字，编辑后不脱钩）</summary>
+    <p>{{ plan.raw_text }}</p>
+  </details>
+
+  <section class="confirm-grid">
+
+    <article class="panel col-goal">
+      <div class="panel-heading"><div><h2>① 目标</h2><p>一句话概括整段计划的总目标</p></div></div>
+      <div class="field">
+        <label class="field-label" for="goal-input">目标（goal）</label>
+        <input id="goal-input" name="goal" value="{{ plan.goal }}" maxlength="200" required>
+      </div>
+      <p class="field-error" id="goal-error" hidden>目标不能为空，请先补充目标。</p>
+      <dl class="plan-meta">
+        <div><dt>计划ID</dt><dd>{{ plan.plan_id }}</dd></div>
+        <div><dt>创建时间</dt><dd>{{ plan.created_at | replace('T', ' ') | truncate(16, true, '') }}</dd></div>
+        <div><dt>解析引擎</dt><dd>{{ plan.parse_engine or '—' }}</dd></div>
+        <div><dt>当前任务</dt><dd>{{ task_total }} 个</dd></div>
+      </dl>
+    </article>
+
+    <article class="panel col-todos">
+      <div class="panel-heading"><div><h2>② 待办</h2><p>解析产物，确认后才拆解为可执行任务</p></div><span class="count-chip" id="todo-count">{{ todos | length }} 条</span></div>
+      <div class="todo-list" id="todo-list">
+        {% for todo in todos %}
+        <div class="todo-row" data-todo-id="{{ todo.todo_id }}">
+          <span class="todo-index" aria-hidden="true">{{ loop.index }}</span>
+          <div class="todo-fields">
+            <label class="sr-only" for="todo-content-{{ loop.index }}">待办内容</label>
+            <input id="todo-content-{{ loop.index }}" class="todo-content" value="{{ todo.content }}" maxlength="120" placeholder="待办内容">
+            <label class="sr-only" for="todo-time-{{ loop.index }}">关键时间</label>
+            <input id="todo-time-{{ loop.index }}" class="todo-time" type="datetime-local" value="{{ todo.key_time_input }}">
+          </div>
+          <button class="todo-remove" type="button" aria-label="删除该待办" title="删除该待办">✕</button>
+        </div>
+        {% endfor %}
+      </div>
+      <p class="field-error" id="todos-error" hidden>至少保留一条待办。</p>
+      <div class="todos-actions">
+        <button class="button button-secondary" type="button" id="add-todo">＋ 添加待办</button>
+        <span class="todos-hint" id="todos-hint">
+          {% if pending_new > 0 %}确认后将新建约 {{ pending_new }} 个任务（按待办自动拆解）
+          {% else %}待办均已有对应任务，确认不会重复创建{% endif %}
+        </span>
+      </div>
+    </article>
+
+    <article class="panel col-times">
+      <div class="panel-heading"><div><h2>③ 关键时间</h2><p>排期与提醒将优先参考这些时间</p></div></div>
+      {% if key_times %}
+      <ul class="time-list">
+        {% for item in key_times %}
+        <li><span class="time-dot" aria-hidden="true"></span><div><strong>{{ item.display }}</strong><small>{{ item.content }}</small></div></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="times-empty">未识别到关键时间。确认后将使用计划默认截止时间（7 天后的 18:00），可在左侧为待办补充时间。</p>
+      {% endif %}
+      <details class="basis-fold">
+        <summary>查看依据</summary>
+        {% if basis %}
+        <ul class="basis-list">
+          {% for line in basis %}<li><b>{{ line.item }}</b><span>{{ line.detail }}</span></li>{% endfor %}
+        </ul>
+        {% else %}
+        <ul class="basis-list"><li><b>说明</b><span>依据说明在解析时生成；本计划为历史演示数据，未保存当时的解析依据。</span></li></ul>
+        {% endif %}
+      </details>
+    </article>
+
+  </section>
+
+  <div class="confirm-actions">
+    <button class="button button-primary" type="submit" id="confirm-button">确认并生成排期</button>
+    <a class="button button-secondary" href="{{ url_for('plan_input', raw_text=plan.raw_text) }}">返回重录</a>
+    <span class="confirm-hint" id="confirm-hint" role="status"></span>
+  </div>
+</form>
+
+{% endif %}
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/plan_confirm.js') }}"></script>{% endblock %}
