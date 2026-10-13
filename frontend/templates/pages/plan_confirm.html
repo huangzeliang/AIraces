@@ -29,6 +29,21 @@
 <div class="notice info" role="status">该计划已确认过。再次确认只会为缺少任务的待办补充拆解，已存在的任务不会重复创建。</div>
 {% endif %}
 
+{% if schedule_risks %}
+<div class="notice error schedule-risk" role="alert">
+  <strong>⚠ 排期风险：与现有排期一起安排时，预计 {{ schedule_risks | length }} 项任务超期或冲突</strong>
+  <ul class="risk-list">
+    {% for risk in schedule_risks[:5] %}
+    <li>{{ risk.text }}</li>
+    {% endfor %}
+  </ul>
+  {% if schedule_risks | length > 5 %}<p class="risk-more">……其余 {{ schedule_risks | length - 5 }} 项将在智能排期中标记</p>{% endif %}
+  <p class="risk-note">预览基于当前待办与关键时间；确认后照常生成任务，可在「智能排期」中拖拽调整或采纳重排建议。</p>
+</div>
+{% elif pending_new > 0 %}
+<div class="notice success" role="status">✓ 排期预览：新增任务与现有排期一起安排，全部可在截止时间前完成，未检测到冲突。</div>
+{% endif %}
+
 <form method="post" action="{{ url_for('plan_confirm_submit') }}" id="confirm-form" novalidate>
   <input type="hidden" name="plan_id" value="{{ plan.plan_id }}">
   <input type="hidden" name="todos" id="todos-json" value="">

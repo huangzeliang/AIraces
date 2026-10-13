@@ -19,16 +19,8 @@
 .empty-state p{margin:0 0 20px;color:var(--muted);font-size:12px}
 .heading-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 
-/* ---------- 计划选择 ---------- */
-.plan-picker{margin-bottom:16px}
-.chips{display:flex;gap:6px;padding:4px;border:1px solid var(--border);border-radius:14px;background:var(--surface);flex-wrap:wrap}
-.chip{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:10px;font-size:12px;font-weight:800;color:var(--muted);transition:background .18s,color .18s}
-.chip em{font-style:normal;font-size:10px;padding:1px 6px;border-radius:7px;background:var(--accent-soft);color:var(--accent)}
-.chip:hover{background:var(--accent-soft);color:var(--accent)}
-.chip.is-active{background:var(--accent);color:#fff}
-.chip.is-active em{background:rgba(255,255,255,.25);color:#fff}
-[data-theme="night"] .chip.is-active{color:#062221}
-[data-theme="night"] .chip.is-active em{background:rgba(6,34,33,.25);color:#062221}
+/* ---------- 所属计划标签 ---------- */
+.plan-tag{max-width:150px;padding:2px 8px;border-radius:7px;background:var(--bg);border:1px dashed var(--border);color:var(--muted);font-size:9.5px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ---------- 概览统计 ---------- */
 .stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:16px}
@@ -57,7 +49,8 @@
 .suggestion-actions form{margin:0}
 
 /* ---------- 时间轴 ---------- */
-.timeline-panel{margin-bottom:16px}
+/* z-index:0 建立局部层叠上下文：时间条 / 截止游标无论 z-index 多高都不会盖住顶部标题栏 */
+.timeline-panel{margin-bottom:16px;position:relative;z-index:0}
 .timeline-tools{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .dirty-chip{padding:4px 10px;border-radius:999px;background:var(--orange-soft);color:var(--orange);font-size:10.5px;font-weight:900}
 .legend{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted);font-weight:700;flex-wrap:wrap}
@@ -67,12 +60,15 @@
 .swatch-doing{background:var(--purple)}
 .swatch-delayed{background:var(--orange)}
 .swatch-generated{background:transparent;border:2px dashed var(--accent)}
+.swatch-due{background:none;border:0;border-left:2px dashed var(--orange);width:2px;border-radius:0}
 
+.timeline-sticky{position:sticky;top:74px;z-index:5;background:var(--surface)}
 .timeline-scroll{overflow-x:auto}
 .timeline{min-width:760px}
-.timeline-ruler{display:grid;grid-template-columns:300px minmax(0,1fr);align-items:end;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.timeline-ruler{display:grid;grid-template-columns:300px minmax(0,1fr);align-items:end;padding-bottom:6px;border-bottom:1px solid var(--border);background:var(--surface)}
 .ruler-corner{font-size:10px;font-weight:900;letter-spacing:.6px;color:var(--subtle)}
-.ruler-track{position:relative;height:26px}
+.ruler-viewport{overflow:hidden}
+.ruler-track{position:relative;height:26px;min-width:460px}/* 460 = .timeline 的 min-width(760) - 左侧信息列(300)，保证窄屏横向滚动时与行轨道对齐 */
 .ruler-day{position:absolute;top:0;font-size:10px;font-weight:800;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 .ruler-day em{font-style:normal;color:var(--subtle);margin-left:4px;font-weight:700}
 .ruler-day.is-weekend{color:var(--orange)}
@@ -113,7 +109,11 @@
 .track-line{position:absolute;top:0;bottom:0;border-left:1px dashed var(--border)}
 .track-line.is-weekend{background:color-mix(in srgb, var(--accent-soft) 42%, transparent);border-left-color:transparent}
 [data-theme="night"] .track-line.is-weekend{background:color-mix(in srgb, var(--accent-soft) 55%, transparent)}
-.due-marker{position:absolute;top:3px;bottom:3px;border-left:2px dashed var(--orange);z-index:1}
+.due-marker{position:absolute;top:3px;bottom:3px;border-left:2px dashed var(--orange);z-index:4;cursor:ew-resize;touch-action:none}
+.due-marker::before{content:"";position:absolute;top:-4px;bottom:-4px;left:-5px;right:-3px}
+.due-marker::after{content:"";position:absolute;top:-4px;left:-4px;width:10px;height:6px;background:var(--orange);border-radius:3px}
+.due-marker:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.due-marker.dragging{border-left-style:solid;box-shadow:0 0 0 3px var(--orange-soft)}
 .time-bar{position:absolute;top:50%;transform:translateY(-50%);height:24px;border-radius:8px;min-width:12px;cursor:grab;touch-action:none;z-index:2;transition:box-shadow .15s}
 .time-bar:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .time-bar.dragging{cursor:grabbing;z-index:3;box-shadow:0 6px 18px rgba(0,0,0,.25)}
@@ -144,5 +144,5 @@
   .suggestion-card{grid-template-columns:minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){
-  .chip,.button,.time-bar{transition:none}
+  .button,.time-bar{transition:none}
 }

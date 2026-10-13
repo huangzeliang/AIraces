@@ -14,6 +14,7 @@ from importlib import import_module
 from flask import flash, jsonify, redirect, render_template, request, url_for
 
 llm = import_module("backend.llm")
+sched = import_module("backend.schedule")
 
 EXAMPLES = (
     {"label": "项目立项", "text": "下周前完成项目立项：先整理立项材料，再组织评审会，最后把评审意见落实到方案里。"},
@@ -238,6 +239,7 @@ def register(app, services):
 
         todo_views, key_times = [], []
         task_total = pending_new = 0
+        schedule_risks = []
         if plan:
             todos = sorted(
                 [t for t in store.get("todos", []) if t.get("plan_id") == plan_id],
@@ -261,6 +263,9 @@ def register(app, services):
                         "display": _time_display(todo.get("key_time")),
                     })
 
+            # 排期风险预览：新任务与现有排期一起安排是否会超期 / 冲突（只读，不写库）
+            schedule_risks = sched.preview_new_plan_risks(store, plan, _now())
+
         return render_template(
             "pages/plan_confirm.html",
             active_page="plan_confirm",
@@ -272,6 +277,7 @@ def register(app, services):
             key_times=key_times,
             task_total=task_total,
             pending_new=pending_new,
+            schedule_risks=schedule_risks,
             basis=(plan.get("basis") if plan else None) or [],
         )
 
@@ -364,14 +370,22 @@ def register(app, services):
                     created.append(task_id)
             write_store(store)
 
+            # 确认后复检：新任务与现有排期一起安排的超期 / 冲突风险（只提示，不阻断）
+            schedule_risks = sched.plan_pending_risks(store, plan, now)
+
         if is_json:
             return jsonify({
                 "ok": True,
                 "plan_id": plan.get("plan_id"),
                 "tasks_created": len(created),
+                "warnings": [risk["text"] for risk in schedule_risks[:6]],
                 "redirect": url_for("schedule", plan_id=plan.get("plan_id")),
             })
         flash("已确认并生成排期（新建任务 %d 个）。" % len(created), "success")
+        if schedule_risks:
+            extra = "……" if len(schedule_risks) > 1 else ""
+            flash("注意：%d 项新任务在现有排期下无法按截止时间完成，请到智能排期中调整（%s%s）。" % (
+                len(schedule_risks), schedule_risks[0]["text"], extra), "info")
         return redirect(url_for("schedule", plan_id=plan.get("plan_id")))
 
     # ------------------------------------------------------------------

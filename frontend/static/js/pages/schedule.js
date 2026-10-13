@@ -1,5 +1,6 @@
-/* 智能排期（A3）页面脚本：时间条拖拽 / 键盘微调 / 冲突实时重算 / 预计耗时与优先级编辑 / 保存校验。
-   冲突口径与后端一致：同一计划内时间重叠、依赖未满足为冲突（阻断保存）；计划完成晚于截止为超期（警告）。
+/* 智能排期（A3）页面脚本：时间条拖拽 / 截止游标拖拽 / 键盘微调 / 冲突实时重算 / 预计耗时与优先级编辑 / 保存校验。
+   统一日程表：全部计划的任务汇总在一张时间轴上；冲突口径与后端一致（跨计划时间重叠一并判定，阻断保存）。
+   日期时间轴吸顶：页面下滚时保持可见，横向滚动与行轨道同步。
    零依赖实现；时间序列化使用本地时间拼接，避免 toISOString 的时区偏移。 */
 
 (function () {
@@ -29,6 +30,8 @@
     return {
       task_id: item.task_id,
       title: item.title,
+      plan_id: item.plan_id || '',
+      plan_title: item.plan_title || '',
       status: item.status,
       priority: item.priority,
       estimate_minutes: item.estimate_minutes,
@@ -49,6 +52,7 @@
   var dirty = false;
   var invalidEstimates = new Set();
   var dragging = null;
+  var dueDrag = null;
 
   /* ---------------- 工具 ---------------- */
   function pad(number) {
@@ -92,6 +96,13 @@
   }
 
   /* ---------------- 冲突重算 ---------------- */
+  function otherLabel(other, self) {
+    if (other.plan_id && self.plan_id && other.plan_id !== self.plan_id && other.plan_title) {
+      return '与其他计划「' + other.plan_title.slice(0, 14) + '」的「' + other.title + '」';
+    }
+    return '与「' + other.title + '」';
+  }
+
   function recompute() {
     tasks.forEach(function (task) {
       task.conflicts = [];
@@ -101,8 +112,8 @@
     for (var i = 0; i < tasks.length; i += 1) {
       for (var j = i + 1; j < tasks.length; j += 1) {
         if (overlaps(tasks[i], tasks[j])) {
-          tasks[i].conflicts.push('与「' + tasks[j].title + '」时间重叠');
-          tasks[j].conflicts.push('与「' + tasks[i].title + '」时间重叠');
+          tasks[i].conflicts.push(otherLabel(tasks[j], tasks[i]) + '时间重叠');
+          tasks[j].conflicts.push(otherLabel(tasks[i], tasks[j]) + '时间重叠');
         }
       }
     }
@@ -180,6 +191,17 @@
         bar.style.width = Math.max(0.4, position(task.finish) - position(task.start)).toFixed(4) + '%';
         bar.setAttribute('aria-label', task.title + '：' + fmt(task.start) + ' 至 ' + fmt(task.finish) + '，可拖拽调整');
         bar.title = task.title + ' · ' + fmt(task.start) + ' → ' + fmt(task.finish);
+      }
+
+      var marker = el.querySelector('.due-marker');
+      if (marker && task.due) {
+        marker.style.left = position(task.due).toFixed(4) + '%';
+        marker.title = '截止时间 ' + fmt(task.due) + '，可拖拽调整';
+        marker.setAttribute('aria-label', task.title + '的截止时间 ' + fmt(task.due) + '，可拖拽或使用左右方向键调整');
+      }
+      var dueText = el.querySelector('.due-text');
+      if (dueText && task.due) {
+        dueText.textContent = '截止 ' + fmt(task.due);
       }
     });
 
@@ -262,6 +284,75 @@
     });
   }
 
+  /* ---------------- 截止游标拖拽（调整截止时间） ---------------- */
+  function applyDue(task, newDue) {
+    task.due = newDue;
+    markDirty();
+    recompute();
+  }
+
+  function attachDueMarker(marker, task) {
+    if (!task.due) {
+      return;
+    }
+
+    marker.addEventListener('pointerdown', function (event) {
+      if (event.button !== 0) {
+        return;
+      }
+      event.preventDefault();
+      var track = marker.parentElement;
+      dueDrag = {
+        task: task,
+        marker: marker,
+        startX: event.clientX,
+        origDue: new Date(task.due),
+        pxPerMs: (track.clientWidth || 1) / totalMs,
+        pointerId: event.pointerId
+      };
+      if (marker.setPointerCapture) {
+        marker.setPointerCapture(event.pointerId);
+      }
+      marker.classList.add('dragging');
+    });
+
+    marker.addEventListener('pointermove', function (event) {
+      if (!dueDrag || dueDrag.marker !== marker) {
+        return;
+      }
+      var deltaMs = (event.clientX - dueDrag.startX) / dueDrag.pxPerMs;
+      var snapped = Math.round((dueDrag.origDue.getTime() + deltaMs) / snapMs) * snapMs;
+      snapped = Math.max(spanStart.getTime(), Math.min(spanEnd.getTime(), snapped));
+      applyDue(task, new Date(snapped));
+    });
+
+    function endDrag() {
+      if (!dueDrag || dueDrag.marker !== marker) {
+        return;
+      }
+      marker.classList.remove('dragging');
+      dueDrag = null;
+      recompute();
+    }
+    marker.addEventListener('pointerup', endDrag);
+    marker.addEventListener('pointercancel', endDrag);
+
+    marker.addEventListener('keydown', function (event) {
+      var step = 0;
+      if (event.key === 'ArrowLeft') {
+        step = -snapMs;
+      } else if (event.key === 'ArrowRight') {
+        step = snapMs;
+      } else {
+        return;
+      }
+      event.preventDefault();
+      var next = task.due.getTime() + step;
+      next = Math.max(spanStart.getTime(), Math.min(spanEnd.getTime(), next));
+      applyDue(task, new Date(next));
+    });
+  }
+
   /* ---------------- 行内编辑 ---------------- */
   function setupRowControls() {
     tasks.forEach(function (task) {
@@ -272,6 +363,11 @@
       var bar = el.querySelector('.time-bar');
       if (bar) {
         attachBar(bar, task);
+      }
+
+      var marker = el.querySelector('.due-marker');
+      if (marker) {
+        attachDueMarker(marker, task);
       }
 
       var estimateInput = el.querySelector('.row-estimate');
@@ -333,13 +429,13 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        plan_id: data.plan_id,
         items: tasks.map(function (task) {
           return {
             task_id: task.task_id,
             scheduled_start_at: toIso(task.start),
             estimate_minutes: task.estimate_minutes,
-            priority: task.priority
+            priority: task.priority,
+            due_at: task.due ? toIso(task.due) : ''
           };
         })
       })
@@ -365,19 +461,49 @@
     });
   });
 
-  /* ---------------- 重排建议忽略（仅本次会话收起） ---------------- */
+  /* ---------------- 重排建议忽略（持久化：刷新后不再显示） ---------------- */
   document.querySelectorAll('.suggestion-ignore').forEach(function (button) {
     button.addEventListener('click', function () {
       var card = button.closest('.suggestion-card');
-      if (card) {
-        card.remove();
+      if (!card) {
+        return;
       }
-      var panel = document.querySelector('#suggestions-panel');
-      if (panel && !panel.querySelector('.suggestion-card')) {
-        panel.remove();
-      }
+      button.disabled = true;
+      fetch('/schedule/suggest/ignore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          task_id: card.getAttribute('data-task-id') || '',
+          start: card.getAttribute('data-suggest-start') || ''
+        })
+      }).then(function (response) {
+        return response.json();
+      }).then(function (result) {
+        if (result && result.ok) {
+          card.remove();
+          var panel = document.querySelector('#suggestions-panel');
+          if (panel && !panel.querySelector('.suggestion-card')) {
+            panel.remove();
+          }
+        } else {
+          button.disabled = false;
+        }
+      }).catch(function () {
+        button.disabled = false;
+      });
     });
   });
+
+  /* ---------------- 日期时间轴吸顶：与行轨道横向滚动同步 ---------------- */
+  var scrollHost = document.querySelector('#timeline-scroll');
+  var rulerTrack = document.querySelector('#ruler-track');
+  if (scrollHost && rulerTrack) {
+    var syncRuler = function () {
+      rulerTrack.style.transform = 'translateX(' + (-scrollHost.scrollLeft) + 'px)';
+    };
+    scrollHost.addEventListener('scroll', syncRuler);
+    window.addEventListener('resize', syncRuler);
+  }
 
   /* ---------------- 初始化 ---------------- */
   var rulerLabels = document.querySelectorAll('.ruler-day');
