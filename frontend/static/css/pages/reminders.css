@@ -1,0 +1,131 @@
+/* 提醒中心（B2）页面专属样式 —— 只使用 tokens.css 的语义变量，双主题自动适配 */
+
+/* ---------- 通用 ---------- */
+.button-secondary{background:var(--surface);border-color:var(--border);color:var(--text)}
+.button-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.button-primary[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+.inline-form{display:contents}
+.notice{padding:11px 15px;border-radius:14px;font-size:12px;font-weight:700;margin-bottom:16px;border:1px solid transparent;transition:opacity .4s}
+.notice.success{background:var(--green-soft);color:var(--green);border-color:var(--green)}
+.notice.error{background:var(--danger-soft);color:var(--danger);border-color:var(--danger)}
+.notice.info{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.notice.is-out{opacity:0}
+.panel{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--surface);box-shadow:var(--card-shadow);padding:20px}
+.panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.panel-heading h2{font-size:15px;margin:0}
+.panel-heading p{margin:4px 0 0;font-size:11px;color:var(--muted)}
+.heading-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.page-info{font-size:11px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ---------- 桌面通知开关 ---------- */
+.switch{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.switch input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.switch-track{position:relative;width:42px;height:23px;border-radius:12px;background:var(--border);transition:background .18s;flex:none}
+.switch-track::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:var(--surface);transition:transform .18s}
+.switch input:checked+.switch-track{background:var(--accent)}
+.switch input:checked+.switch-track::after{transform:translateX(19px)}
+.switch input:focus-visible+.switch-track{outline:3px solid var(--focus);outline-offset:3px}
+.switch input:disabled+.switch-track{opacity:.5}
+.notify-label{font-size:11.5px;font-weight:800;color:var(--muted)}
+
+/* ---------- 概览统计 ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.stat-card{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--surface);box-shadow:var(--card-shadow);padding:15px 17px;display:grid;gap:6px}
+.stat-card span{font-size:11px;font-weight:800;color:var(--muted)}
+.stat-card strong{font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.stat-card small{font-size:10px;color:var(--subtle)}
+.stat-card.is-conflict strong{color:var(--danger)}
+
+/* ---------- 风险横幅 ---------- */
+.risk-banner{margin-bottom:16px;padding:13px 17px;border-radius:14px;background:var(--danger-soft);color:var(--danger);font-size:12px;font-weight:700;line-height:1.8;border:1px solid var(--danger)}
+.risk-banner strong{font-weight:900}
+.risk-banner ul{margin:6px 0 0;padding-left:18px;display:grid;gap:3px;font-weight:600}
+.risk-banner small{display:block;margin-top:7px;font-size:10.5px;color:var(--muted);font-weight:700}
+
+/* ---------- 筛选区 ---------- */
+.filter-panel{margin-bottom:16px;padding:16px 20px}
+.filter-form{display:grid;gap:12px}
+.filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.filter-label{font-size:11px;font-weight:900;color:var(--muted);min-width:32px}
+.chip-group{display:flex;gap:8px;flex-wrap:wrap;margin-right:8px}
+.chip{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;background:var(--surface);cursor:pointer;overflow:hidden;transition:border-color .15s,background .15s}
+.chip input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.chip span{padding:7px 14px;font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.chip:hover{border-color:var(--accent)}
+.chip:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.chip:has(input:checked) span{color:var(--accent)}
+.chip:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
+.filter-reset{font-size:11.5px;font-weight:800;color:var(--subtle);text-decoration:underline;text-underline-offset:3px}
+.filter-reset:hover{color:var(--accent)}
+
+/* ---------- 提醒列表 ---------- */
+.reminder-list{display:grid;gap:12px}
+.reminder-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start;padding:14px 16px;border-radius:14px;background:var(--bg);border:1px solid transparent;border-left:4px solid var(--border)}
+.reminder-card.is-unread{background:color-mix(in srgb, var(--accent-soft) 46%, transparent)}
+.reminder-card.kind-overdue{border-left-color:var(--danger)}
+.reminder-card.kind-due_soon{border-left-color:var(--orange)}
+.reminder-card.kind-dependency{border-left-color:var(--purple)}
+.reminder-card.kind-ready{border-left-color:var(--accent)}
+.reminder-card.kind-info{border-left-color:var(--border)}
+.reminder-card.is-risk{box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--danger) 34%, transparent)}
+.reminder-card.is-unread .reminder-content{font-weight:800;color:var(--text)}
+
+.reminder-main{min-width:0}
+.reminder-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10.5px;color:var(--muted)}
+.kind-tag{padding:2px 8px;border-radius:7px;font-size:9.5px;font-weight:900;white-space:nowrap}
+.kind-tag-overdue{background:var(--danger-soft);color:var(--danger)}
+.kind-tag-due_soon{background:var(--orange-soft);color:var(--orange)}
+.kind-tag-dependency{background:var(--purple-soft);color:var(--purple)}
+.kind-tag-ready{background:var(--accent-soft);color:var(--accent)}
+.kind-tag-info{background:var(--bg);color:var(--subtle);border:1px dashed var(--border)}
+.channel-tag{padding:2px 8px;border-radius:7px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:9.5px;font-weight:800}
+.status-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:900;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.status-tag .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.status-read{background:var(--green-soft);color:var(--green)}
+.status-ignored{background:var(--bg);color:var(--subtle);border:1px dashed var(--border)}
+.trigger-time{font-weight:800;font-variant-numeric:tabular-nums}
+.row-id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;color:var(--subtle)}
+
+.reminder-content{margin:9px 0 0;font-size:12.5px;line-height:1.8;color:var(--text)}
+.reminder-meta{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;font-size:10.5px;color:var(--muted)}
+.reminder-meta small{font-size:10.5px;color:var(--subtle)}
+.task-link{color:var(--accent);font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.task-link:hover{color:var(--purple)}
+.missing-tag{padding:2px 8px;border-radius:7px;background:var(--bg);color:var(--subtle);border:1px dashed var(--border);font-size:9.5px;font-weight:900}
+
+.reminder-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.reminder-actions form{margin:0}
+.mini-btn{height:30px;padding:0 10px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:11px;font-weight:800;transition:border-color .15s,color .15s;white-space:nowrap}
+.mini-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ---------- 分页 / 空态 ---------- */
+.pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px}
+.page-link{font-size:11.5px;font-weight:800;color:var(--accent)}
+.page-link.is-disabled{color:var(--subtle);opacity:.6}
+.empty-state{text-align:center;padding:56px 24px}
+.empty-icon{font-size:34px;margin:0;color:var(--accent)}
+.empty-state h2{margin:12px 0 6px;font-size:18px}
+.empty-state p{margin:0;color:var(--muted);font-size:12px}
+
+/* ---------- 提示条 ---------- */
+.toast-stack{position:fixed;right:26px;bottom:26px;z-index:80;display:grid;gap:10px;max-width:420px}
+.toast{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--border);box-shadow:0 14px 34px rgba(10,14,40,.18);font-size:12px;font-weight:700;animation:toast-in .18s ease-out}
+[data-theme="night"] .toast{box-shadow:0 14px 34px #0008}
+.toast.is-error{border-color:var(--danger);color:var(--danger)}
+.toast.is-out{opacity:0;transition:opacity .35s}
+@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- 响应式 ---------- */
+@media(max-width:1180px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:980px){
+  .reminder-card{grid-template-columns:minmax(0,1fr)}
+  .reminder-actions{justify-content:flex-start}
+}
+@media(max-width:700px){
+  .stats{grid-template-columns:minmax(0,1fr)}
+}
+@media(prefers-reduced-motion:reduce){
+  .switch-track,.switch-track::after,.toast{transition:none;animation:none}
+}

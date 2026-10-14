@@ -44,6 +44,8 @@ EMPTY_STORE = {
     "reminders": [],
     "feedbacks": [],
     "exceptions": [],
+    "logs": [],
+    "scan_state": {},
 }
 
 environment = os.environ.get("APP_ENV", "production").strip().lower()
@@ -174,6 +176,8 @@ for module_name in (
     "backend.1", "backend.2", "backend.3", "backend.4",   # 旧演示：用户管理
     "backend.plan",                                        # A1/A2 计划录入与提炼确认
     "backend.schedule",                                    # A3 智能排期
+    "backend.task_ops",                                    # B1/B2 任务列表与提醒中心
+    "backend.scheduler",                                   # B3 后台定时巡检
     "backend.stats",                                       # C1 驾驶舱
     "backend.data_io",                                     # C2 数据管理
     "backend.settings_io",                                 # C3 系统设置
@@ -190,6 +194,13 @@ def page_context(active_page, page_name):
         "active": sum(user["status"] == "启用" for user in users),
         "admins": sum(user["role"] == "管理员" for user in users),
     }
+
+
+@app.context_processor
+def inject_reminder_badge():
+    store = read_store()
+    unread = sum(1 for item in store.get("reminders", []) if item.get("status") == "未读")
+    return {"unread_reminders": unread}
 
 
 @app.get("/analytics")

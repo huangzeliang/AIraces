@@ -879,15 +879,15 @@
       "due_at": "2026-10-13T16:45:00",
       "scheduled_start_at": "2026-10-11T04:15:00",
       "planned_finish_at": "2026-10-11T05:15:00",
-      "status": "已延期",
-      "progress": 50,
+      "status": "已完成",
+      "progress": 100,
       "depends_on": [],
       "delay_count": 3,
       "delay_reason": "责任人出差，跟进机制推迟到本周落实",
-      "completed_at": "",
+      "completed_at": "2026-10-14T11:44:39",
       "is_demo": false,
       "created_at": "2026-09-17T10:00:00",
-      "updated_at": "2026-10-13T23:38:30"
+      "updated_at": "2026-10-14T11:44:39"
     },
     {
       "task_id": "T010",
@@ -3578,6 +3578,24 @@
       "feedback_type": "完成",
       "comment": "上周完成情况已汇总，周报模板固定下来",
       "created_at": "2026-09-26T15:28:11"
+    },
+    {
+      "feedback_id": "F027",
+      "task_id": "T009",
+      "feedback_type": "完成",
+      "comment": "进度达到 100% 自动完成",
+      "created_at": "2026-10-14T11:44:39",
+      "prev_state": {
+        "status": "已延期",
+        "progress": 5,
+        "completed_at": "",
+        "delay_count": 3,
+        "delay_reason": "责任人出差，跟进机制推迟到本周落实",
+        "due_at": "2026-10-13T16:45:00",
+        "scheduled_start_at": "2026-10-11T04:15:00",
+        "planned_finish_at": "2026-10-11T05:15:00",
+        "updated_at": "2026-10-14T11:44:38"
+      }
     }
   ],
   "exceptions": [
@@ -3735,5 +3753,15 @@
     "T067|2026-10-14T09:15:00",
     "T039|2026-10-15T11:00:00",
     "T016|2026-10-14T09:15:00"
-  ]
+  ],
+  "logs": [
+    {
+      "log_id": "L001",
+      "task_id": "T009",
+      "action": "完成",
+      "detail": "进度达到 100% 自动完成",
+      "created_at": "2026-10-14T11:44:39"
+    }
+  ],
+  "scan_state": {}
 }
