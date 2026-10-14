@@ -3833,9 +3833,13 @@
       "created_at": "2026-10-14T11:44:39"
     }
   ],
+<<<<<<< HEAD
   "scan_state": {
     "last_scan_at": "2026-10-14T13:25:49",
     "last_created": 7,
     "scans": 1
   }
+=======
+  "scan_state": {}
+>>>>>>> f8daf1f59e29363168705ac86241dd17f2b0faef
 }

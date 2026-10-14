@@ -143,6 +143,7 @@
     var keyword = filterForm.querySelector('input[name="keyword"]');
     if (keyword) {
       var keywordTimer = null;
+<<<<<<< HEAD
       var composing = false;
       var queueSubmit = function () {
         window.clearTimeout(keywordTimer);
@@ -160,18 +161,31 @@
       keyword.addEventListener('input', function (event) {
         if (composing || event.isComposing) return;
         queueSubmit();
+=======
+      keyword.addEventListener('input', function () {
+        window.clearTimeout(keywordTimer);
+        keywordTimer = window.setTimeout(function () { filterForm.submit(); }, 250);
+>>>>>>> f8daf1f59e29363168705ac86241dd17f2b0faef
       });
       keyword.addEventListener('change', function () {
         window.clearTimeout(keywordTimer);
         filterForm.submit();
       });
       keyword.addEventListener('keydown', function (event) {
+<<<<<<< HEAD
         if (event.key !== 'Enter') return;
         /* 组字中的 Enter/Space 是输入法选词键，不能当作确认查询 */
         if (composing || event.isComposing || event.keyCode === 229) return;
         event.preventDefault();
         window.clearTimeout(keywordTimer);
         filterForm.submit();
+=======
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          window.clearTimeout(keywordTimer);
+          filterForm.submit();
+        }
+>>>>>>> f8daf1f59e29363168705ac86241dd17f2b0faef
       });
     }
   }
