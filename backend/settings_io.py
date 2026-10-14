@@ -11,7 +11,7 @@ import json
 from datetime import datetime
 from urllib.parse import urlparse
 
-from flask import Response, flash, redirect, render_template, request, url_for
+from flask import Response, flash, jsonify, redirect, render_template, request, url_for
 
 ROLE_OPTIONS = ("普通用户", "管理员")
 THEME_OPTIONS = ("day", "night")
@@ -72,7 +72,7 @@ def _collect(form):
     if view_role not in ROLE_OPTIONS:
         errors.append("视图角色取值无效。")
 
-    interval_raw = (form.get("reminder_interval_minutes") or "").strip()
+    interval_raw = str(form.get("reminder_interval_minutes") or "").strip()
     interval = None
     if not interval_raw.isdigit() or int(interval_raw) <= 0:
         errors.append("巡检间隔必须是大于 0 的整数（分钟）。")
@@ -140,14 +140,19 @@ def register(app, services):
 
     @app.post("/settings/save")
     def save_settings():
-        payload, errors = _collect(request.form)
+        json_payload = request.get_json(silent=True)
+        payload, errors = _collect(json_payload if json_payload is not None else request.form)
         if errors:
+            if json_payload is not None:
+                return jsonify({"ok": False, "message": "；".join(errors), "errors": errors}), 400
             for message in errors:
                 flash(message, "error")
             return _render()
 
         with store_lock:
             write_settings(payload)
+        if json_payload is not None:
+            return jsonify({"ok": True, "message": "设置已保存。"})
         flash("设置已保存。", "success")
         return redirect(url_for("settings"))
 

@@ -5,8 +5,8 @@
   <p class="nav-caption">工作台</p>
   <nav class="nav-menu" aria-label="工作台">
     <a class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><span>▦</span>驾驶舱</a>
-    <span class="nav-item is-pending" aria-disabled="true"><span>☰</span>任务列表<em class="nav-badge">待接入</em></span>
-    <span class="nav-item is-pending" aria-disabled="true"><span>♢</span>提醒中心<em class="nav-badge">待接入</em></span>
+    <a class="nav-item {% if active_page == 'tasks' %}active{% endif %}" href="{{ url_for('tasks') }}"><span>☰</span>任务列表</a>
+    <a class="nav-item {% if active_page == 'reminders' %}active{% endif %}" href="{{ url_for('reminders') }}"><span>♢</span>提醒中心</a>
   </nav>
 
   <p class="nav-caption">计划流程</p>
