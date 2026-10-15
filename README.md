@@ -6,6 +6,8 @@
 
 前端按页面拆分：`pages/` 中每个页面拥有同名的模板、样式和脚本；`layout.html`、`components/`、`css/tokens.css`、`css/layout.css` 与 `js/theme.js` 是公共文件，修改前需先协调。
 
+页面开发前必须阅读 [UI 主题与多端适配规范](docs/UI_THEME_SPEC.md)。所有新增或修改页面默认同时适配手机、平板和 PC，按规范第 8–10 节实现布局、交互并完成验收；AI 开发入口要求见 [AGENTS.md](AGENTS.md)。涉及公共适配能力的修改按规范执行并回归受影响页面。
+
 ## 安装
 
 需要 Python 3.10 或更新版本。在项目目录运行：
