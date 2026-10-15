@@ -1,0 +1,106 @@
+{% extends 'layout.html' %}
+{% block title %}完成与验收 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/c-line.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/pages/review.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">ACCEPTANCE / REVIEW</p>
+    <h1>完成与验收</h1>
+    <p class="subtitle">验收永远对照发布时的快照判定，不看当前值；达成度由四类指标算法算出，AI 只做证据预审、不参与定级。</p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('retro_list') }}"><span aria-hidden="true">✎</span>去复盘</a>
+    <a class="button button-secondary" href="{{ url_for('compare') }}"><span aria-hidden="true">⇅</span>对比分析</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="stats" aria-label="验收概览">
+  <article class="stat-card">
+    <div class="stat-top"><span>待验收</span><b aria-hidden="true">◷</b></div>
+    <strong>{{ summary.pending_count }}</strong>
+    <div><span>已提报待评审</span><em>需定级</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>执行中</span><b aria-hidden="true">✎</b></div>
+    <strong>{{ summary.running_count }}</strong>
+    <div><span>可提交提报</span><em>本周期</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>已验收</span><b aria-hidden="true">✓</b></div>
+    <strong>{{ summary.verified_count }}</strong>
+    <div><span>含已复盘目标</span><em>{{ summary.need_retro }} 项待复盘</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>加权达成度</span><b aria-hidden="true">◎</b></div>
+    <strong>{% if summary.avg_final is not none %}{{ summary.avg_final }}%{% else %}—{% endif %}</strong>
+    <div><span>已定案目标按权重加权</span><em>{{ summary.verified_objs }} 项</em></div>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>目标验收台账</h2><p>按状态分组；达成度以发布快照口径计算，未验收不给分</p></div>
+    <div class="chips" aria-label="状态筛选">
+      <a class="chip {% if tab == 'pending' %}is-active{% endif %}" href="{{ url_for('review_list', tab='pending') }}">待验收 {{ groups.pending | length }}</a>
+      <a class="chip {% if tab == 'running' %}is-active{% endif %}" href="{{ url_for('review_list', tab='running') }}">执行中 {{ groups.running | length }}</a>
+      <a class="chip {% if tab == 'verified' %}is-active{% endif %}" href="{{ url_for('review_list', tab='verified') }}">已验收 {{ groups.verified | length }}</a>
+    </div>
+  </div>
+
+  {% set rows = groups[tab] %}
+  <ul class="review-list">
+    {% for item in rows %}
+    <li class="review-row review-row--{{ 'done' if item.final_score is not none else ('wait' if item.has_review else 'open') }}">
+      <div class="review-main">
+        <div class="review-title">
+          <span class="level-tag level-tag--{{ item.level_label[0] if item.level_label else '个' }}">{{ item.level_label or '个人级' }}</span>
+          <strong>{{ item.title }}</strong>
+        </div>
+        <p class="review-meta">
+          <span>{{ item.owner }}</span>
+          <span>{{ item.cycle }}</span>
+          <span>权重 {{ item.weight }}</span>
+          <span>{{ item.kr_total }} 条 KR</span>
+        </p>
+      </div>
+      <div class="review-score">
+        <b>{% if item.final_score is not none %}{{ item.final_score }}{% elif item.score is not none %}{{ item.score }}{% else %}—{% endif %}</b>
+        <small>{{ item.grade }}</small>
+      </div>
+      <div class="review-state">
+        <span class="state-badge state-badge--{{ 'done' if item.final_score is not none else ('wait' if item.has_review else 'open') }}">{{ item.status }}</span>
+        {% if item.self_score is not none and item.final_score is none %}<small>自评 {{ item.self_score }}</small>{% endif %}
+        {% if item.has_retro %}<small class="retro-done">已复盘</small>{% endif %}
+      </div>
+      <div class="review-action">
+        <a class="button {{ 'button-primary' if item.final_score is none else 'button-secondary' }}" href="{{ url_for('review_detail', objective_id=item.objective_id) }}">
+          {{ '去验收' if item.final_score is none else '查看' }}
+        </a>
+      </div>
+    </li>
+    {% else %}
+    <li class="review-empty">
+      <p class="empty-icon" aria-hidden="true">◷</p>
+      <p>当前分组没有目标{% if tab == 'pending' %}，提报后可在这里追踪评审进度{% endif %}。</p>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="panel review-rules">
+  <div class="panel-heading"><div><h2>验收口径</h2><p>本页所有分数都按以下规则计算，可逐项核对</p></div><span class="badge-demo">口径可自证</span></div>
+  <ol class="rule-list">
+    <li><strong>对照快照</strong>：目标值取发布时的 <code>published_snapshot</code>，发布后改动不影响判定。</li>
+    <li><strong>四类算法</strong>：正向（实际 ÷ 目标）、逆向（2 − 实际 ÷ 目标，封顶 100 下限 0）、里程碑（达成数 ÷ 总数）、定性（档位映射）。</li>
+    <li><strong>加权汇总</strong>：目标达成度按各 KR 权重加权平均；跨目标汇总按目标权重加权，不做简单平均。</li>
+    <li><strong>AI 只做预审</strong>：预审结论用于提示证据缺口，<em>不参与终评分数</em>。</li>
+    <li><strong>差异说明</strong>：自评与终评相差超过 {{ diff_limit | int }} 分时，必须填写差异说明才允许定级。</li>
+  </ol>
+</section>
+
+{% endblock %}

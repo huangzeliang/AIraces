@@ -1,0 +1,130 @@
+{% extends 'layout.html' %}
+{% block title %}目标全景 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/c-line.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/pages/objectives.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">OBJECTIVES / BOARD</p>
+    <h1>目标全景</h1>
+    <p class="subtitle">按层级铺开全部在册目标，红黄绿直接指向需要干预的对象；达成度按目标权重加权，未验收不给分。</p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('review_list') }}"><span aria-hidden="true">✓</span>去验收</a>
+    <a class="button button-secondary" href="{{ url_for('compare') }}"><span aria-hidden="true">⇅</span>对比分析</a>
+  </div>
+</section>
+
+<section class="stats" aria-label="目标概览">
+  <article class="stat-card">
+    <div class="stat-top"><span>在册目标</span><b aria-hidden="true">◎</b></div>
+    <strong>{{ summary.objective_total }}</strong>
+    <div><span>不含草稿</span><em>{{ summary.verified_total }} 已定案</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>加权达成度</span><b aria-hidden="true">◈</b></div>
+    <strong>{% if summary.achievement is not none %}{{ summary.achievement }}%{% else %}—{% endif %}</strong>
+    <div><span>已定案目标按权重加权</span><em>三率分开</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>风险目标</span><b aria-hidden="true">⚠</b></div>
+    <strong>{{ summary.risk_total }}</strong>
+    <div><span>达成度低于 60</span><em>{{ summary.stale_total }} 项长期未更新</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>需关注人员</span><b aria-hidden="true">◔</b></div>
+    <strong>{{ summary.watch_total }}</strong>
+    <div><span>低于关注线或长期未更新</span><em>{{ summary.retro_pending }} 项待复盘</em></div>
+  </article>
+</section>
+
+<p class="rates-note">{{ rates_note }} 当前：目标达成率 {{ rates.objective_achievement if rates.objective_achievement is not none else '—' }}% · 任务完成率 {{ rates.task_rate if rates.task_rate is not none else '—' }}% · 更新覆盖率 {{ rates.coverage_rate if rates.coverage_rate is not none else '—' }}%。</p>
+
+{% if watch %}
+<section class="panel watch-panel">
+  <div class="panel-heading">
+    <div><h2>需关注人员</h2><p>已定案加权达成度低于 {{ watch_score | int }}，或存在超过 {{ stale_days }} 天未更新的目标</p></div>
+    <span class="badge-demo">{{ watch | length }} 人</span>
+  </div>
+  <ul class="watch-list">
+    {% for item in watch %}
+    <li>
+      <div class="watch-head">
+        <strong>{{ item.name }}</strong>
+        <span>{{ item.total }} 项目标 · 已定案 {{ item.verified }}</span>
+        <b>{{ item.score if item.score is not none else '—' }}<small>{{ item.grade }}</small></b>
+      </div>
+      <ul class="watch-reasons">{% for text in item.reasons %}<li>{{ text }}</li>{% endfor %}</ul>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% for group in groups %}
+<section class="panel">
+  <div class="panel-heading">
+    <div>
+      <h2>{{ group.label }}</h2>
+      <p>{{ group.count }} 个目标{% if group.score is not none %} · 该层级加权达成度 {{ group.score }}{% else %} · 该层级暂无已定案目标，不计达成度{% endif %}</p>
+    </div>
+  </div>
+  <ul class="obj-list">
+    {% for node in group.rows %}
+    <li class="obj-row obj-row--{{ node.light }}">
+      <span class="obj-light" aria-hidden="true"></span>
+      <div class="obj-main">
+        <div class="obj-title">
+          <strong>{{ node.title }}</strong>
+          {% if node.parent_title %}<small>↳ {{ node.parent_title }}</small>{% endif %}
+          {% if node.stale %}<i class="obj-flag">超 {{ node.stale_days }} 天未更新</i>{% endif %}
+        </div>
+        <p class="obj-meta">
+          <span>{{ node.owner }}</span><span>{{ node.cycle }}</span>
+          <span>权重 {{ node.weight }}</span><span>{{ node.kr_total }} 条 KR</span>
+          {% if node.has_retro %}<span class="obj-retro">已复盘</span>{% endif %}
+        </p>
+      </div>
+      <div class="obj-score">
+        {% if node.verified %}<b>{{ node.score }}</b><small>达成度</small>
+        {% else %}<b>{{ node.score if node.score is not none else '—' }}</b><small>{{ node.status }}</small>{% endif %}
+      </div>
+      <div class="obj-action">
+        <a class="button button-secondary" href="{{ url_for('review_detail', objective_id=node.objective_id) }}">查看</a>
+      </div>
+    </li>
+    {% else %}
+    <li class="empty-block">该层级暂无目标。</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endfor %}
+
+<section class="panel">
+  <div class="panel-heading"><div><h2>跨周期趋势</h2><p>各周期已定案目标的加权达成度，缺失周期按「无数据」呈现</p></div></div>
+  <ul class="trend-list">
+    {% for item in cycle_trend %}
+    <li>
+      <span class="trend-label">{{ item.cycle_name }}</span>
+      <div class="trend-track">
+        {% if item.has_data %}
+        <div class="trend-fill trend-fill--{{ 'good' if item.score >= 90 else ('mid' if item.score >= 75 else 'low') }}" style="width: {{ item.score }}%"></div>
+        {% else %}<span class="trend-none">无数据</span>{% endif %}
+      </div>
+      <b class="trend-value">{% if item.has_data %}{{ item.score }}{% else %}—{% endif %}<small>{{ item.count }} 项</small></b>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="panel">
+  <div class="panel-heading"><div><h2>口径说明</h2><p>所有数字来自同一套计算出口</p></div><span class="badge-demo">口径可自证</span></div>
+  <ul class="note-list">
+    <li><strong>加权汇总</strong>：达成度按目标权重加权，不做简单平均（AC-30）。</li>
+    <li><strong>未验收不给分</strong>：只统计已定案目标，未验收显示状态而不计入达成度。</li>
+    <li><strong>三率分离</strong>：目标达成率、任务完成率、更新覆盖率分别计算，禁止互相替代。</li>
+    <li><strong>档位阈值</strong>：{{ grade_bands | join('；') }}。</li>
+  </ul>
+</section>
+
+{% endblock %}

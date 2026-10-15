@@ -1,0 +1,166 @@
+{% extends 'layout.html' %}
+{% block title %}周期与字典 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/c-line.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/pages/cycle_dict.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">DATA &amp; SETTINGS / DICT</p>
+    <h1>周期与字典</h1>
+    <p class="subtitle">周期是验收与对比分析的时间基准，必须先于目标存在；被目标引用的周期只能改状态、不能删除，避免历史数据失去归属。</p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('objectives') }}"><span aria-hidden="true">◎</span>目标全景</a>
+    <a class="button button-secondary" href="{{ url_for('compare') }}"><span aria-hidden="true">⇅</span>对比分析</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="stats" aria-label="周期概览">
+  <article class="stat-card">
+    <div class="stat-top"><span>周期总数</span><b aria-hidden="true">◷</b></div>
+    <strong>{{ cycles | length }}</strong>
+    <div><span>季度与月度合计</span><em>时间基准</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>进行中</span><b aria-hidden="true">◔</b></div>
+    <strong>{{ cycles | selectattr('status', 'equalto', '进行中') | list | length }}</strong>
+    <div><span>当前正在执行</span><em>可继续挂目标</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>已引用周期</span><b aria-hidden="true">⚿</b></div>
+    <strong>{{ cycles | selectattr('locked') | list | length }}</strong>
+    <div><span>被目标引用即锁定</span><em>不可删除</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>字典分组</span><b aria-hidden="true">☰</b></div>
+    <strong>{{ dicts | length }}</strong>
+    <div><span>受引用完整性约束</span><em>口径可自证</em></div>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>周期列表</h2><p>编号自动生成（季度 CY-YYYYQn，月度 CY-YYYYMM）；已被引用的周期会标记锁定</p></div>
+    <span class="badge-demo">引用完整性 AC-33</span>
+  </div>
+  <ul class="cycle-list">
+    {% for cycle in cycles %}
+    <li class="cycle-row{% if cycle.locked %} is-locked{% endif %}">
+      <div class="cycle-main">
+        <div class="cycle-title">
+          <strong>{{ cycle.name }}</strong>
+          <span class="tag tag-type">{{ cycle.type }}</span>
+          <span class="tag tag-status tag-status--{{ 'run' if cycle.status == '进行中' else ('done' if cycle.status == '已结束' else 'idle') }}">{{ cycle.status }}</span>
+          {% if cycle.locked %}<span class="tag tag-lock" title="已被目标引用，不可删除">⚿ 已被引用</span>{% endif %}
+        </div>
+        <p class="cycle-meta">
+          <span>{{ cycle.cycle_id }}</span>
+          <span>{{ cycle.start_at or '—' }} → {{ cycle.end_at or '—' }}</span>
+          <span>{{ cycle.objective_count }} 个目标</span>
+          {% if cycle.note %}<span>{{ cycle.note }}</span>{% endif %}
+        </p>
+      </div>
+      <div class="cycle-actions">
+        <button class="button button-secondary cycle-edit" type="button"
+                data-cycle-id="{{ cycle.cycle_id }}" data-name="{{ cycle.name }}"
+                data-type="{{ cycle.type }}" data-status="{{ cycle.status }}"
+                data-start="{{ cycle.start_at }}" data-end="{{ cycle.end_at }}"
+                data-note="{{ cycle.note }}">编辑</button>
+        {% if cycle.locked %}
+        <button class="button button-secondary" type="button" disabled title="该周期已被目标引用，不能删除">删除</button>
+        {% else %}
+        <form method="post" action="{{ url_for('cycle_delete') }}" onsubmit="return confirm('确定删除周期「{{ cycle.name }}」吗？')">
+          <input type="hidden" name="cycle_id" value="{{ cycle.cycle_id }}">
+          <button class="button button-danger" type="submit">删除</button>
+        </form>
+        {% endif %}
+      </div>
+    </li>
+    {% else %}
+    <li class="empty-block"><p class="empty-icon" aria-hidden="true">◷</p>还没有周期，先在下方新建一个，再挂目标。</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2 id="cycle-form-title">新建周期</h2><p>先建周期、再建目标；周期类型与状态决定它在验收与对比里的分组方式</p></div>
+  </div>
+  <form method="post" action="{{ url_for('cycle_save') }}" class="form-grid" id="cycle-form">
+    <input type="hidden" name="cycle_id" id="cycle-id" value="">
+    <div class="field">
+      <label class="field-label" for="cycle-name">周期名称</label>
+      <input type="text" id="cycle-name" name="name" placeholder="如：2026 Q4" maxlength="40" required>
+      <small class="field-hint">建议写成「2026 Q4」或「2026 年 10 月」，编号会自动生成</small>
+    </div>
+    <div class="field">
+      <label class="field-label" for="cycle-type">周期类型</label>
+      <select id="cycle-type" name="type">
+        {% for item in cycle_types %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label" for="cycle-status">状态</label>
+      <select id="cycle-status" name="status">
+        {% for item in cycle_statuses %}<option value="{{ item }}">{{ item }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label" for="cycle-start">开始日期</label>
+      <input type="date" id="cycle-start" name="start_at">
+    </div>
+    <div class="field">
+      <label class="field-label" for="cycle-end">结束日期</label>
+      <input type="date" id="cycle-end" name="end_at">
+      <small class="field-hint">开始不能晚于结束</small>
+    </div>
+    <div class="field field-wide">
+      <label class="field-label" for="cycle-note">备注</label>
+      <input type="text" id="cycle-note" name="note" placeholder="选填，如本周期重点" maxlength="80">
+    </div>
+    <div class="form-actions">
+      <button class="button button-primary" type="submit">保存周期</button>
+      <button class="button button-secondary" type="button" id="cycle-reset">清空表单</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>数据字典</h2><p>字典项被目标、验收或复盘引用后不可删除；评分档位直接来自达成度引擎，保证与验收定级一致</p></div>
+  </div>
+  <div class="dict-grid">
+    {% for group in dicts %}
+    <article class="dict-card">
+      <div class="dict-head"><strong>{{ group['name'] }}</strong><span>{{ group['items'] | length }} 项</span></div>
+      <ul class="dict-tags">{% for item in group['items'] %}<li>{{ item }}</li>{% endfor %}</ul>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-heading"><div><h2>口径参考</h2><p>与验收、对比分析共用同一套定义，改动这里等于全站同步</p></div><span class="badge-demo">口径可自证</span></div>
+  <div class="ref-grid">
+    <div>
+      <h3>四类 KR 指标算法</h3>
+      <dl class="ref-list">
+        {% for key, label in metric_labels.items() %}
+        <div><dt>{{ label }}</dt><dd>{{ metric_formulas.get(key, '') }}</dd></div>
+        {% endfor %}
+      </dl>
+    </div>
+    <div>
+      <h3>评分档位</h3>
+      <ul class="ref-tags">{% for band in grade_bands %}<li>{{ band }}</li>{% endfor %}</ul>
+      <p class="ref-note">自评与终评分差超过 {{ diff_limit | int }} 分时，必须填写差异说明（AC-26）。</p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/cycle_dict.js') }}"></script>{% endblock %}

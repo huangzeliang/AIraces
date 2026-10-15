@@ -1,0 +1,64 @@
+/* C 线 · 目标全景页面专属样式；公共部分见 c-line.css */
+
+/* ---------- 需关注人员 ---------- */
+/* KPI 上色按本页语义重排：风险目标用告警色，需关注人员用关注色（c-line.css 的默认顺序不适用） */
+.stats .stat-card:nth-child(3) .stat-top b{background:var(--danger-soft);color:var(--danger)}
+.stats .stat-card:nth-child(4) .stat-top b{background:var(--prio-mid-soft);color:var(--prio-mid)}
+
+.watch-panel{border-left:5px solid var(--prio-mid)}
+.watch-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.watch-list>li{padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:var(--prio-mid-soft)}
+.watch-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.watch-head strong{font-size:13px}
+.watch-head span{font-size:11px;color:var(--muted)}
+.watch-head b{margin-left:auto;font-size:19px;font-variant-numeric:tabular-nums}
+.watch-head b small{display:block;font-size:10px;font-weight:800;color:var(--muted)}
+.watch-reasons{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px}
+.watch-reasons li{position:relative;padding-left:14px;font-size:11px;line-height:1.65;color:var(--text)}
+.watch-reasons li:before{content:"!";position:absolute;left:0;font-weight:900;color:var(--prio-mid)}
+
+/* ---------- 目标列表 ---------- */
+.obj-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.obj-row{display:grid;grid-template-columns:6px minmax(0,1fr) 96px 84px;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:15px;background:var(--bg)}
+.obj-light{width:6px;height:38px;border-radius:4px;background:var(--prio-low);align-self:center}
+.obj-row--green .obj-light{background:var(--green)}
+.obj-row--amber .obj-light{background:var(--prio-mid)}
+.obj-row--red .obj-light{background:var(--danger)}
+.obj-row--none .obj-light{background:repeating-linear-gradient(180deg,var(--border),var(--border) 4px,transparent 4px,transparent 8px)}
+.obj-main{min-width:0}
+.obj-title{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.obj-title strong{font-size:13px}
+.obj-title small{font-size:10px;color:var(--subtle)}
+.obj-flag{padding:2px 8px;border-radius:7px;background:var(--danger-soft);color:var(--danger);font-size:9px;font-style:normal;font-weight:800}
+.obj-meta{margin:6px 0 0;display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--subtle)}
+.obj-retro{color:var(--purple);font-weight:800}
+.obj-score{text-align:center}
+.obj-score b{display:block;font-size:21px;font-variant-numeric:tabular-nums}
+.obj-score small{font-size:10px;font-weight:800;color:var(--muted)}
+.obj-action{text-align:right}
+.obj-action .button{height:32px;padding:0 12px}
+
+/* ---------- 跨周期趋势 ---------- */
+.trend-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.trend-list li{display:grid;grid-template-columns:132px minmax(0,1fr) 88px;align-items:center;gap:14px}
+.trend-label{font-size:12px;font-weight:800}
+.trend-track{position:relative;height:24px;border-radius:9px;background:var(--bg);border:1px solid var(--border);overflow:hidden}
+.trend-fill{height:100%;border-radius:8px;background:var(--accent);transition:width .5s ease-out}
+.trend-fill--good{background:var(--green)}
+.trend-fill--mid{background:var(--prio-mid)}
+.trend-fill--low{background:var(--danger)}
+.trend-none{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--subtle)}
+.trend-value{text-align:right;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums}
+.trend-value small{display:block;font-size:10px;font-weight:800;color:var(--muted)}
+
+@media(max-width:1000px){
+  .obj-row{grid-template-columns:6px minmax(0,1fr) 84px;row-gap:10px}
+  .obj-row .obj-action{grid-column:2 / -1;text-align:left}
+}
+@media(max-width:760px){
+  .trend-list li{grid-template-columns:minmax(0,1fr) 72px}
+  .trend-list .trend-track{grid-column:1 / -1}
+}
+@media(prefers-reduced-motion:reduce){
+  .trend-fill{transition:none}
+}

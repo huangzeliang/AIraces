@@ -1,0 +1,161 @@
+{% extends 'layout.html' %}
+{% block title %}{{ objective.title }} · 复盘 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/c-line.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/pages/retro.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">RETROSPECTIVE / RETRO / {{ objective.objective_id }}</p>
+    <h1>{{ objective.title }}</h1>
+    <p class="subtitle">
+      {{ objective.level_label or '个人级' }} ·
+      负责人 {{ owner.name or '未指派' }} ·
+      周期 {{ cycle.name or '—' }}
+      {% if next_cycle %} · 改进项将转入 {{ next_cycle.name }}{% endif %}
+    </p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('retro_list') }}"><span aria-hidden="true">←</span>返回列表</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="retro-hero">
+  <div class="retro-hero-score">
+    <span class="score-value">{% if highlights.achievement is not none %}{{ highlights.achievement }}{% else %}—{% endif %}</span>
+    <span class="score-unit">达成度</span>
+    <span class="score-grade">{{ highlights.grade or '未评级' }}</span>
+  </div>
+  <ul class="hero-facts">
+    <li><span>目标状态</span><strong>{{ objective.status }}</strong></li>
+    <li><span>自评分</span><strong>{{ highlights.self_score if highlights.self_score is not none else '—' }}</strong></li>
+    <li><span>终评分</span><strong>{{ highlights.final_score if highlights.final_score is not none else '—' }}</strong></li>
+    <li><span>改进项</span><strong>{{ improvements | length }}</strong></li>
+  </ul>
+</section>
+
+<section class="panel">
+  <div class="panel-heading"><div><h2>结果对照</h2><p>来自验收记录，逐条关键结果的目标值与实际值</p></div></div>
+  {% if rows %}
+  <table class="retro-table">
+    <thead><tr><th>关键结果</th><th>口径</th><th>目标</th><th>实际</th><th>达成度</th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+      <tr class="{% if (row.achievement or 0) < 75 %}is-weak{% elif (row.achievement or 0) >= 95 %}is-strong{% endif %}">
+        <td>{{ row.title }}</td>
+        <td>{{ row.metric_label }}</td>
+        <td>{{ row.target_text }}</td>
+        <td>{{ row.actual_text }}</td>
+        <td class="cell-score">{{ row.achievement }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if highlights.weak %}
+  <p class="retro-warn">未达标项：{% for item in highlights.weak %}{{ item.title }}（{{ item.achievement }}）{% if not loop.last %}、{% endif %}{% endfor %}</p>
+  {% endif %}
+  {% else %}
+  <p class="empty-block">没有验收记录，无法生成对照。</p>
+  {% endif %}
+</section>
+
+{% if not verified %}
+<section class="panel locked-panel">
+  <p class="empty-icon" aria-hidden="true">⚿</p>
+  <h2>尚未完成验收</h2>
+  <p>复盘只对已验收（或已复盘）的目标开放，请先完成验收定级。</p>
+  <a class="button button-primary" href="{{ url_for('review_detail', objective_id=objective.objective_id) }}">去验收</a>
+</section>
+{% else %}
+
+<form method="post" action="{{ url_for('retro_save', objective_id=objective.objective_id) }}" id="retro-form">
+  <section class="panel">
+    <div class="panel-heading">
+      <div><h2>结构化复盘</h2><p>四段固定结构；AI 初稿只填空白框，不会覆盖你已写的内容</p></div>
+      <div class="heading-actions">
+        {% if can_edit %}
+        <button class="button button-secondary" type="button" id="draft-btn" aria-expanded="false">AI 生成初稿</button>
+        <button class="button button-primary" type="submit">保存复盘</button>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="section-grid">
+      {% for item in section_defs %}
+      <div class="field field-wide">
+        <span class="field-label">{{ loop.index }}. {{ item.label }}</span>
+        <small class="field-hint">{{ item.hint }}</small>
+        {% if can_edit %}
+        <textarea name="section_{{ item.key }}" rows="3" data-section="{{ item.label }}" placeholder="填写{{ item.label }}">{{ sections.get(item.label, '') }}</textarea>
+        {% else %}
+        <p class="readonly-text">{{ sections.get(item.label) or '（未填写）' }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div><h2>改进项</h2><p>每条可一键转为下周期目标（草稿）或自建任务</p></div>
+      {% if can_edit %}<button class="button button-secondary" type="button" id="improve-add">＋ 添加改进项</button>{% endif %}
+    </div>
+    <div id="improve-list">
+      {% for item in improvements %}
+      <div class="improve-row" data-index="{{ loop.index0 }}">
+        {% if can_edit %}
+        <input class="improve-text" name="improve_text" value="{{ item.text }}" placeholder="改进项内容">
+        <select name="improve_kind" aria-label="转化类型">
+          {% for kind in improve_kinds %}<option value="{{ kind }}" {% if kind == item.kind %}selected{% endif %}>{{ kind }}</option>{% endfor %}
+        </select>
+        <select name="improve_owner" aria-label="负责人">
+          <option value="">默认负责人</option>
+          {% for uid, member in users.items() %}<option value="{{ uid }}" {% if uid == item.owner_id %}selected{% endif %}>{{ member.name }}</option>{% endfor %}
+        </select>
+        <button class="improve-remove" type="button" aria-label="删除该改进项">×</button>
+        {% else %}
+        <div class="improve-readonly"><strong>{{ item.text }}</strong><small>{{ item.kind }} · {{ (users.get(item.owner_id) or {}).name or '默认负责人' }}</small></div>
+        {% endif %}
+        {% if item.converted_to %}
+        <span class="convert-done">已转 {{ item.converted_to }}</span>
+        {% elif can_edit %}
+        <button class="button button-secondary convert-btn" type="button" data-index="{{ loop.index0 }}">转下周期</button>
+        {% endif %}
+      </div>
+      {% else %}
+      <p class="empty-block" id="improve-empty">还没有改进项，点「添加改进项」开始沉淀。</p>
+      {% endfor %}
+    </div>
+  </section>
+</form>
+
+{% if can_edit %}
+<template id="improve-template">
+  <div class="improve-row">
+    <input class="improve-text" name="improve_text" placeholder="改进项内容">
+    <select name="improve_kind" aria-label="转化类型">
+      {% for kind in improve_kinds %}<option value="{{ kind }}">{{ kind }}</option>{% endfor %}
+    </select>
+    <select name="improve_owner" aria-label="负责人">
+      <option value="">默认负责人</option>
+      {% for uid, member in users.items() %}<option value="{{ uid }}">{{ member.name }}</option>{% endfor %}
+    </select>
+    <button class="improve-remove" type="button" aria-label="删除该改进项">×</button>
+  </div>
+</template>
+<form method="post" action="{{ url_for('retro_convert', objective_id=objective.objective_id) }}" id="convert-form" hidden>
+  <input type="hidden" name="index" id="convert-index">
+</form>
+<form method="post" action="{{ url_for('retro_delete_improve', objective_id=objective.objective_id) }}" id="delete-improve-form" hidden>
+  <input type="hidden" name="index" id="delete-index">
+</form>
+{% endif %}
+
+{% endif %}
+
+<script type="application/json" id="retro-data">{{ {"objective_id": objective.objective_id, "can_edit": can_edit, "sections": section_defs | map(attribute='label') | list} | tojson }}</script>
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/retro.js') }}"></script>{% endblock %}

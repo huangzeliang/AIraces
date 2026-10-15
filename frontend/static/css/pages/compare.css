@@ -1,0 +1,51 @@
+/* C 线 · 对比分析页面专属样式；公共部分见 c-line.css */
+
+/* ---------- 纵向头部 ---------- */
+.vertical-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.vertical-head h3{margin:0;font-size:14px}
+.delta-tag{padding:4px 11px;border-radius:9px;font-size:11px;font-weight:900}
+.delta-tag--up{background:var(--green-soft);color:var(--green)}
+.delta-tag--down{background:var(--danger-soft);color:var(--danger)}
+
+/* ---------- 条形对比 ---------- */
+.bar-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.bar-row{display:grid;grid-template-columns:190px minmax(0,1fr) 92px;align-items:center;gap:16px}
+.bar-label{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-flag{padding:2px 7px;border-radius:7px;background:var(--green-soft);color:var(--green);font-size:9px;font-style:normal;font-weight:800;flex:none}
+.bar-sub{font-size:10px;font-style:normal;font-weight:600;color:var(--subtle);flex:none}
+.bar-track{position:relative;height:26px;border-radius:9px;background:var(--bg);border:1px solid var(--border);overflow:hidden}
+.bar-fill{height:100%;border-radius:8px;background:var(--accent);transition:width .5s ease-out}
+.bar-fill--good{background:var(--green)}
+.bar-fill--mid{background:var(--prio-mid)}
+.bar-fill--low{background:var(--danger)}
+.bar-row--empty .bar-track{background:repeating-linear-gradient(45deg,var(--bg),var(--bg) 6px,var(--prio-low-soft) 6px,var(--prio-low-soft) 12px)}
+.bar-none{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:800;color:var(--subtle)}
+.bar-value{text-align:right;font-size:16px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar-value small{display:block;font-size:10px;font-weight:800;color:var(--muted)}
+
+/* ---------- 不可比提示 ---------- */
+.warning-box{margin-top:16px;padding:13px 16px;border-radius:13px;background:var(--prio-mid-soft);border:1px solid var(--prio-mid)}
+.warning-box h3{margin:0 0 8px;font-size:11px;color:var(--prio-mid)}
+.warning-box ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.warning-box li{position:relative;padding-left:14px;font-size:11px;line-height:1.7;color:var(--text)}
+.warning-box li:before{content:"!";position:absolute;left:0;font-weight:900;color:var(--prio-mid)}
+
+/* ---------- 图例 ---------- */
+.legend-row{list-style:none;margin:16px 0 0;padding:12px 14px;border-radius:12px;background:var(--bg);display:flex;gap:20px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.legend-row li{display:inline-flex;align-items:center;gap:7px}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.dot-good{background:var(--green)}
+.dot-mid{background:var(--prio-mid)}
+.dot-low{background:var(--danger)}
+
+/* ---------- 窄屏 ---------- */
+@media(max-width:1000px){
+  .bar-row{grid-template-columns:140px minmax(0,1fr) 76px;gap:12px}
+}
+@media(max-width:760px){
+  .bar-row{grid-template-columns:minmax(0,1fr) 70px;row-gap:6px}
+  .bar-row .bar-track{grid-column:1 / -1}
+}
+@media(prefers-reduced-motion:reduce){
+  .bar-fill{transition:none}
+}
