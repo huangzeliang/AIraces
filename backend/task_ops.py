@@ -1,7 +1,7 @@
-"""B 线 · 执行与巡检线后端：B1 任务列表 + B2 提醒中心。
+"""B 线 · 执行与巡检线后端：B1 任务列表 + B2 提醒中心 + F-116/F-117 拆解详情。
 
 对应需求：REQ-006/007/009/010/019/021/022/032（F-301~307/403~405/501/503/903/905/906）
-归属文件：backend/task_ops.py · pages/tasks.* · pages/reminders.*
+归属文件：backend/task_ops.py · pages/tasks.* · pages/reminders.* · pages/task_detail.*
 
 接口契约（AI 自测脚本依赖，路径与动词不可改动）：
 - GET  /tasks                              列表页（筛选 / 排序 / 分页，URL 保留筛选态）
@@ -10,16 +10,26 @@
 - POST /tasks/{task_id}/delay              延期（原因必填，写入 delay_reason）
 - POST /tasks/{task_id}/cancel             取消（页面二次确认后提交）
 - POST /tasks/{task_id}/progress           进度滑杆（100 自动完成）
-- POST /tasks/{task_id}/edit               编辑（标题/描述/优先级/耗时/截止）
+- POST /tasks/{task_id}/edit               编辑（标题/描述/优先级/耗时/截止/负责人）
 - POST /tasks/{task_id}/delete             删除（写状态日志，历史反馈与提醒保留）
 - POST /tasks/undo/{feedback_id}           撤销反馈（按前态快照回滚）
 - GET  /tasks/export                       导出当前筛选结果（CSV / JSON）
+- GET  /tasks/{task_id}                    单任务详情（F-116）：拆解树 + 子任务时间线甘特图
+- POST /tasks/{task_id}/decompose          拆解为个人子任务（F-117）：负责人 / 工时 / 起止
+- POST /tasks/{child_id}/detach            子任务迁出（上提为顶层任务）
 - GET  /reminders                          提醒中心（未读置顶高亮，风险样式）
 - POST /reminders/{reminder_id}/read       标记已读
 - POST /reminders/{reminder_id}/unread     重新标记未读
 - POST /reminders/{reminder_id}/ignore     忽略
 - POST /reminders/read-all                 全部已读（页面二次确认后提交）
 - GET  /reminders/export                   导出提醒记录 CSV
+
+拆解规则（F-117，提交时强校验，失败不写任何数据）：
+- 拆解层级最多 3 层（大任务 → 个人任务 → 再下拆一层）；已完成 / 已取消任务不可再拆；
+- 子任务工时合计不得超过父任务预计工时；
+- 子任务时间窗必须落在父任务时间窗内（父任务未排期时，首个子任务提交后父窗口自动扩为其并集）；
+- 同级子任务时间窗不得互相重叠；
+- 父子链由 parent_task_id 自引用构成，页面展示与甘特缩进都基于该链，结构上不存在循环引用。
 
 落库闭环沿用全局约定：读取 → 校验 → 加锁写 → 刷新展示；失败不写任何数据。
 接口同时接受 JSON（AI 自测脚本 / fetch）与表单（页面）两种提交方式。
@@ -28,7 +38,7 @@
 import csv
 import io
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from importlib import import_module
 from urllib.parse import urlencode
 
@@ -52,6 +62,11 @@ DETAIL_LIMIT = 500
 REASON_LIMIT = 200
 KEYWORD_LIMIT = 60
 ESTIMATE_LIMIT = 100000
+OWNER_LIMIT = 20
+
+MAX_DEPTH = 3                 # 拆解树最多 3 层：大任务 → 个人任务 → 再下拆一层
+DECOMPOSE_BLOCKED = ("已完成", "已取消")
+GANTT_WIDTH_DAYS_LIMIT = 45   # 甘特时间轴最宽 45 天，超出截断（与智能排期口径一致）
 
 PAGINATE_THRESHOLD = 50
 PAGE_SIZE = 20
@@ -126,6 +141,157 @@ def _find_task(store, task_id):
 
 def _find_reminder(store, reminder_id):
     return next((r for r in store.get("reminders", []) if r.get("reminder_id") == reminder_id), None)
+
+
+def _task_index(store):
+    return {t.get("task_id"): t for t in store.get("tasks", []) if t.get("task_id")}
+
+
+def _child_index(store):
+    """parent_task_id → 直接子任务列表（按计划开始时间排序，供列表徽标与甘特缩进复用）。"""
+    index = {}
+    for task in store.get("tasks", []):
+        parent_id = task.get("parent_task_id") or ""
+        if parent_id:
+            index.setdefault(parent_id, []).append(task)
+    for children in index.values():
+        children.sort(key=lambda t: (t.get("scheduled_start_at") or "9999", t.get("task_id") or ""))
+    return index
+
+
+def _ancestors(task, by_id):
+    """自下而上的父链（带 seen 防环兜底），用于面包屑、层级校验与循环引用兜底。"""
+    chain, seen = [], set()
+    current = task
+    while current is not None:
+        parent_id = current.get("parent_task_id") or ""
+        if not parent_id or parent_id in seen:
+            break
+        parent = by_id.get(parent_id)
+        if parent is None:
+            break
+        seen.add(parent_id)
+        chain.append(parent)
+        current = parent
+    return chain
+
+
+def _depth_of(task, by_id):
+    """任务在拆解树中的层级：顶层 = 1。"""
+    return len(_ancestors(task, by_id)) + 1
+
+
+def _minutes_of(task):
+    try:
+        value = int(task.get("estimate_minutes") or 60)
+    except (TypeError, ValueError):
+        value = 60
+    return value if value > 0 else 60
+
+
+def _subtree_rows(root, child_index):
+    """拆解树深度优先展开为 [(task, depth)]，以 root 为第 1 层；防环 + 层级兜底。"""
+    rows, seen = [], set()
+
+    def walk(task, depth):
+        task_id = task.get("task_id")
+        if task_id in seen or depth > MAX_DEPTH + 2:
+            return
+        seen.add(task_id)
+        rows.append((task, depth))
+        for child in child_index.get(task_id, []):
+            walk(child, depth + 1)
+
+    walk(root, 1)
+    return rows
+
+
+def _effective_window(task, child_index, guard=0):
+    """任务在甘特上的有效窗口：优先自身计划起止；未排期的父任务用子任务窗口并集兜底。"""
+    start = llm.parse_dt(task.get("scheduled_start_at") or "")
+    finish = llm.parse_dt(task.get("planned_finish_at") or "")
+    if start and finish and start < finish:
+        return start, finish
+    if guard < 6:
+        windows = [w for w in (_effective_window(child, child_index, guard + 1)
+                               for child in child_index.get(task.get("task_id"), [])) if w]
+        if windows:
+            return min(w[0] for w in windows), max(w[1] for w in windows)
+    return None
+
+
+def _floor_day(moment):
+    return moment.replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def _ceil_day(moment):
+    floored = _floor_day(moment)
+    return moment if floored == moment else floored + timedelta(days=1)
+
+
+def _timeline_span(views, now):
+    """为拆解树视图计算甘特刻度与百分比定位；无任何窗口时返回 None（页面显示空态）。"""
+    windows = [v.pop("_window", None) for v in views]
+    if not any(windows):
+        return None
+    span_start = _floor_day(min(w[0] for w in windows if w))
+    span_end = _ceil_day(max(w[1] for w in windows if w))
+    dues = [llm.parse_dt(v.get("due_at") or "") for v in views]
+    dues = [d for d in dues if d]
+    if dues:
+        span_end = _ceil_day(max(span_end, max(dues)))
+    capped = (span_end - span_start) > timedelta(days=GANTT_WIDTH_DAYS_LIMIT)
+    if capped:
+        span_end = span_start + timedelta(days=GANTT_WIDTH_DAYS_LIMIT)
+    total_minutes = max(1, int((span_end - span_start).total_seconds() // 60))
+
+    days = []
+    day = span_start
+    while day < span_end:
+        days.append({
+            "label": day.strftime("%m-%d"),
+            "weekday": "一二三四五六日"[day.weekday()],
+            "weekend": day.weekday() >= 5,
+            "left_pct": round((day - span_start).total_seconds() / 60 / total_minutes * 100, 4),
+        })
+        day += timedelta(days=1)
+    width = round(100.0 / max(1, len(days)), 4)
+    for item in days:
+        item["width_pct"] = width
+
+    def position(moment):
+        return max(0.0, min(100.0, (moment - span_start).total_seconds() / 60 / total_minutes * 100))
+
+    for view, window in zip(views, windows):
+        if not window:
+            view["unscheduled"] = True
+            continue
+        start, finish = window
+        view["left_pct"] = round(position(start), 4)
+        view["width_pct"] = round(max(0.4, position(finish) - position(start)), 4)
+        view["window_disp"] = "%s → %s" % (start.strftime("%m-%d %H:%M"), finish.strftime("%m-%d %H:%M"))
+        due = llm.parse_dt(view.get("due_at") or "")
+        if due:
+            view["due_left_pct"] = round(position(due), 4)
+    today_pct = round(position(now), 4) if span_start <= now <= span_end else None
+
+    return {
+        "start_disp": span_start.strftime("%m-%d"),
+        "end_disp": span_end.strftime("%m-%d"),
+        "days": days,
+        "capped": capped,
+        "today_pct": today_pct,
+    }
+
+
+def _respond_task_detail(ok, message, task_id, code=200, **extra):
+    """详情页专用响应：JSON 返回 JSON；表单 flash 后回到同一任务详情（或列表）。"""
+    if request.get_json(silent=True) is not None:
+        body = {"ok": ok, "message": message}
+        body.update(extra)
+        return jsonify(body), (200 if ok else code)
+    flash(message, "success" if ok else "error")
+    return redirect(url_for("task_detail", task_id=task_id))
 
 
 def _next_suffix():
