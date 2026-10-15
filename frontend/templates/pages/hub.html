@@ -1,0 +1,224 @@
+{% extends 'layout.html' %}
+{% block title %}AI 任务中枢 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/hub.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">WORKBENCH / AI HUB</p>
+    <h1>AI 任务中枢</h1>
+    <p class="subtitle">把计划、排期、任务、异常四路数据收敛成一个入口，回答「卡在哪一环、卡的是什么、该先动谁」。研判走可解释规则，每条结论都能回溯到原始任务。</p>
+  </div>
+  <div class="heading-actions">
+    <span class="hub-stamp">研判于 {{ generated_at }}</span>
+    <button class="button button-secondary" type="button" id="hub-refresh"><span aria-hidden="true">⟳</span>重新研判</button>
+    <a class="button button-secondary" href="{{ url_for('tasks') }}">打开任务列表</a>
+  </div>
+</section>
+
+{% if not has_data %}
+<section class="panel empty-state">
+  <p class="empty-icon" aria-hidden="true">◎</p>
+  <h2>还没有可研判的任务</h2>
+  <p>先在数据管理里导入一份任务清单，中枢会自动识别卡点并给出处置顺序。</p>
+  <a class="button button-primary" href="{{ url_for('data_manage') }}">去数据管理导入</a>
+</section>
+{% else %}
+
+<section class="hub-hero hub-hero--{{ health.key }}">
+  <div class="hub-hero-main">
+    <p class="eyebrow">CURRENT BOTTLENECK · 当前卡点</p>
+    <h2>{{ bottleneck.headline }}</h2>
+    <p class="hub-judgement">{{ judgement }}</p>
+    <div class="hub-hero-actions">
+      <a class="button button-primary" href="{{ bottleneck.link }}">立即处理 {{ bottleneck.top_task_id }}</a>
+      <span class="hub-hero-hint">{{ bottleneck.hint }}</span>
+    </div>
+  </div>
+  <div class="hub-score">
+    <div class="hub-score-ring">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle cx="60" cy="60" r="52" class="ring-track"></circle>
+        <circle cx="60" cy="60" r="52" class="ring-value" style="stroke-dashoffset: {{ (327 * (1 - health.value / 100)) | round(1) }}"></circle>
+      </svg>
+      <span data-count="{{ health.value }}">{{ health.value }}</span>
+    </div>
+    <p class="hub-score-label">中枢健康分 · <strong>{{ health.label }}</strong></p>
+    <p class="hub-score-formula">{{ health.formula }}</p>
+  </div>
+</section>
+
+<section class="stats" aria-label="中枢核心指标">
+  <article class="stat-card">
+    <div class="stat-top"><span>未完成任务</span><b aria-hidden="true">▦</b></div>
+    <strong data-count="{{ kpi.open_total }}">{{ kpi.open_total }}</strong>
+    <div><span>仍在流水线上的任务</span><em>全局口径</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>识别卡点</span><b aria-hidden="true">◎</b></div>
+    <strong data-count="{{ kpi.blocker_total }}">{{ kpi.blocker_total }}</strong>
+    <div><span>高风险 {{ kpi.critical }} · 需关注 {{ kpi.warning }}</span><em>共 {{ kpi.blocker_total }} 条</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>排期覆盖率</span><b aria-hidden="true">◷</b></div>
+    <strong data-count="{{ kpi.schedule_rate }}" data-suffix="%">{{ kpi.schedule_rate }}%</strong>
+    <div><span>未完成任务已落时间窗</span><em>排期环节</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>最长阻塞链</span><b aria-hidden="true">⛓</b></div>
+    <strong data-count="{{ kpi.chain_len }}">{{ kpi.chain_len }}</strong>
+    <div><span>一级阻塞牵连的层级</span><em>依赖关系</em></div>
+  </article>
+</section>
+
+<section class="panel hub-stages">
+  <div class="panel-heading">
+    <div><h2>环节卡点定位</h2><p>按状态把流水线切成五段，分段宽度代表在途任务量，颜色代表受阻程度</p></div>
+    <span class="badge-demo">规则研判</span>
+  </div>
+  {% set stage_total = stages | sum(attribute='count') %}
+  <div class="stage-strip" role="list">
+    {% for stage in stages %}
+    <div class="stage-seg stage-seg--{{ stage.state }}" role="listitem"
+         style="--grow: {{ stage.count }}"
+         title="{{ stage.name }}：在途 {{ stage.count }}，受阻 {{ stage.blocked }}">
+      <span class="stage-seg-name">{{ stage.name }}</span>
+      <span class="stage-seg-count">{{ stage.count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <ul class="stage-list">
+    {% for stage in stages %}
+    <li class="stage-row stage-row--{{ stage.state }}">
+      <span class="stage-dot" aria-hidden="true"></span>
+      <div class="stage-name"><strong>{{ stage.name }}</strong><small>{{ stage.hint }}</small></div>
+      <span class="stage-metric"><b>{{ stage.count }}</b>在途</span>
+      <span class="stage-metric"><b>{{ stage.blocked }}</b>受阻</span>
+      <span class="stage-ratio">{{ stage.ratio }}%</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="panel hub-blockers">
+  <div class="panel-heading">
+    <div><h2>卡点清单</h2><p>按严重度排序；同一任务只保留最严重的一条，其余类型作为标签展示</p></div>
+    <div class="chips" role="group" aria-label="按严重度筛选" id="blocker-filter">
+      <button class="chip is-active" type="button" data-level="all">全部 {{ kpi.blocker_total }}</button>
+      <button class="chip" type="button" data-level="critical">🔴 高风险 {{ kpi.critical }}</button>
+      <button class="chip" type="button" data-level="warning">🟡 需关注 {{ kpi.warning }}</button>
+      <button class="chip" type="button" data-level="info">🟢 可延后 {{ kpi.info }}</button>
+    </div>
+  </div>
+
+  {% if blockers %}
+  <ul class="blocker-list" id="blocker-list">
+    {% for item in blockers %}
+    <li class="blocker blocker--{{ item.level }}" data-level="{{ item.level }}">
+      <div class="blocker-head">
+        <span class="blocker-level">{{ item.level_label }}</span>
+        <span class="blocker-kind">{{ item.kind }}</span>
+        <span class="blocker-impact">{{ item.impact_text }}</span>
+      </div>
+      <h3 class="blocker-title"><span class="blocker-id">{{ item.task_id }}</span>{{ item.title }}</h3>
+      <p class="blocker-reason">{{ item.reason }}</p>
+      <ul class="blocker-evidence">
+        {% for line in item.evidence %}<li>{{ line }}</li>{% endfor %}
+      </ul>
+      <div class="blocker-foot">
+        <p class="blocker-advice"><span aria-hidden="true">✦</span>{{ item.suggestion }}</p>
+        <a class="button button-secondary blocker-go" href="{{ item.link }}">去处理</a>
+      </div>
+      {% if item.tags | length > 1 %}
+      <p class="blocker-tags">同时命中：{% for tag in item.tags %}<span>{{ tag }}</span>{% endfor %}</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="blocker-empty" id="blocker-empty" hidden>该严重度下没有卡点。</p>
+  {% else %}
+  <p class="blocker-empty">未识别到卡点，流水线整体通畅。</p>
+  {% endif %}
+</section>
+
+<section class="hub-grid">
+  <article class="panel">
+    <div class="panel-heading"><div><h2>阻塞传播链</h2><p>沿着依赖关系向下走，看清一条链会拖住多少环</p></div></div>
+    {% if chains %}
+    <ul class="chain-list">
+      {% for chain in chains %}
+      <li class="chain">
+        {% for node in chain %}
+        <a class="chain-node" href="{{ url_for('tasks', focus=node.task_id) }}">
+          <span class="chain-id">{{ node.task_id }}</span>
+          <span class="chain-title">{{ node.title[:14] }}</span>
+          <span class="chain-status">{{ node.status }}</span>
+        </a>
+        {% if not loop.last %}<span class="chain-arrow" aria-hidden="true">→</span>{% endif %}
+        {% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="blocker-empty">当前没有形成阻塞链，依赖关系互不牵连。</p>
+    {% endif %}
+  </article>
+
+  <article class="panel">
+    <div class="panel-heading"><div><h2>中枢行动清单</h2><p>按「一次动手能解冻多少」排序</p></div><span class="badge-demo">演示级</span></div>
+    {% if actions %}
+    <ol class="action-list">
+      {% for item in actions %}
+      <li class="action action--{{ item.level }}">
+        <span class="action-mark" aria-hidden="true"></span>
+        <div class="action-body">
+          <strong>{{ item.title }}</strong>
+          <p>{{ item.why }}</p>
+        </div>
+        <a class="action-go" href="{{ item.link }}" aria-label="前往处理">→</a>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="blocker-empty">暂无需要立即处置的动作。</p>
+    {% endif %}
+  </article>
+
+  <article class="panel">
+    <div class="panel-heading">
+      <div><h2>AI 深度研判</h2><p>把规则结论交给大模型复述成结论与建议</p></div>
+      <button class="button button-secondary" type="button" id="deep-btn" aria-expanded="false" aria-controls="deep-body">开始研判</button>
+    </div>
+    <div class="deep-body" id="deep-body" hidden>
+      <ul id="deep-lines"></ul>
+      <p class="deep-advice" id="deep-advice"></p>
+      <p class="blocker-foot-note" id="deep-source"></p>
+    </div>
+    <div class="deep-idle" id="deep-idle">
+      <p>点「开始研判」，中枢会把当前卡点摘要交给大模型，输出 2–3 条结论和一条最优先动作。</p>
+      <p class="blocker-foot-note">未配置大模型时自动回退规则引擎结论，不会报错。</p>
+    </div>
+  </article>
+
+  <article class="panel">
+    <div class="panel-heading"><div><h2>数据异常待处置</h2><p>导入时被校验拦截的记录，积压会让统计口径失真</p></div><span class="badge-demo">{{ data_issues | length }} 条</span></div>
+    {% if data_issues %}
+    <ul class="issue-list">
+      {% for issue in data_issues[:8] %}
+      <li>
+        <span class="issue-id">{{ issue.exception_id }}</span>
+        <div><strong>{{ issue.title or '（无标题）' }}</strong><small>{{ issue.reason }}</small></div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% if data_issues | length > 8 %}<p class="blocker-foot-note">另有 {{ data_issues | length - 8 }} 条，去「数据管理」查看全部。</p>{% endif %}
+    <a class="button button-secondary issue-go" href="{{ url_for('data_manage') }}">去数据管理</a>
+    {% else %}
+    <p class="blocker-empty">没有待处置的异常数据。</p>
+    {% endif %}
+  </article>
+</section>
+
+{% endif %}
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/hub.js') }}"></script>{% endblock %}

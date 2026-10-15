@@ -4,10 +4,17 @@
 
 | 文件 | 说明 |
 | --- | --- |
-| `plans.json` | 应用运行时主数据（计划 / 待办 / 任务 / 提醒 / 反馈 / 异常 / 日志），启动时若不存在会自动初始化 |
+| `plans.json` | 应用运行时主数据（计划 / 待办 / 任务 / 提醒 / 反馈 / 异常 / 日志），启动时若不存在会自动初始化；计划与任务带 `user_id` 归属到账号 |
 | `sample_data.json` | 示例实例数据（只读样例），字段与 `plans.json` 完全同构，可直接替换用于演示 |
-| `users.json` | 用户与角色（登录 / 视图角色） |
+| `users.json` | 账号与角色（`id` / 姓名 / 邮箱 / 角色 / 状态 / `password_hash`）；角色仅两种：`管理员`、`普通用户` |
 | `settings.json` | 系统设置（主题、巡检间隔、免打扰时段、通知渠道） |
+
+## users.json 说明
+
+- `id` 采用 `U001` 起的编号，并作为 `plans.json` 中 `plans[].user_id` / `tasks[].user_id` 的归属依据；普通用户只能看到自己名下的数据。
+- 密码通过 `werkzeug.security`（pbkdf2:sha256）哈希存储，不保存明文；管理员在「用户管理」页可重置密码。
+- 演示账号：管理员 `ruoxi.lin@example.com`（U001）、普通用户 `yuhang.chen@example.com`（U002）、`zimo.zhou@example.com`（U004），初始密码均为 `123456`；`sihan.wang@example.com`（U003）为「停用」状态示例。
+- 启动时 `app.py` 会自动补齐旧数据：角色 `运营` / `编辑` 归一为 `普通用户`，缺少密码哈希的账号补默认密码，缺少 `user_id` 的任务按所属计划补齐。
 
 ## sample_data.json 说明
 

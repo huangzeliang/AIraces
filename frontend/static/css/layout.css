@@ -2,3 +2,33 @@
 .nav-menu+.nav-caption{margin-top:24px}
 .icon-button .reminder-count{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--danger);color:#fff;font-size:10px;font-weight:900;font-style:normal;line-height:1;display:grid;place-items:center;border:2px solid var(--surface)}
 [data-theme="night"] .icon-button .reminder-count{color:#3a1e1c}
+
+/* ---------- 顶栏左区：移动端菜单按钮 + 面包屑 ---------- */
+.topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
+.breadcrumbs{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.menu-button{display:none;flex:none;width:44px;height:44px;border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--muted);font-size:18px;place-items:center}
+.menu-button[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+.logout-form{margin:0;display:flex}
+.logout-button{height:37px;padding:0 12px;border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--muted);font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:5px;transition:transform .2s}
+.logout-button:hover{border-color:var(--danger);color:var(--danger)}
+.nav-logout{width:100%;margin-top:12px;flex:none}
+
+/* ---------- 移动端抽屉导航（≤700px 侧栏隐藏时使用） ---------- */
+.mobile-nav{position:fixed;inset:0;z-index:40}
+.mobile-nav[hidden]{display:none}
+.mobile-nav-mask{position:absolute;inset:0;background:rgba(8,13,26,.5);backdrop-filter:blur(3px)}
+.mobile-nav-panel{position:absolute;top:0;left:0;bottom:0;width:min(320px,86vw);display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;background:var(--side);border-right:1px solid var(--border);padding:18px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 18px 40px rgba(0,0,0,.28)}
+.mobile-nav-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.mobile-nav-head .brand{padding:0}
+.mobile-nav-close{flex:none;width:44px;height:44px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--muted);font-size:22px;line-height:1}
+.mobile-nav-panel .sidebar-spacer{flex:1}
+.mobile-nav-panel .profile{padding-top:14px}
+body.nav-open{overflow:hidden}
+@media(min-width:701px){.mobile-nav{display:none}}
+
+@media(max-width:700px){
+  .menu-button{display:grid}
+  .crumb-root{display:none}
+  .top-avatar{display:none}
+  .logout-form{display:none}
+}

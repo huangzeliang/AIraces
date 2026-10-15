@@ -6,8 +6,8 @@
 - 数据读写沿用「读取 → 校验 → 加锁写 → 刷新」闭环，不引入数据库。
 
 数据载体：
-- data/users.json   用户（旧演示数据，保留不动）
-- data/plans.json   Plan / Todo / Task / Reminder / Feedback / Exception
+- data/users.json   账号（姓名 / 邮箱 / 角色 / 状态 / 密码哈希），登录与角色体系的数据源
+- data/plans.json   Plan / Todo / Task / Reminder / Feedback / Exception（按 user_id 归属到账号）
 - data/settings.json 系统设置
 """
 
@@ -20,7 +20,7 @@ from importlib import import_module
 from pathlib import Path
 from types import SimpleNamespace
 
-from flask import Flask, render_template, request
+from flask import Flask, g, render_template, request
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -33,7 +33,10 @@ SETTINGS_FILE = DATA_DIR / "settings.json"
 # 请求线程与后台巡检线程共用同一把锁，保证并发写入不互相覆盖
 DATA_LOCK = threading.Lock()
 
-ALLOWED_ROLES = {"管理员", "运营", "编辑", "普通用户"}
+auth = import_module("backend.auth")
+scope = import_module("backend.scope")
+
+ALLOWED_ROLES = set(auth.ALLOWED_ROLES)
 ALLOWED_STATUSES = {"启用", "停用"}
 EMAIL_PATTERN = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 
@@ -93,7 +96,7 @@ def write_json(path, payload):
 
 
 # --------------------------------------------------------------------------
-# 用户（旧演示数据，保留原有能力）
+# 账号（登录与角色体系的数据源）
 # --------------------------------------------------------------------------
 
 def read_users():
@@ -104,7 +107,7 @@ def write_users(users):
     write_json(USERS_FILE, users)
 
 
-def form_data():
+def form_data(require_password=False):
     name = request.form.get("name", "").strip()
     email = request.form.get("email", "").strip().lower()
     phone = request.form.get("phone", "").strip()
@@ -119,7 +122,13 @@ def form_data():
         return None, "电话不能超过 30 个字符。"
     if role not in ALLOWED_ROLES or status not in ALLOWED_STATUSES:
         return None, "角色或状态无效。"
-    return {"name": name, "email": email, "phone": phone, "role": role, "status": status}, None
+    fields = {"name": name, "email": email, "phone": phone, "role": role, "status": status}
+    if require_password:
+        password = request.form.get("password", "")
+        if not auth.PASSWORD_MIN_LENGTH <= len(password) <= auth.PASSWORD_MAX_LENGTH:
+            return None, "密码长度需为 %d-%d 个字符。" % (auth.PASSWORD_MIN_LENGTH, auth.PASSWORD_MAX_LENGTH)
+        fields["password_hash"] = auth.hash_password(password)
+    return fields, None
 
 
 # --------------------------------------------------------------------------
@@ -172,8 +181,10 @@ services = SimpleNamespace(
 )
 
 # 每条业务线各占一个路由模块；在此统一注册，启动始终只有一条命令。
+# backend.auth 必须最先注册：它的 before_request 负责登录与角色守卫。
 for module_name in (
-    "backend.1", "backend.2", "backend.3", "backend.4",   # 旧演示：用户管理
+    "backend.auth",                                       # 公共：登录 / 退出 / 角色守卫
+    "backend.1", "backend.2", "backend.3", "backend.4",   # 用户管理（管理员专属）
     "backend.plan",                                        # A1/A2 计划录入与提炼确认
     "backend.schedule",                                    # A3 智能排期
     "backend.task_ops",                                    # B1/B2 任务列表与提醒中心
@@ -181,8 +192,37 @@ for module_name in (
     "backend.stats",                                       # C1 驾驶舱
     "backend.data_io",                                     # C2 数据管理
     "backend.settings_io",                                 # C3 系统设置
+    "backend.hub",                                         # D 线 AI 任务中枢（跨线聚合 + 卡点研判）
 ):
     import_module(module_name).register(app, services)
+
+
+def migrate_legacy_data():
+    """启动时补齐旧数据：角色归一为两种、密码哈希、任务归属 user_id。
+
+    保证用旧的 users.json / plans.json 直接启动也能登录，且数据归属正确。
+    """
+    users = read_users()
+    changed = False
+    for user in users:
+        if user.get("role") not in ALLOWED_ROLES:
+            user["role"] = auth.ROLE_USER
+            changed = True
+        if not user.get("password_hash"):
+            user["password_hash"] = auth.hash_password(auth.DEFAULT_DEMO_PASSWORD)
+            changed = True
+    if changed:
+        write_users(users)
+
+    store = read_store()
+    plan_owners = {plan.get("plan_id"): plan.get("user_id") for plan in store.get("plans", [])}
+    migrated = False
+    for task in store.get("tasks", []):
+        if not task.get("user_id"):
+            task["user_id"] = plan_owners.get(task.get("plan_id")) or ""
+            migrated = True
+    if migrated:
+        write_store(store)
 
 
 def page_context(active_page, page_name):
@@ -197,15 +237,22 @@ def page_context(active_page, page_name):
 
 
 @app.context_processor
-def inject_reminder_badge():
+def inject_shell_context():
+    user = g.get("current_user")
     store = read_store()
-    unread = sum(1 for item in store.get("reminders", []) if item.get("status") == "未读")
-    return {"unread_reminders": unread}
+    return {
+        "current_user": user,
+        "is_admin": auth.is_admin(user),
+        "unread_reminders": scope.unread_reminder_count(store, user),
+    }
 
 
 @app.get("/analytics")
 def analytics():
     return render_template("pages/analytics.html", **page_context("analytics", "数据报表"))
+
+
+migrate_legacy_data()
 
 
 if __name__ == "__main__":

@@ -11,10 +11,12 @@
 from datetime import datetime
 from importlib import import_module
 
-from flask import flash, jsonify, redirect, render_template, request, url_for
+from flask import flash, g, jsonify, redirect, render_template, request, url_for
 
+auth = import_module("backend.auth")
 llm = import_module("backend.llm")
 sched = import_module("backend.schedule")
+scope = import_module("backend.scope")
 
 EXAMPLES = (
     {"label": "项目立项", "text": "下周前完成项目立项：先整理立项材料，再组织评审会，最后把评审意见落实到方案里。"},
@@ -154,7 +156,7 @@ def register(app, services):
     # ------------------------------------------------------------------
     @app.get("/plan/input")
     def plan_input():
-        store = read_store()
+        store = scope.scope_store(read_store(), g.current_user)
         return render_template(
             "pages/plan_input.html",
             active_page="plan_input",
@@ -200,7 +202,7 @@ def register(app, services):
             plan_id = _next_plan_id(store.get("plans", []), now)
             store.setdefault("plans", []).append({
                 "plan_id": plan_id,
-                "user_id": "U001",
+                "user_id": g.current_user["id"],
                 "raw_text": raw_text,
                 "goal": parsed["goal"],
                 "status": "待确认",
@@ -234,7 +236,7 @@ def register(app, services):
     @app.get("/plan/confirm")
     def plan_confirm():
         plan_id = request.args.get("plan_id", "").strip()
-        store = read_store()
+        store = scope.scope_store(read_store(), g.current_user)
         plan = next((p for p in store.get("plans", []) if p.get("plan_id") == plan_id), None) if plan_id else None
 
         todo_views, key_times = [], []
@@ -264,7 +266,8 @@ def register(app, services):
                     })
 
             # 排期风险预览：新任务与现有排期一起安排是否会超期 / 冲突（只读，不写库）
-            schedule_risks = sched.preview_new_plan_risks(store, plan, _now())
+            schedule_risks = sched.preview_new_plan_risks(
+                scope.scope_store(store, g.current_user), plan, _now())
 
         return render_template(
             "pages/plan_confirm.html",
@@ -301,7 +304,11 @@ def register(app, services):
         now = _now()
         with store_lock:
             store = read_store()
-            plan = next((p for p in store.get("plans", []) if p.get("plan_id") == collected["plan_id"]), None)
+            plan = next(
+                (p for p in store.get("plans", [])
+                 if p.get("plan_id") == collected["plan_id"] and scope.owns_plan(p, g.current_user)),
+                None,
+            )
             if plan is None:
                 return fail(["计划不存在或已被删除，请重新录入。"])
 
@@ -348,6 +355,7 @@ def register(app, services):
                         "task_id": task_id,
                         "plan_id": plan.get("plan_id"),
                         "todo_id": todo.get("todo_id"),
+                        "user_id": plan.get("user_id") or g.current_user["id"],
                         "parent_task_id": "",
                         "title": blueprint["title"],
                         "detail": blueprint["detail"],
@@ -371,7 +379,7 @@ def register(app, services):
             write_store(store)
 
             # 确认后复检：新任务与现有排期一起安排的超期 / 冲突风险（只提示，不阻断）
-            schedule_risks = sched.plan_pending_risks(store, plan, now)
+            schedule_risks = sched.plan_pending_risks(scope.scope_store(store, g.current_user), plan, now)
 
         if is_json:
             return jsonify({
@@ -395,7 +403,11 @@ def register(app, services):
     def plan_command():
         payload = request.get_json(silent=True)
         query = str((payload.get("query") if payload is not None else request.form.get("query")) or "")
-        result = llm.handle_command(query, read_store())
+        result = llm.handle_command(query, scope.scope_store(read_store(), g.current_user))
+        # 普通用户不返回管理页跳转链接（驾驶舱 / 数据管理 / 系统设置仅管理员可用）
+        link = result.get("link") or {}
+        if not scope.is_admin(g.current_user) and auth.is_admin_path(link.get("path") or ""):
+            result = dict(result, link=None)
         if payload is not None:
             return jsonify(result), (200 if result.get("ok", True) else 400)
         if not result.get("ok", True):

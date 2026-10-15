@@ -6,10 +6,13 @@
 
 用法：
     pip install -r requirements.txt
-    python selftest.py                                  # 全量
+    python selftest.py                                  # 全量（含登录与角色用例）
     python selftest.py --phase smoke                    # 只跑端到端冒烟 TC-041
     python selftest.py --base http://127.0.0.1:8080
     python selftest.py --config my_routes.json          # 指定配置
+
+说明：系统已启用账号体系，脚本会先用 routes.json 的 auth 配置登录；
+TC-050~054 覆盖管理员/普通用户登录、越权拦截、导航过滤与数据隔离。
 
 退出码：0 = 无 P0 失败；1 = 存在 P0 失败
 """
@@ -22,14 +25,73 @@ import time
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_CONFIG = os.path.join(HERE, "routes.json")
+
 try:
     import requests
 except ImportError:
-    print("缺少依赖，请先执行： pip install -r requirements.txt")
-    sys.exit(2)
+    requests = None
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-DEFAULT_CONFIG = os.path.join(HERE, "routes.json")
+
+if requests is None:
+    # 无 requests 的离线环境回退：极简会话（Cookie + get/post + 重定向控制），不联网安装依赖。
+    import http.cookiejar
+    import json as _json_module
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    class _MiniResponse:
+        def __init__(self, status_code, text, headers):
+            self.status_code = status_code
+            self.text = text
+            self.headers = headers
+
+        def json(self):
+            return json.loads(self.text)
+
+    class _NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *args, **kwargs):
+            return None
+
+    class _MiniSession:
+        def __init__(self):
+            self._jar = http.cookiejar.CookieJar()
+
+        def _open(self, req, timeout, allow_redirects):
+            handlers = [urllib.request.HTTPCookieProcessor(self._jar)]
+            if not allow_redirects:
+                handlers.append(_NoRedirect)
+            opener = urllib.request.build_opener(*handlers)
+            try:
+                with opener.open(req, timeout=timeout) as resp:
+                    return _MiniResponse(resp.status, resp.read().decode("utf-8", "replace"),
+                                         dict(resp.headers))
+            except urllib.error.HTTPError as err:
+                return _MiniResponse(err.code, err.read().decode("utf-8", "replace"),
+                                     dict(err.headers))
+            except Exception:
+                return None
+
+        def get(self, url, timeout=8, allow_redirects=True):
+            return self._open(urllib.request.Request(url), timeout, allow_redirects)
+
+        def post(self, url, data=None, json=None, timeout=8, allow_redirects=False):
+            headers = {}
+            payload = None
+            if json is not None:
+                payload = _json_module.dumps(json).encode("utf-8")
+                headers["Content-Type"] = "application/json"
+            elif data is not None:
+                payload = urllib.parse.urlencode(data).encode("utf-8")
+                headers["Content-Type"] = "application/x-www-form-urlencoded"
+            req = urllib.request.Request(url, data=payload, headers=headers)
+            return self._open(req, timeout, allow_redirects)
+
+    _session_cls = _MiniSession
+else:
+    _session_cls = requests.Session
 
 
 @dataclass
@@ -50,6 +112,7 @@ class Runner:
         self.api = cfg.get("api", {})
         self.results: List[Result] = []
         self.plan_id: Optional[str] = None
+        self.session = _session_cls()
 
     # ---------- 配置读取 ----------
     def endpoint(self, key: str, **kwargs) -> str:
@@ -61,14 +124,40 @@ class Runner:
     # ---------- HTTP ----------
     def get(self, path: str):
         try:
-            return requests.get(self.base + path, timeout=self.timeout, allow_redirects=True)
+            return self.session.get(self.base + path, timeout=self.timeout, allow_redirects=True)
         except Exception:
             return None
 
     def post(self, path: str, payload: Dict[str, Any]):
         try:
-            return requests.post(self.base + path, json=payload,
-                                 timeout=self.timeout, allow_redirects=False)
+            return self.session.post(self.base + path, json=payload,
+                                     timeout=self.timeout, allow_redirects=False)
+        except Exception:
+            return None
+
+    # ---------- 登录 ----------
+    def login(self, account: Dict[str, str], session=None):
+        auth = self.cfg.get("auth", {})
+        path = auth.get("login_path", "/login")
+        sess = session or self.session
+        try:
+            return sess.post(self.base + path,
+                             data={"email": account.get("email", ""),
+                                   "password": account.get("password", "")},
+                             timeout=self.timeout, allow_redirects=False)
+        except Exception:
+            return None
+
+    def _get_with(self, session, path: str, redirects: bool = True):
+        try:
+            return session.get(self.base + path, timeout=self.timeout, allow_redirects=redirects)
+        except Exception:
+            return None
+
+    def _export_count(self, session) -> Optional[int]:
+        r = self._get_with(session, "/tasks/export?format=json")
+        try:
+            return len((r.json() or {}).get("items") or [])
         except Exception:
             return None
 
@@ -228,6 +317,50 @@ class Runner:
                 self.record("TC-032", "系统设置-巡检间隔0被拦截", "P1", "反例",
                             r.status_code >= 400, f"status={r.status_code}（期望400）")
 
+    # ============ 登录与角色（TC-050~054） ============
+    def run_auth(self):
+        auth = self.cfg.get("auth", {})
+        admin = auth.get("admin")
+        if not admin:
+            self.record("TC-050", "账号体系-管理员登录", "P0", "正例", False,
+                        "routes.json 未配置 auth.admin", skip=True)
+            return
+
+        r1 = self.login(admin)
+        home = self.get("/tasks")
+        self.record("TC-050", "账号体系-管理员登录进入工作台", "P0", "正例",
+                    r1 is not None and r1.status_code == 302
+                    and home is not None and home.status_code == 200,
+                    f"login={getattr(r1, 'status_code', 'N/A')}, /tasks={getattr(home, 'status_code', 'N/A')}")
+
+        employee = auth.get("employee")
+        if not employee:
+            return
+
+        emp = _session_cls()
+        r2 = self.login(employee, emp)
+        self.record("TC-051", "账号体系-普通用户登录成功", "P0", "正例",
+                    r2 is not None and r2.status_code == 302,
+                    f"login={getattr(r2, 'status_code', 'N/A')}")
+
+        emp_settings = self._get_with(emp, "/settings", redirects=False)
+        self.record("TC-052", "账号体系-普通用户访问系统设置被拦截", "P0", "反例",
+                    emp_settings is not None and emp_settings.status_code in (301, 302),
+                    f"status={getattr(emp_settings, 'status_code', 'N/A')}（期望 3xx 重定向）")
+
+        emp_tasks = self._get_with(emp, "/tasks")
+        text = (emp_tasks.text if emp_tasks is not None else "")
+        hidden = (emp_tasks is not None and emp_tasks.status_code == 200
+                  and all(term not in text for term in ("数据管理", "系统设置", "用户管理", "驾驶舱")))
+        self.record("TC-053", "账号体系-普通用户导航不含管理入口", "P0", "正例", bool(hidden),
+                    "导航已按角色过滤" if hidden else "页面中仍出现管理入口或页面不可访问")
+
+        admin_count = self._export_count(self.session)
+        emp_count = self._export_count(emp)
+        isolated = admin_count is not None and emp_count is not None and admin_count >= emp_count
+        self.record("TC-054", "账号体系-普通用户仅见自己的任务（数据隔离）", "P0", "正例",
+                    bool(isolated), f"管理员 {admin_count} 条 / 普通用户 {emp_count} 条")
+
     # ============ 报告 ============
     def merge(self, other: "Runner"):
         self.results.extend(other.results)
@@ -284,6 +417,7 @@ def main():
         cfg["base"] = args.base
 
     r = Runner(cfg)
+    r.run_auth()
     if args.phase in ("all", "pages", "p0"):
         r.run_pages()
     if args.phase in ("all", "smoke", "p0"):

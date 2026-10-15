@@ -1,7 +1,8 @@
-"""C 线 · 系统设置（C3）：主题、视图角色、巡检间隔、免打扰与通知渠道配置。
+"""C 线 · 系统设置（C3）：主题、巡检间隔、免打扰与通知渠道配置。
 
-对应需求：REQ-025 / 026 / 027 / 029 / 030（F-1004 / 1005 / 1101 / 1103 / 1104）
+对应需求：REQ-025 / 026 / 027 / 029 / 030（F-1005 / 1101 / 1103 / 1104）
 归属文件：backend/settings_io.py · templates/pages/settings.html · css|js/pages/settings.*
+页面为管理员专属；登录身份与角色由账号体系（backend/auth.py）管理，本页不再模拟。
 
 配置落库沿用全局约定：读取 → 校验 → 加锁写 → 刷新展示。
 通知渠道为「配置占位」：保存开关与 Webhook，不做真实投递（D9）。
@@ -13,7 +14,6 @@ from urllib.parse import urlparse
 
 from flask import Response, flash, jsonify, redirect, render_template, request, url_for
 
-ROLE_OPTIONS = ("普通用户", "管理员")
 THEME_OPTIONS = ("day", "night")
 CHANNEL_DEFS = (
     ("page", "页面弹窗", "系统内弹出提示条，默认开启"),
@@ -23,8 +23,6 @@ CHANNEL_DEFS = (
 )
 
 DEFAULT_SETTINGS = {
-    "display_name": "魏先生",
-    "view_role": "普通用户",
     "theme": "day",
     "reminder_interval_minutes": 240,
     "dnd_start": "12:00",
@@ -62,16 +60,6 @@ def _valid_time(value):
 def _collect(form):
     """把表单收集为配置对象，同时返回错误列表。"""
     errors = []
-    display_name = (form.get("display_name") or "").strip()
-    if not display_name:
-        errors.append("显示名不能为空。")
-    elif len(display_name) > 30:
-        errors.append("显示名不能超过 30 个字符。")
-
-    view_role = form.get("view_role") or "普通用户"
-    if view_role not in ROLE_OPTIONS:
-        errors.append("视图角色取值无效。")
-
     interval_raw = str(form.get("reminder_interval_minutes") or "").strip()
     interval = None
     if not interval_raw.isdigit() or int(interval_raw) <= 0:
@@ -105,8 +93,6 @@ def _collect(form):
         theme = "day"
 
     payload = {
-        "display_name": display_name,
-        "view_role": view_role,
         "theme": theme,
         "reminder_interval_minutes": interval if interval else DEFAULT_SETTINGS["reminder_interval_minutes"],
         "dnd_start": dnd_start,
@@ -129,7 +115,6 @@ def register(app, services):
             page_name="系统设置",
             settings=settings,
             channel_defs=CHANNEL_DEFS,
-            role_options=ROLE_OPTIONS,
             shortcuts=SHORTCUTS,
             defaults=DEFAULT_SETTINGS,
         )

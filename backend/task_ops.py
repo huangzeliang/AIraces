@@ -42,11 +42,12 @@ from datetime import datetime, timedelta
 from importlib import import_module
 from urllib.parse import urlencode
 
-from flask import Response, flash, jsonify, redirect, render_template, request, url_for
+from flask import Response, flash, g, jsonify, redirect, render_template, request, url_for
 
 fb = import_module("backend.feedback")
 llm = import_module("backend.llm")
 sched = import_module("backend.scheduler")
+scope = import_module("backend.scope")
 
 VISIBLE_STATUSES = ("待安排", "待执行", "进行中", "已延期")
 ALL_STATUSES = ("待安排", "待执行", "进行中", "已延期", "已完成", "已取消")
@@ -528,7 +529,7 @@ def register(app, services):
     # ------------------------------------------------------------------
     @app.get("/tasks")
     def tasks():
-        store = read_store()
+        store = scope.scope_store(read_store(), g.current_user)
         settings = read_settings()
         now = _now()
         plan_titles = {p.get("plan_id"): (p.get("goal") or "") for p in store.get("plans", [])}
@@ -655,13 +656,17 @@ def register(app, services):
         now = _now()
         with store_lock:
             store = read_store()
-            if plan_id and not any(p.get("plan_id") == plan_id for p in store.get("plans", [])):
+            if plan_id and not any(
+                p.get("plan_id") == plan_id and scope.owns_plan(p, g.current_user)
+                for p in store.get("plans", [])
+            ):
                 plan_id = ""
             task_id = _next_seq_id(store.setdefault("tasks", []), "task_id", "T")
             task = {
                 "task_id": task_id,
                 "plan_id": plan_id,
                 "todo_id": "",
+                "user_id": g.current_user["id"],
                 "parent_task_id": "",
                 "owner": owner,
                 "title": title,
@@ -734,7 +739,7 @@ def register(app, services):
         with store_lock:
             store = read_store()
             task = _find_task(store, task_id)
-            if task is None:
+            if task is None or not scope.owns_task(task, g.current_user):
                 if is_json:
                     return jsonify({"ok": False, "message": "任务不存在或已被删除。"}), 404
                 flash("任务不存在或已被删除。", "error")
@@ -1046,7 +1051,7 @@ def register(app, services):
         with store_lock:
             store = read_store()
             task = _find_task(store, task_id)
-            if task is None:
+            if task is None or not scope.owns_task(task, g.current_user):
                 return _respond(False, "任务不存在或已被删除。", 404)
             if task.get("status") == "已完成":
                 return _respond(True, "任务已经是「已完成」状态。", status="已完成", status_key="done")
@@ -1075,7 +1080,7 @@ def register(app, services):
         with store_lock:
             store = read_store()
             task = _find_task(store, task_id)
-            if task is None:
+            if task is None or not scope.owns_task(task, g.current_user):
                 return _respond(False, "任务不存在或已被删除。", 404)
             if task.get("status") in ("已完成", "已取消"):
                 return _respond(False, "已完成或已取消的任务不能延期，请先重新打开。", 400)
@@ -1101,7 +1106,7 @@ def register(app, services):
         with store_lock:
             store = read_store()
             task = _find_task(store, task_id)
-            if task is None:
+            if task is None or not scope.owns_task(task, g.current_user):
                 return _respond(False, "任务不存在或已被删除。", 404)
             if task.get("status") == "已取消":
                 return _respond(True, "任务已经是「已取消」状态。", status="已取消", status_key="canceled")
@@ -1128,7 +1133,7 @@ def register(app, services):
         with store_lock:
             store = read_store()
             task = _find_task(store, task_id)
-            if task is None:
+            if task is None or not scope.owns_task(task, g.current_user):
                 return _respond(False, "任务不存在或已被删除。", 404)
             status = task.get("status")
             if status == "已取消":
@@ -1171,7 +1176,7 @@ def register(app, services):
         with store_lock:
             store = read_store()
             task = _find_task(store, task_id)
-            if task is None:
+            if task is None or not scope.owns_task(task, g.current_user):
                 return _respond(False, "任务不存在或已被删除。", 404)
             title = task.get("title") or task_id
             store["tasks"] = [t for t in store.get("tasks", []) if t.get("task_id") != task_id]
@@ -1200,7 +1205,7 @@ def register(app, services):
             if feedback is None:
                 return _respond(False, "撤销失败：该反馈记录不存在或已被撤销。", 404)
             task = _find_task(store, feedback.get("task_id"))
-            if task is None:
+            if task is None or not scope.owns_task(task, g.current_user):
                 return _respond(False, "撤销失败：关联任务已被删除。", 400)
             if not feedback.get("prev_state"):
                 return _respond(False, "撤销失败：该历史记录没有可恢复的前态快照。", 400)
@@ -1220,7 +1225,7 @@ def register(app, services):
     # ------------------------------------------------------------------
     @app.get("/tasks/export")
     def tasks_export():
-        store = read_store()
+        store = scope.scope_store(read_store(), g.current_user)
         now = _now()
         rows = _sort_tasks(_filter_tasks(store, request.args, now), request.args)
         stamp = datetime.now().strftime("%Y%m%d-%H%M")
@@ -1252,7 +1257,7 @@ def register(app, services):
     # ------------------------------------------------------------------
     @app.get("/reminders")
     def reminders():
-        store = read_store()
+        store = scope.scope_store(read_store(), g.current_user)
         settings = read_settings()
         now = _now()
         task_index = {t.get("task_id"): t for t in store.get("tasks", [])}
@@ -1338,7 +1343,7 @@ def register(app, services):
         with store_lock:
             store = read_store()
             reminder = _find_reminder(store, reminder_id)
-            if reminder is None:
+            if reminder is None or not scope.owns_reminder(reminder, store, g.current_user):
                 return _respond_reminders(False, "提醒不存在或已被清理。", 404)
             reminder["status"] = status
             reminder["updated_at"] = llm.iso(now)
@@ -1352,7 +1357,7 @@ def register(app, services):
             store = read_store()
             count = 0
             for reminder in store.get("reminders", []):
-                if reminder.get("status") == "未读":
+                if reminder.get("status") == "未读" and scope.owns_reminder(reminder, store, g.current_user):
                     reminder["status"] = "已读"
                     reminder["updated_at"] = llm.iso(now)
                     count += 1
@@ -1363,7 +1368,7 @@ def register(app, services):
 
     @app.get("/reminders/export")
     def reminders_export():
-        store = read_store()
+        store = scope.scope_store(read_store(), g.current_user)
         now = _now()
         task_index = {t.get("task_id"): t for t in store.get("tasks", [])}
         statuses = [s for s in request.args.getlist("status") if s in REMINDER_STATUSES]

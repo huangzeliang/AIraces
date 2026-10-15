@@ -66,7 +66,7 @@ PLANS = [
     },
     {
         "plan_id": "P20260928003",
-        "user_id": "U001",
+        "user_id": "U004",
         "raw_text": "团队知识库建设：先把开发环境搭建手册和常见报错处理整理出来，"
                     "再沉淀常见问题库，同步安排一次新人培训。",
         "goal": "搭建团队知识库并完成首轮新人培训",
@@ -82,7 +82,7 @@ PLANS = [
     },
     {
         "plan_id": "P20261008005",
-        "user_id": "U001",
+        "user_id": "U004",
         "raw_text": "数据中台需求对接：收集各业务部门的取数需求，与中台团队对齐接口字段和频率，"
                     "输出一份需求说明书。",
         "goal": "完成数据中台下游取数需求的梳理与接口对齐",
@@ -90,7 +90,7 @@ PLANS = [
     },
     {
         "plan_id": "P20261009006",
-        "user_id": "U001",
+        "user_id": "U004",
         "raw_text": "准备一次技术分享，主题是 AI 在内网开发中的使用，先定大纲、收集行内案例，"
                     "再准备演示环境，最后试讲定稿。",
         "goal": "完成「AI 在内网的使用」技术分享从选题到定稿的全流程",
@@ -105,7 +105,7 @@ PLANS = [
     },
     {
         "plan_id": "P20261012008",
-        "user_id": "U001",
+        "user_id": "U002",
         "raw_text": "本月系统巡检和容量评估：执行一次完整巡检，汇总容量使用数据，输出评估报告并上报。",
         "goal": "完成本月系统巡检与容量评估报告",
         "created_at": iso(day(-5, 9, 5)),
@@ -356,6 +356,7 @@ def _jitter(moment, days=0, hours=0):
 
 def build_store():
     todos, tasks = [], []
+    plan_owners = {plan["plan_id"]: plan["user_id"] for plan in PLANS}
 
     for index, (plan_id, content, offset) in enumerate(TODO_SEEDS, start=1):
         todos.append(
@@ -401,6 +402,7 @@ def build_store():
                 "task_id": task_id,
                 "plan_id": todo["plan_id"],
                 "todo_id": todo["todo_id"],
+                "user_id": plan_owners.get(todo["plan_id"], "U001"),
                 "parent_task_id": "",
                 "title": title,
                 "detail": "",
@@ -540,8 +542,6 @@ def build_store():
 
 def build_settings():
     return {
-        "display_name": "魏先生",
-        "view_role": "管理员",
         "theme": "day",
         "reminder_interval_minutes": 120,
         "dnd_start": "12:00",

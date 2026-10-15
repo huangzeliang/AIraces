@@ -2,6 +2,12 @@
   "base": "http://127.0.0.1:5000",
   "timeout": 8,
 
+  "auth": {
+    "login_path": "/login",
+    "admin":    { "email": "ruoxi.lin@example.com",  "password": "123456" },
+    "employee": { "email": "yuhang.chen@example.com", "password": "123456" }
+  },
+
   "api": {
     "parse":            { "method": "POST", "path": "/plan/parse" },
     "confirm":          { "method": "POST", "path": "/plan/confirm" },

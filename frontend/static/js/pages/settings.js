@@ -1,5 +1,6 @@
-/* 系统设置（C3）页面脚本：主题（复用公共 theme.js）、视图角色、渠道占位、吉祥物与快捷键。
-   零依赖实现；主题切换不重复实现逻辑，统一触发顶栏的主题按钮。 */
+/* 系统设置（C3）页面脚本：主题（复用公共 theme.js）、渠道占位、吉祥物与快捷键。
+   零依赖实现；主题切换不重复实现逻辑，统一触发顶栏的主题按钮。
+   页面为管理员专属；登录身份与角色由账号体系管理，不在本页切换。 */
 
 (function () {
   'use strict';
@@ -35,24 +36,6 @@
       syncThemeControls();
     });
     syncThemeControls();
-  }
-
-  /* ---------------- 视图角色：普通用户隐藏管理操作 ---------------- */
-  var roleSelect = document.querySelector('#role-select');
-
-  function syncRoleView() {
-    var isAdmin = roleSelect && roleSelect.value === '管理员';
-    document.querySelectorAll('.admin-only').forEach(function (node) {
-      node.classList.toggle('is-hidden', !isAdmin);
-    });
-  }
-
-  if (roleSelect) {
-    roleSelect.addEventListener('change', function () {
-      syncRoleView();
-      flashHint('已切换到「' + roleSelect.value + '」视图，保存后写入配置。', false);
-    });
-    syncRoleView();
   }
 
   /* ---------------- 渠道：测试发送为占位 ---------------- */
