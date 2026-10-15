@@ -109,35 +109,8 @@ def register(app, services):
 
     @app.route("/login", methods=("GET", "POST"))
     def login():
-        users = read_users()
-        signed_in = find_user(users, session.get("user_id"))
-        if signed_in is not None and signed_in.get("status") == "启用" and request.method == "GET":
-            return redirect(landing_path(signed_in))
-
-        email = ""
-        if request.method == "POST":
-            email = request.form.get("email", "").strip().lower()
-            password = request.form.get("password", "")
-            candidate = next((item for item in users if item.get("email") == email), None)
-            if candidate is None or not verify_password(candidate.get("password_hash"), password):
-                flash("邮箱或密码不正确，请重试。", "error")
-            elif candidate.get("status") != "启用":
-                flash("该账号已停用，请联系管理员。", "error")
-            else:
-                session.clear()
-                session["user_id"] = candidate["id"]
-                target = _safe_next(request.args.get("next") or request.form.get("next"), candidate)
-                flash("欢迎回来，%s。" % candidate["name"], "success")
-                return redirect(target or landing_path(candidate))
-
-        return render_template(
-            "pages/login.html",
-            page_name="登录",
-            email=email,
-            next_target=request.args.get("next", ""),
-            demo_password=DEFAULT_DEMO_PASSWORD,
-            demo_accounts=_demo_accounts(users),
-        )
+        # 系统合并为单一入口：旧登录页退役，统一跳转 NS 登录。
+        return redirect(url_for("ns_login"))
 
     @app.post("/logout")
     def logout():

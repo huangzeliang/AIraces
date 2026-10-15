@@ -285,7 +285,6 @@ def register(app, services):
         )
 
     @app.get("/dashboard")
-    @app.get("/")
     def dashboard():
         period = request.args.get("period", "本周")
         if period not in PERIODS:

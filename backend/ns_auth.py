@@ -112,6 +112,15 @@ def register(app, services):
             return redirect(url_for("ns_login"))
         return redirect(landing_url(store, user))
 
+    # 合并后系统唯一入口：已登录进各自工作台，未登录进 NS 登录页
+    @app.get("/")
+    def ns_root():
+        store = read_store()
+        user = ns_current_user(store)
+        if user is None:
+            return redirect(url_for("ns_login"))
+        return redirect(landing_url(store, user))
+
     # ------------------------------------------------------------------ 非 B 线菜单占位页
     placeholder_pages = (
         ("ns_dashboard", "/ns/dashboard", "dashboard", "部门驾驶舱", "工作线 C · 看板与数据"),
