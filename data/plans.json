@@ -988,7 +988,7 @@
       "completed_at": "",
       "is_demo": false,
       "created_at": "2026-10-04T22:09:40",
-      "updated_at": "2026-10-14T20:09:40"
+      "updated_at": "2026-10-14T17:30:00"
     },
     {
       "task_id": "T032",
@@ -2174,6 +2174,82 @@
       "is_demo": false,
       "created_at": "2026-10-15T15:09:41",
       "updated_at": "2026-10-15T15:09:41"
+    },
+    {
+      "task_id": "T083",
+      "plan_id": "P20260928003",
+      "todo_id": "",
+      "user_id": "U002",
+      "parent_task_id": "T031",
+      "owner": "陈宇航",
+      "title": "收集培训素材与案例",
+      "detail": "汇总往期培训反馈与常见问题，整理成可复用的素材清单。",
+      "priority": "中",
+      "estimate_minutes": 90,
+      "due_at": "2026-10-21T10:30:00",
+      "scheduled_start_at": "2026-10-21T09:00:00",
+      "planned_finish_at": "2026-10-21T10:30:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-14T17:30:00",
+      "updated_at": "2026-10-14T17:30:00"
+    },
+    {
+      "task_id": "T084",
+      "plan_id": "P20260928003",
+      "todo_id": "",
+      "user_id": "U001",
+      "parent_task_id": "T031",
+      "owner": "林若溪",
+      "title": "制作课件初稿",
+      "detail": "依据素材清单编写课件初稿，覆盖知识库使用与协作规范两大章节。",
+      "priority": "中",
+      "estimate_minutes": 90,
+      "due_at": "2026-10-21T12:00:00",
+      "scheduled_start_at": "2026-10-21T10:30:00",
+      "planned_finish_at": "2026-10-21T12:00:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [
+        "T083"
+      ],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-14T17:30:00",
+      "updated_at": "2026-10-14T17:30:00"
+    },
+    {
+      "task_id": "T085",
+      "plan_id": "P20260928003",
+      "todo_id": "",
+      "user_id": "U004",
+      "parent_task_id": "T031",
+      "owner": "周子墨",
+      "title": "课件评审修订并定稿",
+      "detail": "组织内部评审，按意见修订并输出定稿版本。",
+      "priority": "中",
+      "estimate_minutes": 60,
+      "due_at": "2026-10-21T13:00:00",
+      "scheduled_start_at": "2026-10-21T12:00:00",
+      "planned_finish_at": "2026-10-21T13:00:00",
+      "status": "待执行",
+      "progress": 0,
+      "depends_on": [
+        "T084"
+      ],
+      "delay_count": 0,
+      "delay_reason": "",
+      "completed_at": "",
+      "is_demo": false,
+      "created_at": "2026-10-14T17:30:00",
+      "updated_at": "2026-10-14T17:30:00"
     }
   ],
   "reminders": [

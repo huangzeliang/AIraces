@@ -423,6 +423,44 @@ def build_store():
             }
         )
 
+    # F-117 拆解演示样例：把 T031「准备培训课件」拆给三人协作链，
+    # 子任务窗口落在父任务窗口（截止前 8 小时 → 截止前 4 小时）内且首尾相接
+    parent = tasks[30]
+    assert parent["task_id"] == "T031", "拆解样例依赖 TASK_BLUEPRINT 第 31 条为 T031"
+    decompose_chain = [
+        ("收集培训素材与案例", "陈宇航", "U002", 90, day(6, 9), day(6, 10, 30),
+         "汇总往期培训反馈与常见问题，整理成可复用的素材清单。"),
+        ("制作课件初稿", "林若溪", "U001", 90, day(6, 10, 30), day(6, 12, 0),
+         "依据素材清单编写课件初稿，覆盖知识库使用与协作规范两大章节。"),
+        ("课件评审修订并定稿", "周子墨", "U004", 60, day(6, 12, 0), day(6, 13, 0),
+         "组织内部评审，按意见修订并输出定稿版本。"),
+    ]
+    for index, (title, owner, uid, est, start, finish, detail) in enumerate(decompose_chain, start=80):
+        tasks.append({
+            "task_id": "T%03d" % index,
+            "plan_id": parent["plan_id"],
+            "todo_id": "",
+            "user_id": uid,
+            "parent_task_id": parent["task_id"],
+            "owner": owner,
+            "title": title,
+            "detail": detail,
+            "priority": PRIORITY_MID,
+            "estimate_minutes": est,
+            "due_at": iso(finish),
+            "scheduled_start_at": iso(start),
+            "planned_finish_at": iso(finish),
+            "status": STATUS_READY,
+            "progress": 0,
+            "depends_on": ["T%03d" % (index - 1)] if index > 80 else [],
+            "delay_count": 0,
+            "delay_reason": "",
+            "completed_at": "",
+            "is_demo": False,
+            "created_at": iso(_jitter(NOW, days=-1, hours=-3)),
+            "updated_at": iso(_jitter(NOW, days=-1, hours=-3)),
+        })
+
     reminders = [
         {
             "reminder_id": "R%03d" % index,

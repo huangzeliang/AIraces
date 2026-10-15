@@ -312,6 +312,19 @@ def _owner_options(users, extra=()):
     return names
 
 
+def _user_id_by_name(users, name):
+    """姓名 → 用户 ID；找不到返回空串（历史姓名仅保留展示，不改归属）。"""
+    for user in users:
+        if name and user.get("name") == name:
+            return user.get("id") or ""
+    return ""
+
+
+def _user_display_names(users):
+    """用户 ID → 姓名：任务只存 user_id 时（账号体系数据）把它还原为负责人展示名。"""
+    return {u.get("id"): (u.get("name") or "") for u in users if u.get("id")}
+
+
 def _fail_or_flash(is_json, message, code=400):
     """列表页操作失败：JSON 请求返回错误体；表单请求 flash 后回到当前筛选态。"""
     if is_json:
@@ -433,7 +446,7 @@ def _paginate(rows, args):
     return rows[start:start + PAGE_SIZE], {"enabled": True, "page": page, "pages": pages, "total": total}
 
 
-def _serialize_task(task, now, plan_titles, is_focus=False, child_counts=None, task_index=None):
+def _serialize_task(task, now, plan_titles, is_focus=False, child_counts=None, task_index=None, user_names=None):
     due = llm.parse_dt(task.get("due_at") or "")
     status = task.get("status") or ""
     overdue = bool(due and due < now and status not in ("已完成", "已取消"))
@@ -464,7 +477,7 @@ def _serialize_task(task, now, plan_titles, is_focus=False, child_counts=None, t
         "completed_at": task.get("completed_at") or "",
         "is_demo": bool(task.get("is_demo")),
         "is_focus": is_focus,
-        "owner": task.get("owner") or "",
+        "owner": task.get("owner") or (user_names or {}).get(task.get("user_id")) or "",
         "parent_task_id": parent_id,
         "parent_title": (parent.get("title") or "") if parent else "",
         "subtask_count": int((child_counts or {}).get(task.get("task_id"), 0)),
@@ -532,6 +545,8 @@ def register(app, services):
         store = scope.scope_store(read_store(), g.current_user)
         settings = read_settings()
         now = _now()
+        users = read_users()
+        user_names = _user_display_names(users)
         plan_titles = {p.get("plan_id"): (p.get("goal") or "") for p in store.get("plans", [])}
         task_index = _task_index(store)
         child_counts = {tid: len(children) for tid, children in _child_index(store).items()}
@@ -544,7 +559,7 @@ def register(app, services):
             rows = [focus_task] + rows
 
         page_rows, pagination = _paginate(rows, request.args)
-        task_views = [_serialize_task(t, now, plan_titles, t is focus_task, child_counts, task_index)
+        task_views = [_serialize_task(t, now, plan_titles, t is focus_task, child_counts, task_index, user_names)
                       for t in page_rows]
 
         raw_status = request.args.getlist("status")
@@ -592,7 +607,7 @@ def register(app, services):
                 "next": url_for("tasks") + _build_query(request.args, drop=("page", "focus"), **{"page": pagination["page"] + 1}),
             },
             next_query=request.query_string.decode()[:600],
-            owners=_owner_options(read_users()),
+            owners=_owner_options(users),
             urls={
                 "complete": url_for("task_complete", task_id="__ID__"),
                 "delay": url_for("task_delay", task_id="__ID__"),
@@ -662,11 +677,12 @@ def register(app, services):
             ):
                 plan_id = ""
             task_id = _next_seq_id(store.setdefault("tasks", []), "task_id", "T")
+            assignee_id = _user_id_by_name(read_users(), owner)
             task = {
                 "task_id": task_id,
                 "plan_id": plan_id,
                 "todo_id": "",
-                "user_id": g.current_user["id"],
+                "user_id": assignee_id or g.current_user["id"],
                 "parent_task_id": "",
                 "owner": owner,
                 "title": title,
@@ -764,6 +780,9 @@ def register(app, services):
             task["detail"] = detail
             task["priority"] = priority
             task["owner"] = owner
+            assignee_id = _user_id_by_name(read_users(), owner)
+            if assignee_id:
+                task["user_id"] = assignee_id
             task["estimate_minutes"] = estimate
             task["due_at"] = llm.iso(due) if due else ""
             task["updated_at"] = llm.iso(now)
@@ -784,10 +803,13 @@ def register(app, services):
         settings = read_settings()
         now = _now()
         task = _find_task(store, task_id)
-        if task is None:
+        if task is None or not scope.owns_task(task, g.current_user):
             flash("任务不存在或已被删除。", "error")
             return redirect(url_for("tasks"))
 
+        users = read_users()
+        user_names = _user_display_names(users)
+        owner_disp = task.get("owner") or user_names.get(task.get("user_id")) or ""
         plan_titles = {p.get("plan_id"): (p.get("goal") or "") for p in store.get("plans", [])}
         by_id = _task_index(store)
         child_index = _child_index(store)
@@ -797,14 +819,16 @@ def register(app, services):
 
         views = []
         for node, depth in _subtree_rows(root, child_index):
-            view = _serialize_task(node, now, plan_titles, child_counts=child_counts, task_index=by_id)
+            view = _serialize_task(node, now, plan_titles, child_counts=child_counts,
+                                   task_index=by_id, user_names=user_names)
             view["depth"] = depth
             view["is_current"] = node.get("task_id") == task_id
             view["_window"] = _effective_window(node, child_index)
             views.append(view)
         timeline = _timeline_span(views, now)
 
-        children_views = [_serialize_task(c, now, plan_titles, child_counts=child_counts, task_index=by_id)
+        children_views = [_serialize_task(c, now, plan_titles, child_counts=child_counts,
+                                          task_index=by_id, user_names=user_names)
                           for c in child_index.get(task_id, [])]
         current = next(v for v in views if v["is_current"])
         current_depth = len(ancestors) + 1
@@ -840,12 +864,12 @@ def register(app, services):
             },
             can_decompose=can_decompose,
             block_reason=block_reason,
-            owners=_owner_options(read_users(), [task.get("owner") or ""]),
+            owners=_owner_options(users, [owner_disp]),
             priorities=PRIORITIES,
             prefill={
                 "start": _time_input_value(task.get("scheduled_start_at")),
                 "finish": _time_input_value(task.get("planned_finish_at")),
-                "owner": task.get("owner") or "",
+                "owner": owner_disp,
             },
             urls={
                 "decompose": url_for("task_decompose", task_id=task_id),
@@ -914,7 +938,7 @@ def register(app, services):
         with store_lock:
             store = read_store()
             parent = _find_task(store, task_id)
-            if parent is None:
+            if parent is None or not scope.owns_task(parent, g.current_user):
                 return _respond_task_detail(False, "任务不存在或已被删除。", task_id, 404)
             if (parent.get("status") or "") in DECOMPOSE_BLOCKED:
                 return _respond_task_detail(
@@ -968,6 +992,7 @@ def register(app, services):
                 "task_id": child_id,
                 "plan_id": parent.get("plan_id") or "",
                 "todo_id": "",
+                "user_id": _user_id_by_name(read_users(), owner) or (parent.get("user_id") or ""),
                 "parent_task_id": task_id,
                 "owner": owner,
                 "title": title,
@@ -1017,7 +1042,7 @@ def register(app, services):
         with store_lock:
             store = read_store()
             child = _find_task(store, child_id)
-            if child is None:
+            if child is None or not scope.owns_task(child, g.current_user):
                 return _respond_task_detail(False, "任务不存在或已被删除。", child_id, 404)
             parent_id = child.get("parent_task_id") or ""
             if not parent_id:
