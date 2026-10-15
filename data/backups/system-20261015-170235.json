@@ -1,0 +1,4069 @@
+{
+  "org_unit": [
+    {
+      "org_unit_id": "ORG-000",
+      "org_name": "星北科技",
+      "parent_id": "",
+      "org_type": "company",
+      "manager_user_id": "U001",
+      "path": "/ORG-000/",
+      "status": "启用"
+    },
+    {
+      "org_unit_id": "ORG-001",
+      "org_name": "研发部",
+      "parent_id": "ORG-000",
+      "org_type": "dept",
+      "manager_user_id": "U002",
+      "path": "/ORG-000/ORG-001/",
+      "status": "启用"
+    },
+    {
+      "org_unit_id": "ORG-002",
+      "org_name": "市场部",
+      "parent_id": "ORG-000",
+      "org_type": "dept",
+      "manager_user_id": "U003",
+      "path": "/ORG-000/ORG-002/",
+      "status": "启用"
+    },
+    {
+      "org_unit_id": "ORG-101",
+      "org_name": "平台组",
+      "parent_id": "ORG-001",
+      "org_type": "team",
+      "manager_user_id": "U004",
+      "path": "/ORG-000/ORG-001/ORG-101/",
+      "status": "启用"
+    },
+    {
+      "org_unit_id": "ORG-102",
+      "org_name": "数据组",
+      "parent_id": "ORG-001",
+      "org_type": "team",
+      "manager_user_id": "U005",
+      "path": "/ORG-000/ORG-001/ORG-102/",
+      "status": "启用"
+    }
+  ],
+  "user": [
+    {
+      "user_id": "U001",
+      "display_name": "陈北峰",
+      "login_name": "chenbf",
+      "org_unit_id": "ORG-000",
+      "position": "super_admin",
+      "status": "启用",
+      "last_login_at": "2026-10-15T16:54:53"
+    },
+    {
+      "user_id": "U002",
+      "display_name": "李敏",
+      "login_name": "limin",
+      "org_unit_id": "ORG-001",
+      "position": "manager",
+      "status": "启用",
+      "last_login_at": "2026-10-15T16:51:19"
+    },
+    {
+      "user_id": "U003",
+      "display_name": "周彦",
+      "login_name": "zhouyan",
+      "org_unit_id": "ORG-002",
+      "position": "manager",
+      "status": "启用",
+      "last_login_at": "2026-10-15T16:51:38"
+    },
+    {
+      "user_id": "U004",
+      "display_name": "张伟",
+      "login_name": "zhangwei",
+      "org_unit_id": "ORG-101",
+      "position": "backend",
+      "status": "启用",
+      "last_login_at": "2026-10-15T16:51:43"
+    },
+    {
+      "user_id": "U005",
+      "display_name": "王芳",
+      "login_name": "wangfang",
+      "org_unit_id": "ORG-102",
+      "position": "data",
+      "status": "启用",
+      "last_login_at": "2026-10-15T16:50:56"
+    },
+    {
+      "user_id": "U006",
+      "display_name": "赵磊",
+      "login_name": "zhaolei",
+      "org_unit_id": "ORG-101",
+      "position": "backend",
+      "status": "启用",
+      "last_login_at": "2026-10-04T15:00:00"
+    },
+    {
+      "user_id": "U007",
+      "display_name": "孙悦",
+      "login_name": "sunyue",
+      "org_unit_id": "ORG-101",
+      "position": "frontend",
+      "status": "启用",
+      "last_login_at": "2026-10-06T09:00:00"
+    },
+    {
+      "user_id": "U008",
+      "display_name": "吴迪",
+      "login_name": "wudi",
+      "org_unit_id": "ORG-101",
+      "position": "product",
+      "status": "启用",
+      "last_login_at": "2026-10-05T11:00:00"
+    },
+    {
+      "user_id": "U009",
+      "display_name": "陈晨",
+      "login_name": "chenchen",
+      "org_unit_id": "ORG-002",
+      "position": "market",
+      "status": "启用",
+      "last_login_at": "2026-10-05T14:00:00"
+    },
+    {
+      "user_id": "U010",
+      "display_name": "何佳",
+      "login_name": "hejia",
+      "org_unit_id": "ORG-002",
+      "position": "market",
+      "status": "启用",
+      "last_login_at": "2026-10-03T16:00:00"
+    }
+  ],
+  "role": [
+    {
+      "role_id": "R001",
+      "role_code": "super_admin",
+      "role_name": "系统管理员",
+      "scope_type": "ALL",
+      "is_builtin": true,
+      "status": "启用",
+      "remark": "全局配置与审计，不参与业务操作"
+    },
+    {
+      "role_id": "R002",
+      "role_code": "manager",
+      "role_name": "部门负责人",
+      "scope_type": "DEPT",
+      "is_builtin": true,
+      "status": "启用",
+      "remark": "本部门及下级组织的目标、派工与验收"
+    },
+    {
+      "role_id": "R003",
+      "role_code": "staff",
+      "role_name": "员工",
+      "scope_type": "SELF",
+      "is_builtin": true,
+      "status": "启用",
+      "remark": "承接目标、日计划、拉条与自评"
+    }
+  ],
+  "permission": [
+    {
+      "perm_id": "P001",
+      "perm_code": "menu:workbench",
+      "perm_type": "menu",
+      "target_key": "workbench",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P002",
+      "perm_code": "menu:today",
+      "perm_type": "menu",
+      "target_key": "today",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P003",
+      "perm_code": "menu:dashboard",
+      "perm_type": "menu",
+      "target_key": "dashboard",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P004",
+      "perm_code": "menu:goal_dept",
+      "perm_type": "menu",
+      "target_key": "goal_dept",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P005",
+      "perm_code": "menu:goal_smart",
+      "perm_type": "menu",
+      "target_key": "goal_smart",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P006",
+      "perm_code": "menu:goal_tree",
+      "perm_type": "menu",
+      "target_key": "goal_tree",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P007",
+      "perm_code": "menu:assign",
+      "perm_type": "menu",
+      "target_key": "assign",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P008",
+      "perm_code": "menu:progress",
+      "perm_type": "menu",
+      "target_key": "progress",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P009",
+      "perm_code": "menu:warning",
+      "perm_type": "menu",
+      "target_key": "warning",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P010",
+      "perm_code": "menu:changes",
+      "perm_type": "menu",
+      "target_key": "changes",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P011",
+      "perm_code": "menu:critical_path",
+      "perm_type": "menu",
+      "target_key": "critical_path",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P012",
+      "perm_code": "menu:review",
+      "perm_type": "menu",
+      "target_key": "review",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P013",
+      "perm_code": "menu:retro",
+      "perm_type": "menu",
+      "target_key": "retro",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P014",
+      "perm_code": "menu:compare",
+      "perm_type": "menu",
+      "target_key": "compare",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P015",
+      "perm_code": "menu:settings_org",
+      "perm_type": "menu",
+      "target_key": "settings_org",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P016",
+      "perm_code": "menu:settings_dict",
+      "perm_type": "menu",
+      "target_key": "settings_dict",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P017",
+      "perm_code": "menu:data",
+      "perm_type": "menu",
+      "target_key": "data",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P018",
+      "perm_code": "menu:settings",
+      "perm_type": "menu",
+      "target_key": "settings",
+      "group_name": "菜单"
+    },
+    {
+      "perm_id": "P019",
+      "perm_code": "action:goal.create",
+      "perm_type": "action",
+      "target_key": "goal.create",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P020",
+      "perm_code": "action:goal.submit_confirm",
+      "perm_type": "action",
+      "target_key": "goal.submit_confirm",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P021",
+      "perm_code": "action:goal.confirm_accept",
+      "perm_type": "action",
+      "target_key": "goal.confirm_accept",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P022",
+      "perm_code": "action:goal.publish",
+      "perm_type": "action",
+      "target_key": "goal.publish",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P023",
+      "perm_code": "action:goal.smart_apply",
+      "perm_type": "action",
+      "target_key": "goal.smart_apply",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P024",
+      "perm_code": "action:goal.ai_draft",
+      "perm_type": "action",
+      "target_key": "goal.ai_draft",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P025",
+      "perm_code": "action:assign.dispatch",
+      "perm_type": "action",
+      "target_key": "assign.dispatch",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P026",
+      "perm_code": "action:assign.override",
+      "perm_type": "action",
+      "target_key": "assign.override",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P027",
+      "perm_code": "action:task.create",
+      "perm_type": "action",
+      "target_key": "task.create",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P028",
+      "perm_code": "action:task.update",
+      "perm_type": "action",
+      "target_key": "task.update",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P029",
+      "perm_code": "action:task.mount_goal",
+      "perm_type": "action",
+      "target_key": "task.mount_goal",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P030",
+      "perm_code": "action:daily.submit",
+      "perm_type": "action",
+      "target_key": "daily.submit",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P031",
+      "perm_code": "action:daily.review",
+      "perm_type": "action",
+      "target_key": "daily.review",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P032",
+      "perm_code": "action:daily.slider",
+      "perm_type": "action",
+      "target_key": "daily.slider",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P033",
+      "perm_code": "action:progress.manual",
+      "perm_type": "action",
+      "target_key": "progress.manual",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P034",
+      "perm_code": "action:change.apply",
+      "perm_type": "action",
+      "target_key": "change.apply",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P035",
+      "perm_code": "action:change.approve",
+      "perm_type": "action",
+      "target_key": "change.approve",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P036",
+      "perm_code": "action:review.submit",
+      "perm_type": "action",
+      "target_key": "review.submit",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P037",
+      "perm_code": "action:review.accept",
+      "perm_type": "action",
+      "target_key": "review.accept",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P038",
+      "perm_code": "action:review.appeal",
+      "perm_type": "action",
+      "target_key": "review.appeal",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P039",
+      "perm_code": "action:retro.create",
+      "perm_type": "action",
+      "target_key": "retro.create",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P040",
+      "perm_code": "action:retro.convert",
+      "perm_type": "action",
+      "target_key": "retro.convert",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P041",
+      "perm_code": "action:org.manage",
+      "perm_type": "action",
+      "target_key": "org.manage",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P042",
+      "perm_code": "action:role.manage",
+      "perm_type": "action",
+      "target_key": "role.manage",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P043",
+      "perm_code": "action:user.manage",
+      "perm_type": "action",
+      "target_key": "user.manage",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P044",
+      "perm_code": "action:period.manage",
+      "perm_type": "action",
+      "target_key": "period.manage",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P045",
+      "perm_code": "action:dict.manage",
+      "perm_type": "action",
+      "target_key": "dict.manage",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P046",
+      "perm_code": "action:settings.manage",
+      "perm_type": "action",
+      "target_key": "settings.manage",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P047",
+      "perm_code": "action:data.import",
+      "perm_type": "action",
+      "target_key": "data.import",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P048",
+      "perm_code": "action:data.export",
+      "perm_type": "action",
+      "target_key": "data.export",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P049",
+      "perm_code": "action:data.resolve",
+      "perm_type": "action",
+      "target_key": "data.resolve",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P050",
+      "perm_code": "action:data.backup",
+      "perm_type": "action",
+      "target_key": "data.backup",
+      "group_name": "操作"
+    },
+    {
+      "perm_id": "P051",
+      "perm_code": "field:objective.owner_id",
+      "perm_type": "field",
+      "target_key": "objective.owner_id",
+      "group_name": "字段"
+    },
+    {
+      "perm_id": "P052",
+      "perm_code": "field:objective.content",
+      "perm_type": "field",
+      "target_key": "objective.content",
+      "group_name": "字段"
+    },
+    {
+      "perm_id": "P053",
+      "perm_code": "field:objective.status_confirm",
+      "perm_type": "field",
+      "target_key": "objective.status_confirm",
+      "group_name": "字段"
+    },
+    {
+      "perm_id": "P054",
+      "perm_code": "field:work_task.assignees",
+      "perm_type": "field",
+      "target_key": "work_task.assignees",
+      "group_name": "字段"
+    },
+    {
+      "perm_id": "P055",
+      "perm_code": "field:staff_profile.capacity",
+      "perm_type": "field",
+      "target_key": "staff_profile.capacity",
+      "group_name": "字段"
+    },
+    {
+      "perm_id": "P056",
+      "perm_code": "field:assessment.self_score",
+      "perm_type": "field",
+      "target_key": "assessment.self_score",
+      "group_name": "字段"
+    },
+    {
+      "perm_id": "P057",
+      "perm_code": "field:assessment.final_score",
+      "perm_type": "field",
+      "target_key": "assessment.final_score",
+      "group_name": "字段"
+    },
+    {
+      "perm_id": "P058",
+      "perm_code": "field:setting.value",
+      "perm_type": "field",
+      "target_key": "setting.value",
+      "group_name": "字段"
+    },
+    {
+      "perm_id": "P059",
+      "perm_code": "field:role.grant",
+      "perm_type": "field",
+      "target_key": "role.grant",
+      "group_name": "字段"
+    }
+  ],
+  "role_permission": [
+    {
+      "role_id": "R001",
+      "perm_id": "P001"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P002"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P003"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P004"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P005"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P006"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P007"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P008"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P009"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P010"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P011"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P012"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P013"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P014"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P015"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P016"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P017"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P018"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P041"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P042"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P043"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P044"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P045"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P046"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P047"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P048"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P049"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P050"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P058"
+    },
+    {
+      "role_id": "R001",
+      "perm_id": "P059"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P001"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P002"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P003"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P004"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P005"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P006"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P007"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P008"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P009"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P010"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P011"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P012"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P013"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P014"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P019"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P020"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P022"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P023"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P024"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P025"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P026"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P027"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P031"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P033"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P035"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P037"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P039"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P040"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P048"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P051"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P052"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P054"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P055"
+    },
+    {
+      "role_id": "R002",
+      "perm_id": "P057"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P001"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P002"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P008"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P009"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P012"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P013"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P014"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P021"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P027"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P028"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P029"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P030"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P032"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P034"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P036"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P038"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P039"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P053"
+    },
+    {
+      "role_id": "R003",
+      "perm_id": "P056"
+    }
+  ],
+  "user_role": [
+    {
+      "user_id": "U001",
+      "role_id": "R001",
+      "org_unit_id": "ORG-000",
+      "granted_by": "system",
+      "granted_at": "2026-09-06T18:00:00"
+    },
+    {
+      "user_id": "U002",
+      "role_id": "R002",
+      "org_unit_id": "ORG-001",
+      "granted_by": "U001",
+      "granted_at": "2026-09-08T18:00:00"
+    },
+    {
+      "user_id": "U003",
+      "role_id": "R002",
+      "org_unit_id": "ORG-002",
+      "granted_by": "U001",
+      "granted_at": "2026-09-08T18:00:00"
+    },
+    {
+      "user_id": "U004",
+      "role_id": "R003",
+      "org_unit_id": "ORG-101",
+      "granted_by": "U001",
+      "granted_at": "2026-09-09T18:00:00"
+    },
+    {
+      "user_id": "U005",
+      "role_id": "R003",
+      "org_unit_id": "ORG-102",
+      "granted_by": "U001",
+      "granted_at": "2026-09-09T18:00:00"
+    },
+    {
+      "user_id": "U006",
+      "role_id": "R003",
+      "org_unit_id": "ORG-101",
+      "granted_by": "U001",
+      "granted_at": "2026-09-09T18:00:00"
+    },
+    {
+      "user_id": "U007",
+      "role_id": "R003",
+      "org_unit_id": "ORG-101",
+      "granted_by": "U001",
+      "granted_at": "2026-09-09T18:00:00"
+    },
+    {
+      "user_id": "U008",
+      "role_id": "R003",
+      "org_unit_id": "ORG-101",
+      "granted_by": "U001",
+      "granted_at": "2026-09-09T18:00:00"
+    },
+    {
+      "user_id": "U009",
+      "role_id": "R003",
+      "org_unit_id": "ORG-002",
+      "granted_by": "U001",
+      "granted_at": "2026-09-09T18:00:00"
+    },
+    {
+      "user_id": "U010",
+      "role_id": "R003",
+      "org_unit_id": "ORG-002",
+      "granted_by": "U001",
+      "granted_at": "2026-09-09T18:00:00"
+    }
+  ],
+  "period": [
+    {
+      "period_id": "P-2026Q3",
+      "period_name": "2026 年 Q3",
+      "period_type": "quarter",
+      "start_date": "2026-07-02",
+      "end_date": "2026-09-30",
+      "is_current": false,
+      "is_frozen": true
+    },
+    {
+      "period_id": "P-2026Q4",
+      "period_name": "2026 年 Q4",
+      "period_type": "quarter",
+      "start_date": "2026-10-01",
+      "end_date": "2026-12-31",
+      "is_current": true,
+      "is_frozen": false
+    },
+    {
+      "period_id": "P-2026-10",
+      "period_name": "2026 年 10 月",
+      "period_type": "month",
+      "start_date": "2026-10-01",
+      "end_date": "2026-10-31",
+      "is_current": false,
+      "is_frozen": false
+    }
+  ],
+  "objective": [
+    {
+      "objective_id": "O-001",
+      "title": "研发部 Q4 交付 AIraces 目标闭环平台并达成稳定性 SLA",
+      "source": "部门重点工作",
+      "parent_id": "",
+      "level": "dept",
+      "org_unit_id": "ORG-001",
+      "owner_id": "U002",
+      "period_id": "P-2026Q4",
+      "weight": 40,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-12-25",
+      "success_criteria": [
+        "11 月底完成拆解 / 派工 / 验收 3 个核心模块上线",
+        "线上 P1 缺陷保持 0",
+        "平台演示通过正式验收评审"
+      ],
+      "smart": {
+        "S": {
+          "score": 18,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 18,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 58.0,
+      "attainment": null,
+      "status": "executing",
+      "is_archived": false,
+      "published_snapshot": {
+        "published_at": "2026-09-24T10:00:00",
+        "criteria": [
+          "11 月底完成拆解 / 派工 / 验收 3 个核心模块上线",
+          "线上 P1 缺陷保持 0",
+          "平台演示通过正式验收评审"
+        ],
+        "krs": [
+          {
+            "kr_id": "KR-001",
+            "target_value": 300
+          },
+          {
+            "kr_id": "KR-002",
+            "target_value": 4
+          },
+          {
+            "kr_id": "KR-003",
+            "target_value": "A"
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "O-002",
+      "title": "搭建目标拆解与 SMART 校验模块",
+      "source": "上级拆解",
+      "parent_id": "O-001",
+      "level": "team",
+      "org_unit_id": "ORG-101",
+      "owner_id": "U004",
+      "period_id": "P-2026Q4",
+      "weight": 30,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-10-20",
+      "success_criteria": [
+        "拆解树支持 3 层结构与上下追溯",
+        "SMART 五维质检拦截率 100%",
+        "AI 草案采纳流程可演示"
+      ],
+      "smart": {
+        "S": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 18,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 15,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 55.0,
+      "attainment": null,
+      "status": "executing",
+      "is_archived": false,
+      "published_snapshot": {
+        "published_at": "2026-09-24T10:00:00",
+        "criteria": [
+          "拆解树支持 3 层结构与上下追溯",
+          "SMART 五维质检拦截率 100%",
+          "AI 草案采纳流程可演示"
+        ],
+        "krs": [
+          {
+            "kr_id": "KR-004",
+            "target_value": 100
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "O-003",
+      "title": "完成部门驾驶舱与数据看板",
+      "source": "上级拆解",
+      "parent_id": "O-001",
+      "level": "team",
+      "org_unit_id": "ORG-102",
+      "owner_id": "U005",
+      "period_id": "P-2026Q4",
+      "weight": 25,
+      "plan_start": "2026-10-13",
+      "plan_end": "2026-10-26",
+      "success_criteria": [
+        "驾驶舱 8 张 KPI 卡与三视图全部可用",
+        "统计口径与任务 / 目标分开展示"
+      ],
+      "smart": {
+        "S": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 15,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 41.0,
+      "attainment": null,
+      "status": "executing",
+      "is_archived": false,
+      "published_snapshot": {
+        "published_at": "2026-09-24T10:00:00",
+        "criteria": [
+          "驾驶舱 8 张 KPI 卡与三视图全部可用",
+          "统计口径与任务 / 目标分开展示"
+        ],
+        "krs": [
+          {
+            "kr_id": "KR-006",
+            "target_value": 8
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "O-004",
+      "title": "客户满意度提升专项",
+      "source": "上级拆解",
+      "parent_id": "O-001",
+      "level": "team",
+      "org_unit_id": "ORG-101",
+      "owner_id": "U008",
+      "period_id": "P-2026Q4",
+      "weight": 20,
+      "plan_start": "2026-10-16",
+      "plan_end": "2026-12-15",
+      "success_criteria": [
+        "客户投诉数降至每月 3 件以内",
+        "重点客户完成 2 轮回访"
+      ],
+      "smart": {
+        "S": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 15,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 14,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 0.0,
+      "attainment": null,
+      "status": "published",
+      "is_archived": false,
+      "published_snapshot": {
+        "published_at": "2026-10-05T11:00:00",
+        "criteria": [
+          "客户投诉数降至每月 3 件以内",
+          "重点客户完成 2 轮回访"
+        ],
+        "krs": [
+          {
+            "kr_id": "KR-007",
+            "target_value": 3
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "O-005",
+      "title": "目标拆解模块的移动端适配",
+      "source": "上级拆解",
+      "parent_id": "O-002",
+      "level": "team",
+      "org_unit_id": "ORG-101",
+      "owner_id": "U007",
+      "period_id": "P-2026Q4",
+      "weight": 15,
+      "plan_start": "2026-10-08",
+      "plan_end": "2026-10-13",
+      "success_criteria": [
+        "三个断点无横向溢出",
+        "手机端可完成拆解树浏览与承接确认",
+        "真机验证记录留存"
+      ],
+      "smart": {
+        "S": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 15,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 14,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 88.0,
+      "attainment": null,
+      "status": "pending_review",
+      "is_archived": false,
+      "published_snapshot": {
+        "published_at": "2026-09-26T10:00:00",
+        "criteria": [
+          "三个断点无横向溢出",
+          "手机端可完成拆解树浏览与承接确认",
+          "真机验证记录留存"
+        ],
+        "krs": []
+      }
+    },
+    {
+      "objective_id": "O-006",
+      "title": "沉淀数据治理规范 v1",
+      "source": "员工自建",
+      "parent_id": "O-001",
+      "level": "team",
+      "org_unit_id": "ORG-102",
+      "owner_id": "U005",
+      "period_id": "P-2026Q4",
+      "weight": 10,
+      "plan_start": "2026-10-18",
+      "plan_end": "2026-12-20",
+      "success_criteria": [
+        "输出规范文档并完成评审"
+      ],
+      "smart": {
+        "S": {
+          "score": 15,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 9,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 10,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 9,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 0.0,
+      "attainment": null,
+      "status": "draft",
+      "is_archived": false,
+      "published_snapshot": null
+    },
+    {
+      "objective_id": "O-007",
+      "title": "研发效能与质量基建（季度工作包）",
+      "source": "部门重点工作",
+      "parent_id": "",
+      "level": "dept",
+      "org_unit_id": "ORG-001",
+      "owner_id": "U002",
+      "period_id": "P-2026Q4",
+      "weight": 20,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-12-25",
+      "success_criteria": [
+        "性能 P95 优化到 300ms 内",
+        "技术债存量下降 50%"
+      ],
+      "smart": {
+        "S": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 15,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 15,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 33.0,
+      "attainment": null,
+      "status": "executing",
+      "is_archived": false,
+      "published_snapshot": {
+        "published_at": "2026-09-24T10:00:00",
+        "criteria": [
+          "性能 P95 优化到 300ms 内",
+          "技术债存量下降 50%"
+        ],
+        "krs": [
+          {
+            "kr_id": "KR-008",
+            "target_value": 300
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "O-101",
+      "title": "市场部 Q4 品牌曝光增长 50%",
+      "source": "部门重点工作",
+      "parent_id": "",
+      "level": "dept",
+      "org_unit_id": "ORG-002",
+      "owner_id": "U003",
+      "period_id": "P-2026Q4",
+      "weight": 60,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-12-25",
+      "success_criteria": [
+        "品牌曝光量达到 180 万",
+        "完成 3 场行业活动"
+      ],
+      "smart": {
+        "S": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 45.0,
+      "attainment": null,
+      "status": "executing",
+      "is_archived": false,
+      "published_snapshot": {
+        "published_at": "2026-09-24T10:00:00",
+        "criteria": [
+          "品牌曝光量达到 180 万",
+          "完成 3 场行业活动"
+        ],
+        "krs": [
+          {
+            "kr_id": "KR-101",
+            "target_value": 180
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "O-102",
+      "title": "完成 3 场行业活动落地",
+      "source": "上级拆解",
+      "parent_id": "O-101",
+      "level": "team",
+      "org_unit_id": "ORG-002",
+      "owner_id": "U009",
+      "period_id": "P-2026Q4",
+      "weight": 40,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-11-05",
+      "success_criteria": [
+        "3 场活动全部落地且报名达标",
+        "活动复盘模板沉淀"
+      ],
+      "smart": {
+        "S": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 17,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 15,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 100.0,
+      "attainment": null,
+      "status": "reviewed",
+      "is_archived": false,
+      "published_snapshot": {
+        "published_at": "2026-09-24T10:00:00",
+        "criteria": [
+          "3 场活动全部落地且报名达标",
+          "活动复盘模板沉淀"
+        ],
+        "krs": [
+          {
+            "kr_id": "KR-102",
+            "target_value": 3
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "O-103",
+      "title": "Q3 平台 1.0 版本上线",
+      "source": "部门重点工作",
+      "parent_id": "",
+      "level": "dept",
+      "org_unit_id": "ORG-001",
+      "owner_id": "U002",
+      "period_id": "P-2026Q3",
+      "weight": 50,
+      "plan_start": "2026-07-02",
+      "plan_end": "2026-09-25",
+      "success_criteria": [
+        "1.0 版本按期上线并通过验收"
+      ],
+      "smart": {
+        "S": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "M": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "A": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "R": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        },
+        "T": {
+          "score": 16,
+          "comment": "",
+          "suggestion": ""
+        }
+      },
+      "progress": 100.0,
+      "attainment": 96.0,
+      "status": "archived",
+      "is_archived": true,
+      "published_snapshot": null
+    }
+  ],
+  "key_result": [
+    {
+      "kr_id": "KR-001",
+      "objective_id": "O-001",
+      "kr_name": "核心接口 P95 响应时间",
+      "metric_direction": "down",
+      "baseline_value": 800,
+      "target_value": 300,
+      "current_value": 420,
+      "unit": "ms",
+      "weight": 40,
+      "calc_strategy": "reverse"
+    },
+    {
+      "kr_id": "KR-002",
+      "objective_id": "O-001",
+      "kr_name": "核心模块上线数",
+      "metric_direction": "up",
+      "baseline_value": 0,
+      "target_value": 4,
+      "current_value": 2,
+      "unit": "个",
+      "weight": 35,
+      "calc_strategy": "milestone"
+    },
+    {
+      "kr_id": "KR-003",
+      "objective_id": "O-001",
+      "kr_name": "验收评级",
+      "metric_direction": "up",
+      "baseline_value": "C",
+      "target_value": "A",
+      "current_value": "B",
+      "unit": "",
+      "weight": 25,
+      "calc_strategy": "qualitative"
+    },
+    {
+      "kr_id": "KR-004",
+      "objective_id": "O-002",
+      "kr_name": "SMART 校验点覆盖率",
+      "metric_direction": "up",
+      "baseline_value": 0,
+      "target_value": 100,
+      "current_value": 70,
+      "unit": "%",
+      "weight": 60,
+      "calc_strategy": "forward"
+    },
+    {
+      "kr_id": "KR-005",
+      "objective_id": "O-002",
+      "kr_name": "拆解树节点通过率",
+      "metric_direction": "up",
+      "baseline_value": 40,
+      "target_value": 95,
+      "current_value": 62,
+      "unit": "%",
+      "weight": 40,
+      "calc_strategy": "forward"
+    },
+    {
+      "kr_id": "KR-006",
+      "objective_id": "O-003",
+      "kr_name": "驾驶舱 KPI 卡片数",
+      "metric_direction": "up",
+      "baseline_value": 3,
+      "target_value": 8,
+      "current_value": 5,
+      "unit": "个",
+      "weight": 100,
+      "calc_strategy": "milestone"
+    },
+    {
+      "kr_id": "KR-007",
+      "objective_id": "O-004",
+      "kr_name": "月度客户投诉数",
+      "metric_direction": "down",
+      "baseline_value": 12,
+      "target_value": 3,
+      "current_value": 6,
+      "unit": "件",
+      "weight": 100,
+      "calc_strategy": "reverse"
+    },
+    {
+      "kr_id": "KR-008",
+      "objective_id": "O-007",
+      "kr_name": "接口 P95 响应时间",
+      "metric_direction": "down",
+      "baseline_value": 900,
+      "target_value": 300,
+      "current_value": 760,
+      "unit": "ms",
+      "weight": 100,
+      "calc_strategy": "reverse"
+    },
+    {
+      "kr_id": "KR-101",
+      "objective_id": "O-101",
+      "kr_name": "品牌曝光量",
+      "metric_direction": "up",
+      "baseline_value": 120,
+      "target_value": 180,
+      "current_value": 152,
+      "unit": "万",
+      "weight": 100,
+      "calc_strategy": "forward"
+    },
+    {
+      "kr_id": "KR-102",
+      "objective_id": "O-102",
+      "kr_name": "行业活动场次",
+      "metric_direction": "up",
+      "baseline_value": 0,
+      "target_value": 3,
+      "current_value": 3,
+      "unit": "场",
+      "weight": 100,
+      "calc_strategy": "milestone"
+    }
+  ],
+  "work_task": [
+    {
+      "task_id": "T-001",
+      "title": "目标树数据模型与接口设计",
+      "detail": "四层模型（目标-指标-任务-证据）落库与接口契约冻结。",
+      "parent_task_id": "",
+      "objective_id": "O-002",
+      "kr_id": "KR-004",
+      "priority": "中",
+      "plan_hours": 16,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-10-07",
+      "progress": 100,
+      "exec_rate": 100.0,
+      "status": "done",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U004",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-05T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-002",
+      "title": "拆解树前端页面（PC + 移动端）",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-002",
+      "kr_id": "KR-005",
+      "priority": "中",
+      "plan_hours": 24,
+      "plan_start": "2026-10-08",
+      "plan_end": "2026-10-11",
+      "progress": 60,
+      "exec_rate": 60.0,
+      "status": "doing",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U007",
+          "role_in_task": "R",
+          "weight": 70,
+          "is_owner": true
+        },
+        {
+          "user_id": "U004",
+          "role_in_task": "C",
+          "weight": 30,
+          "is_owner": false
+        }
+      ],
+      "created_at": "2026-10-07T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-003",
+      "title": "核心校验引擎（SMART + 完整度 + 对齐度）",
+      "detail": "五维分开打分与 <12 分拦截；发布前完整度与对齐度检查。",
+      "parent_task_id": "",
+      "objective_id": "O-002",
+      "kr_id": "KR-004",
+      "priority": "中",
+      "plan_hours": 16,
+      "plan_start": "2026-10-08",
+      "plan_end": "2026-10-12",
+      "progress": 70,
+      "exec_rate": 70.0,
+      "status": "doing",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U004",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-07T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-004",
+      "title": "AI 拆解建议接入（LLM + mock 降级）",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-002",
+      "kr_id": "KR-004",
+      "priority": "中",
+      "plan_hours": 12,
+      "plan_start": "2026-10-13",
+      "plan_end": "2026-10-15",
+      "progress": 45,
+      "exec_rate": 45.0,
+      "status": "doing",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U004",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-12T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-005",
+      "title": "驾驶舱 KPI 聚合接口",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-003",
+      "kr_id": "KR-006",
+      "priority": "中",
+      "plan_hours": 20,
+      "plan_start": "2026-10-13",
+      "plan_end": "2026-10-15",
+      "progress": 50,
+      "exec_rate": 50.0,
+      "status": "doing",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U005",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-12T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-006",
+      "title": "三视图 SVG 组件（环形 / 热图 / 日历）",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-003",
+      "kr_id": "KR-006",
+      "priority": "高",
+      "plan_hours": 20,
+      "plan_start": "2026-10-16",
+      "plan_end": "2026-10-20",
+      "progress": 0,
+      "exec_rate": 0.0,
+      "status": "blocked",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "依赖驾驶舱 KPI 聚合接口（T-005）字段冻结",
+      "assignees": [
+        {
+          "user_id": "U007",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-15T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-007",
+      "title": "移动端适配与三断点验证",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-005",
+      "kr_id": "",
+      "priority": "中",
+      "plan_hours": 16,
+      "plan_start": "2026-10-11",
+      "plan_end": "2026-10-14",
+      "progress": 80,
+      "exec_rate": 80.0,
+      "status": "doing",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U007",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-10T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-008",
+      "title": "验收用例与证据整理",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-005",
+      "kr_id": "",
+      "priority": "中",
+      "plan_hours": 8,
+      "plan_start": "2026-10-15",
+      "plan_end": "2026-10-17",
+      "progress": 0,
+      "exec_rate": 0.0,
+      "status": "todo",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U004",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-14T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-009",
+      "title": "客户回访脚本与满意度问卷",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-004",
+      "kr_id": "KR-007",
+      "priority": "中",
+      "plan_hours": 12,
+      "plan_start": "2026-10-17",
+      "plan_end": "2026-10-22",
+      "progress": 0,
+      "exec_rate": 0.0,
+      "status": "todo",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U008",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-16T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-010",
+      "title": "P95 性能压测与优化",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-007",
+      "kr_id": "KR-008",
+      "priority": "中",
+      "plan_hours": 24,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-10-11",
+      "progress": 35,
+      "exec_rate": 35.0,
+      "status": "doing",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U006",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-05T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-011",
+      "title": "缺陷清理专项（P2 存量）",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-007",
+      "kr_id": "KR-008",
+      "priority": "中",
+      "plan_hours": 16,
+      "plan_start": "2026-10-12",
+      "plan_end": "2026-10-13",
+      "progress": 0,
+      "exec_rate": 0.0,
+      "status": "todo",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U006",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-11T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-012",
+      "title": "数据治理规范草案",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-006",
+      "kr_id": "",
+      "priority": "中",
+      "plan_hours": 8,
+      "plan_start": "2026-10-09",
+      "plan_end": "2026-10-12",
+      "progress": 40,
+      "exec_rate": 40.0,
+      "status": "doing",
+      "source": "self",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U005",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-08T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-013",
+      "title": "行业活动策划案与执行",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-102",
+      "kr_id": "KR-102",
+      "priority": "中",
+      "plan_hours": 16,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-10-08",
+      "progress": 100,
+      "exec_rate": 100.0,
+      "status": "done",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U009",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-05T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-014",
+      "title": "品牌曝光渠道投放排期",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-101",
+      "kr_id": "KR-101",
+      "priority": "中",
+      "plan_hours": 12,
+      "plan_start": "2026-10-09",
+      "plan_end": "2026-10-12",
+      "progress": 60,
+      "exec_rate": 60.0,
+      "status": "doing",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U010",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-08T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-016",
+      "title": "季度技术债与稳定性治理（工作包）",
+      "detail": "季度持续工作包：技术债清理、监控告警、稳定性演练。",
+      "parent_task_id": "",
+      "objective_id": "O-007",
+      "kr_id": "KR-008",
+      "priority": "中",
+      "plan_hours": 400,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-12-25",
+      "progress": 22,
+      "exec_rate": 22.0,
+      "status": "doing",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U006",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-05T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-017",
+      "title": "设计系统与组件库重建（季度工作包）",
+      "detail": "季度持续工作包：设计令牌、SVG 组件、适配基线。",
+      "parent_task_id": "",
+      "objective_id": "O-007",
+      "kr_id": "",
+      "priority": "中",
+      "plan_hours": 300,
+      "plan_start": "2026-10-06",
+      "plan_end": "2026-12-05",
+      "progress": 18,
+      "exec_rate": 18.0,
+      "status": "doing",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U007",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-05T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    },
+    {
+      "task_id": "T-018",
+      "title": "管理端页面全面适配改造",
+      "detail": "",
+      "parent_task_id": "",
+      "objective_id": "O-007",
+      "kr_id": "",
+      "priority": "中",
+      "plan_hours": 200,
+      "plan_start": "2026-10-16",
+      "plan_end": "2026-11-30",
+      "progress": 0,
+      "exec_rate": 0.0,
+      "status": "todo",
+      "source": "assigned",
+      "is_demo": false,
+      "manual_override": false,
+      "blocked_reason": "",
+      "assignees": [
+        {
+          "user_id": "U007",
+          "role_in_task": "R",
+          "weight": 100,
+          "is_owner": true
+        }
+      ],
+      "created_at": "2026-10-15T09:00:00",
+      "updated_at": "2026-10-05T17:00:00"
+    }
+  ],
+  "task_assignee": [
+    {
+      "task_id": "T-001",
+      "user_id": "U004",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-002",
+      "user_id": "U007",
+      "role_in_task": "R",
+      "weight": 70,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-002",
+      "user_id": "U004",
+      "role_in_task": "C",
+      "weight": 30,
+      "is_owner": false
+    },
+    {
+      "task_id": "T-003",
+      "user_id": "U004",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-004",
+      "user_id": "U004",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-005",
+      "user_id": "U005",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-006",
+      "user_id": "U007",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-007",
+      "user_id": "U007",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-008",
+      "user_id": "U004",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-009",
+      "user_id": "U008",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-010",
+      "user_id": "U006",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-011",
+      "user_id": "U006",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-012",
+      "user_id": "U005",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-013",
+      "user_id": "U009",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-014",
+      "user_id": "U010",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-016",
+      "user_id": "U006",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-017",
+      "user_id": "U007",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    },
+    {
+      "task_id": "T-018",
+      "user_id": "U007",
+      "role_in_task": "R",
+      "weight": 100,
+      "is_owner": true
+    }
+  ],
+  "dependency": [
+    {
+      "dep_id": "D-001",
+      "from_task_id": "T-001",
+      "to_task_id": "T-002",
+      "dep_type": "FS",
+      "lag_days": 0
+    },
+    {
+      "dep_id": "D-002",
+      "from_task_id": "T-001",
+      "to_task_id": "T-003",
+      "dep_type": "FS",
+      "lag_days": 0
+    },
+    {
+      "dep_id": "D-003",
+      "from_task_id": "T-003",
+      "to_task_id": "T-004",
+      "dep_type": "FS",
+      "lag_days": 0
+    },
+    {
+      "dep_id": "D-004",
+      "from_task_id": "T-003",
+      "to_task_id": "T-005",
+      "dep_type": "FS",
+      "lag_days": 0
+    },
+    {
+      "dep_id": "D-005",
+      "from_task_id": "T-005",
+      "to_task_id": "T-006",
+      "dep_type": "FS",
+      "lag_days": 0
+    },
+    {
+      "dep_id": "D-006",
+      "from_task_id": "T-002",
+      "to_task_id": "T-007",
+      "dep_type": "FS",
+      "lag_days": 0
+    },
+    {
+      "dep_id": "D-007",
+      "from_task_id": "T-007",
+      "to_task_id": "T-008",
+      "dep_type": "FS",
+      "lag_days": 0
+    },
+    {
+      "dep_id": "D-008",
+      "from_task_id": "T-010",
+      "to_task_id": "T-011",
+      "dep_type": "FS",
+      "lag_days": 0
+    },
+    {
+      "dep_id": "D-009",
+      "from_task_id": "T-013",
+      "to_task_id": "T-014",
+      "dep_type": "FS",
+      "lag_days": 2
+    }
+  ],
+  "progress_log": [
+    {
+      "log_id": "LOG-0001",
+      "target_type": "task",
+      "target_id": "T-003",
+      "progress": 70,
+      "note": "评分规则与拦截逻辑完成，等待联调",
+      "operator_id": "U004",
+      "logged_at": "2026-10-05T18:00:00",
+      "source": "daily"
+    },
+    {
+      "log_id": "LOG-0002",
+      "target_type": "task",
+      "target_id": "T-002",
+      "progress": 60,
+      "note": "拆解树主视图完成，移动端抽屉待联调",
+      "operator_id": "U007",
+      "logged_at": "2026-10-05T18:00:00",
+      "source": "daily"
+    },
+    {
+      "log_id": "LOG-0003",
+      "target_type": "task",
+      "target_id": "T-005",
+      "progress": 50,
+      "note": "KPI 聚合完成一半，热图数据源待接",
+      "operator_id": "U005",
+      "logged_at": "2026-10-04T18:00:00",
+      "source": "daily"
+    },
+    {
+      "log_id": "LOG-0004",
+      "target_type": "task",
+      "target_id": "T-010",
+      "progress": 35,
+      "note": "压测脚本完成，定位到 2 个慢查询",
+      "operator_id": "U006",
+      "logged_at": "2026-10-04T18:00:00",
+      "source": "manual"
+    },
+    {
+      "log_id": "LOG-0005",
+      "target_type": "objective",
+      "target_id": "O-001",
+      "progress": 58,
+      "note": "月度复盘：整体按计划推进，性能专项滞后",
+      "operator_id": "U002",
+      "logged_at": "2026-10-04T20:00:00",
+      "source": "manual"
+    },
+    {
+      "log_id": "LOG-0006",
+      "target_type": "kr",
+      "target_id": "KR-001",
+      "progress": 60,
+      "note": "P95 降至 420ms",
+      "operator_id": "U006",
+      "logged_at": "2026-10-04T20:00:00",
+      "source": "manual"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "EV-001",
+      "target_type": "objective",
+      "target_id": "O-005",
+      "file_name": "三断点自查截图.zip",
+      "file_path": "data/uploads/breakpoints.zip",
+      "note": "375 / 768 / 1440 三档自查截图",
+      "uploaded_by": "U007",
+      "uploaded_at": "2026-10-04T16:00:00",
+      "ai_review_result": {
+        "result": "基本齐备",
+        "missing": [
+          "真机验证记录"
+        ],
+        "mismatch": [],
+        "pending": [
+          "验收用例执行记录"
+        ]
+      }
+    },
+    {
+      "evidence_id": "EV-002",
+      "target_type": "objective",
+      "target_id": "O-005",
+      "file_name": "移动端适配说明.md",
+      "file_path": "data/uploads/mobile_note.md",
+      "note": "适配方案与已知问题",
+      "uploaded_by": "U007",
+      "uploaded_at": "2026-10-04T16:00:00",
+      "ai_review_result": null
+    },
+    {
+      "evidence_id": "EV-003",
+      "target_type": "task",
+      "target_id": "T-013",
+      "file_name": "活动复盘报告.pdf",
+      "file_path": "data/uploads/event_review.pdf",
+      "note": "3 场活动数据与复盘",
+      "uploaded_by": "U009",
+      "uploaded_at": "2026-10-03T15:00:00",
+      "ai_review_result": {
+        "result": "齐备",
+        "missing": [],
+        "mismatch": [],
+        "pending": []
+      }
+    },
+    {
+      "evidence_id": "EV-004",
+      "target_type": "kr",
+      "target_id": "KR-001",
+      "file_name": "压测报告 v2.pdf",
+      "file_path": "data/uploads/perf_v2.pdf",
+      "note": "P95 = 420ms 的证据",
+      "uploaded_by": "U006",
+      "uploaded_at": "2026-10-04T17:00:00",
+      "ai_review_result": null
+    }
+  ],
+  "daily_plan": [
+    {
+      "plan_id": "DP-001",
+      "user_id": "U004",
+      "plan_date": "2026-10-13",
+      "day_status": "approved",
+      "day_progress": 65.0,
+      "streak_abnormal": 0,
+      "reviewer_id": "U002",
+      "reviewed_at": "2026-10-03T20:00:00",
+      "reject_reason": "",
+      "submitted_at": "2026-10-03T09:00:00",
+      "ack_at": "2026-10-03T21:00:00"
+    },
+    {
+      "plan_id": "DP-002",
+      "user_id": "U004",
+      "plan_date": "2026-10-14",
+      "day_status": "approved",
+      "day_progress": 50.0,
+      "streak_abnormal": 0,
+      "reviewer_id": "U002",
+      "reviewed_at": "2026-10-05T21:00:00",
+      "reject_reason": "",
+      "submitted_at": "2026-10-04T09:00:00",
+      "ack_at": "2026-10-05T22:00:00"
+    },
+    {
+      "plan_id": "DP-003",
+      "user_id": "U004",
+      "plan_date": "2026-10-15",
+      "day_status": "submitted",
+      "day_progress": 0.0,
+      "streak_abnormal": 0,
+      "reviewer_id": "",
+      "reviewed_at": "",
+      "reject_reason": "",
+      "submitted_at": "2026-10-06T09:00:00",
+      "ack_at": ""
+    },
+    {
+      "plan_id": "DP-004",
+      "user_id": "U007",
+      "plan_date": "2026-10-15",
+      "day_status": "draft",
+      "day_progress": 0.0,
+      "streak_abnormal": 0,
+      "reviewer_id": "",
+      "reviewed_at": "",
+      "reject_reason": "",
+      "submitted_at": "",
+      "ack_at": ""
+    },
+    {
+      "plan_id": "DP-005",
+      "user_id": "U005",
+      "plan_date": "2026-10-14",
+      "day_status": "rejected",
+      "day_progress": 0.0,
+      "streak_abnormal": 0,
+      "reviewer_id": "U002",
+      "reviewed_at": "2026-10-05T19:00:00",
+      "reject_reason": "工时与目标口径不一致，请拆分到具体任务后重新提交",
+      "submitted_at": "2026-10-04T10:00:00",
+      "ack_at": ""
+    }
+  ],
+  "daily_plan_item": [
+    {
+      "item_id": "DIT-001",
+      "plan_id": "DP-001",
+      "task_id": "T-002",
+      "plan_hours": 4,
+      "plan_desc": "拆解树主视图联调",
+      "done": true,
+      "progress": 60,
+      "sort_no": 1,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-002",
+      "plan_id": "DP-001",
+      "task_id": "T-003",
+      "plan_hours": 4,
+      "plan_desc": "评分规则编码与自测",
+      "done": true,
+      "progress": 70,
+      "sort_no": 2,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-003",
+      "plan_id": "DP-002",
+      "task_id": "T-002",
+      "plan_hours": 4,
+      "plan_desc": "树节点交互与抽屉",
+      "done": true,
+      "progress": 60,
+      "sort_no": 1,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-004",
+      "plan_id": "DP-002",
+      "task_id": "T-004",
+      "plan_hours": 4,
+      "plan_desc": "LLM 提示词与 mock 兜底",
+      "done": true,
+      "progress": 45,
+      "sort_no": 2,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-005",
+      "plan_id": "DP-002",
+      "task_id": "T-012",
+      "plan_hours": 2,
+      "plan_desc": "规范目录结构梳理",
+      "done": true,
+      "progress": 40,
+      "sort_no": 3,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-006",
+      "plan_id": "DP-003",
+      "task_id": "T-002",
+      "plan_hours": 3,
+      "plan_desc": "拆解树移动端交互联调",
+      "done": false,
+      "progress": 0,
+      "sort_no": 1,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-007",
+      "plan_id": "DP-003",
+      "task_id": "T-004",
+      "plan_hours": 3,
+      "plan_desc": "LLM 真实接口联调与降级验证",
+      "done": false,
+      "progress": 0,
+      "sort_no": 2,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-008",
+      "plan_id": "DP-003",
+      "task_id": "T-003",
+      "plan_hours": 2,
+      "plan_desc": "完善五维评分细节规则",
+      "done": false,
+      "progress": 0,
+      "sort_no": 3,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-009",
+      "plan_id": "DP-004",
+      "task_id": "T-002",
+      "plan_hours": 2,
+      "plan_desc": "拆解树字号与点击区适配",
+      "done": false,
+      "progress": 0,
+      "sort_no": 1,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-010",
+      "plan_id": "DP-004",
+      "task_id": "T-017",
+      "plan_hours": 6,
+      "plan_desc": "设计令牌与组件盘点",
+      "done": false,
+      "progress": 0,
+      "sort_no": 2,
+      "abnormal_flag": ""
+    },
+    {
+      "item_id": "DIT-011",
+      "plan_id": "DP-005",
+      "task_id": "T-005",
+      "plan_hours": 6,
+      "plan_desc": "KPI 聚合接口",
+      "done": false,
+      "progress": 0,
+      "sort_no": 1,
+      "abnormal_flag": ""
+    }
+  ],
+  "change_request": [
+    {
+      "change_id": "CR-001",
+      "objective_id": "O-005",
+      "change_type": "延期",
+      "reason_code": "需求变更",
+      "reason_text": "移动端适配新增真机验证要求，需要额外 4 个工作日。",
+      "before_snapshot": {
+        "plan_end": "2026-10-13"
+      },
+      "after_snapshot": {
+        "plan_end": "2026-10-17"
+      },
+      "impact_note": "影响验收时间 4 天，不影响上级目标关键路径。",
+      "applicant_id": "U007",
+      "approver_id": "U002",
+      "status": "pending",
+      "applied_at": "2026-10-05T10:00:00",
+      "approved_at": ""
+    },
+    {
+      "change_id": "CR-002",
+      "objective_id": "O-001",
+      "change_type": "指标调整",
+      "reason_code": "优先级调整",
+      "reason_text": "P95 目标由 300ms 放宽至 350ms，与基础设施升级计划对齐。",
+      "before_snapshot": {
+        "krs": [
+          {
+            "kr_id": "KR-001",
+            "target_value": 300
+          }
+        ]
+      },
+      "after_snapshot": {
+        "krs": [
+          {
+            "kr_id": "KR-001",
+            "target_value": 350
+          }
+        ]
+      },
+      "impact_note": "达成度口径同步调整，基线快照留档。",
+      "applicant_id": "U002",
+      "approver_id": "U001",
+      "status": "approved",
+      "applied_at": "2026-09-30T09:00:00",
+      "approved_at": "2026-10-01T11:00:00"
+    },
+    {
+      "change_id": "CR-003",
+      "objective_id": "O-003",
+      "change_type": "范围调整",
+      "reason_code": "资源冲突",
+      "reason_text": "申请去掉热图视图，集中资源保障 KPI 卡片。",
+      "before_snapshot": {
+        "criteria": [
+          "驾驶舱 8 张 KPI 卡与三视图全部可用"
+        ]
+      },
+      "after_snapshot": {
+        "criteria": [
+          "驾驶舱 8 张 KPI 卡与环形、日历视图可用"
+        ]
+      },
+      "impact_note": "减少 1 个视图开发量。",
+      "applicant_id": "U005",
+      "approver_id": "U002",
+      "status": "rejected",
+      "applied_at": "2026-10-02T15:00:00",
+      "approved_at": "2026-10-03T10:00:00"
+    }
+  ],
+  "assessment": [
+    {
+      "assess_id": "AS-001",
+      "objective_id": "O-005",
+      "period_id": "P-2026Q4",
+      "self_score": 90,
+      "self_note": "三个断点自查通过，真机验证记录待补。",
+      "evidence_ids": [
+        "EV-001",
+        "EV-002"
+      ],
+      "ai_precheck": {
+        "result": "基本齐备",
+        "missing": [
+          "真机验证记录"
+        ],
+        "mismatch": [],
+        "pending": [
+          "验收用例执行记录"
+        ],
+        "suggestion": "建议补充一台 iOS 与一台 Android 真机记录后再提交验收。"
+      },
+      "final_score": null,
+      "grade": "",
+      "conclusion": "",
+      "assessor_id": "U002",
+      "status": "pending_manager",
+      "appealed": false
+    },
+    {
+      "assess_id": "AS-002",
+      "objective_id": "O-102",
+      "period_id": "P-2026Q4",
+      "self_score": 88,
+      "self_note": "3 场活动均落地，复盘模板已沉淀。",
+      "evidence_ids": [
+        "EV-003"
+      ],
+      "ai_precheck": {
+        "result": "齐备",
+        "missing": [],
+        "mismatch": [],
+        "pending": [],
+        "suggestion": "证据链完整。"
+      },
+      "final_score": 85,
+      "grade": "B",
+      "conclusion": "达成",
+      "assessor_id": "U003",
+      "status": "done",
+      "appealed": false
+    },
+    {
+      "assess_id": "AS-003",
+      "objective_id": "O-103",
+      "period_id": "P-2026Q3",
+      "self_score": 96,
+      "self_note": "按期上线。",
+      "evidence_ids": [],
+      "ai_precheck": null,
+      "final_score": 96,
+      "grade": "A",
+      "conclusion": "达成",
+      "assessor_id": "U001",
+      "status": "done",
+      "appealed": false
+    }
+  ],
+  "retrospective": [
+    {
+      "retro_id": "RT-001",
+      "objective_id": "O-102",
+      "period_id": "P-2026Q4",
+      "review_note": "3 场活动平均报名率 118%，复盘机制跑通。",
+      "result_compare": "目标 3 场，实际 3 场；曝光贡献 62 万，超出预期 12%。",
+      "diff_reason": "渠道排期与活动主题匹配度高。",
+      "improvements": [
+        {
+          "text": "建立活动效果复盘模板并沉淀到字典",
+          "converted": false
+        },
+        {
+          "text": "下一周期提前锁定 2 个标杆客户联合活动",
+          "converted": false
+        }
+      ],
+      "author_id": "U009",
+      "created_at": "2026-10-03T16:00:00",
+      "converted_task_ids": []
+    },
+    {
+      "retro_id": "RT-002",
+      "objective_id": "O-103",
+      "period_id": "P-2026Q3",
+      "review_note": "1.0 上线按期交付，变更流程运转良好。",
+      "result_compare": "达成度 96%，超基线。",
+      "diff_reason": "需求冻结机制前置是关键。",
+      "improvements": [
+        {
+          "text": "将需求冻结窗口写入流程规范",
+          "converted": false
+        }
+      ],
+      "author_id": "U002",
+      "created_at": "2026-09-18T15:00:00",
+      "converted_task_ids": []
+    }
+  ],
+  "reminder": [
+    {
+      "reminder_id": "RM-036",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-008",
+      "alert_type": "due_soon",
+      "level": "yellow",
+      "title": "任务临近截止：验收用例与证据整理",
+      "body": "距计划结束仅剩 1 天，当前进度 0.0%。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-due_soon-T-008:U004"
+    },
+    {
+      "reminder_id": "RM-035",
+      "user_id": "U005",
+      "target_type": "task",
+      "target_id": "T-005",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "检查点提醒：驾驶舱 KPI 聚合接口",
+      "body": "检查点 2026-10-14 已到，请上传阶段性成果并更新进度。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-checkpoint-T-005:U005"
+    },
+    {
+      "reminder_id": "RM-034",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-004",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "检查点提醒：AI 拆解建议接入（LLM + mock 降级）",
+      "body": "检查点 2026-10-14 已到，请上传阶段性成果并更新进度。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-checkpoint-T-004:U004"
+    },
+    {
+      "reminder_id": "RM-033",
+      "user_id": "U007",
+      "target_type": "task",
+      "target_id": "T-007",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "检查点提醒：移动端适配与三断点验证",
+      "body": "检查点 2026-10-13 已到，请上传阶段性成果并更新进度。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-checkpoint-T-007:U007"
+    },
+    {
+      "reminder_id": "RM-032",
+      "user_id": "U010",
+      "target_type": "task",
+      "target_id": "T-014",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "检查点提醒：品牌曝光渠道投放排期",
+      "body": "检查点 2026-10-11 已到，请上传阶段性成果并更新进度。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-checkpoint-T-014:U010"
+    },
+    {
+      "reminder_id": "RM-031",
+      "user_id": "U005",
+      "target_type": "task",
+      "target_id": "T-012",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "检查点提醒：数据治理规范草案",
+      "body": "检查点 2026-10-11 已到，请上传阶段性成果并更新进度。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-checkpoint-T-012:U005"
+    },
+    {
+      "reminder_id": "RM-030",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-003",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "检查点提醒：核心校验引擎（SMART + 完整度 + 对齐度）",
+      "body": "检查点 2026-10-11 已到，请上传阶段性成果并更新进度。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-checkpoint-T-003:U004"
+    },
+    {
+      "reminder_id": "RM-029",
+      "user_id": "U006",
+      "target_type": "task",
+      "target_id": "T-010",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "检查点提醒：P95 性能压测与优化",
+      "body": "检查点 2026-10-10 已到，请上传阶段性成果并更新进度。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-checkpoint-T-010:U006"
+    },
+    {
+      "reminder_id": "RM-028",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-002",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "检查点提醒：拆解树前端页面（PC + 移动端）",
+      "body": "检查点 2026-10-10 已到，请上传阶段性成果并更新进度。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-checkpoint-T-002:U004"
+    },
+    {
+      "reminder_id": "RM-027",
+      "user_id": "U007",
+      "target_type": "task",
+      "target_id": "T-002",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "检查点提醒：拆解树前端页面（PC + 移动端）",
+      "body": "检查点 2026-10-10 已到，请上传阶段性成果并更新进度。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-checkpoint-T-002:U007"
+    },
+    {
+      "reminder_id": "RM-026",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-006",
+      "alert_type": "deviation",
+      "level": "red",
+      "title": "进度异常：三视图 SVG 组件（环形 / 热图 / 日历）",
+      "body": "任务阻塞：依赖驾驶舱 KPI 聚合接口（T-005）字段冻结",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-deviation-T-006:U004"
+    },
+    {
+      "reminder_id": "RM-025",
+      "user_id": "U007",
+      "target_type": "task",
+      "target_id": "T-006",
+      "alert_type": "deviation",
+      "level": "red",
+      "title": "进度异常：三视图 SVG 组件（环形 / 热图 / 日历）",
+      "body": "任务阻塞：依赖驾驶舱 KPI 聚合接口（T-005）字段冻结",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-deviation-T-006:U007"
+    },
+    {
+      "reminder_id": "RM-024",
+      "user_id": "U005",
+      "target_type": "task",
+      "target_id": "T-005",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：驾驶舱 KPI 聚合接口",
+      "body": "已超期 1 天，当前进度 50.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-005:U005"
+    },
+    {
+      "reminder_id": "RM-023",
+      "user_id": "U002",
+      "target_type": "task",
+      "target_id": "T-005",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：驾驶舱 KPI 聚合接口",
+      "body": "已超期 1 天，当前进度 50.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-005:U002"
+    },
+    {
+      "reminder_id": "RM-022",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-004",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：AI 拆解建议接入（LLM + mock 降级）",
+      "body": "已超期 1 天，当前进度 45.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-004:U004"
+    },
+    {
+      "reminder_id": "RM-021",
+      "user_id": "U002",
+      "target_type": "task",
+      "target_id": "T-004",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：AI 拆解建议接入（LLM + mock 降级）",
+      "body": "已超期 1 天，当前进度 45.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-004:U002"
+    },
+    {
+      "reminder_id": "RM-020",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-007",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：移动端适配与三断点验证",
+      "body": "已超期 1 天，当前进度 80.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-007:U004"
+    },
+    {
+      "reminder_id": "RM-019",
+      "user_id": "U007",
+      "target_type": "task",
+      "target_id": "T-007",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：移动端适配与三断点验证",
+      "body": "已超期 1 天，当前进度 80.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-007:U007"
+    },
+    {
+      "reminder_id": "RM-018",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-011",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：缺陷清理专项（P2 存量）",
+      "body": "已超期 2 天，当前进度 0.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-011:U004"
+    },
+    {
+      "reminder_id": "RM-017",
+      "user_id": "U006",
+      "target_type": "task",
+      "target_id": "T-011",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：缺陷清理专项（P2 存量）",
+      "body": "已超期 2 天，当前进度 0.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-011:U006"
+    },
+    {
+      "reminder_id": "RM-016",
+      "user_id": "U010",
+      "target_type": "task",
+      "target_id": "T-014",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：品牌曝光渠道投放排期",
+      "body": "已超期 3 天，当前进度 60.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-014:U010"
+    },
+    {
+      "reminder_id": "RM-015",
+      "user_id": "U003",
+      "target_type": "task",
+      "target_id": "T-014",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：品牌曝光渠道投放排期",
+      "body": "已超期 3 天，当前进度 60.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-014:U003"
+    },
+    {
+      "reminder_id": "RM-014",
+      "user_id": "U005",
+      "target_type": "task",
+      "target_id": "T-012",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：数据治理规范草案",
+      "body": "已超期 3 天，当前进度 40.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-012:U005"
+    },
+    {
+      "reminder_id": "RM-013",
+      "user_id": "U002",
+      "target_type": "task",
+      "target_id": "T-012",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：数据治理规范草案",
+      "body": "已超期 3 天，当前进度 40.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-012:U002"
+    },
+    {
+      "reminder_id": "RM-012",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-003",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：核心校验引擎（SMART + 完整度 + 对齐度）",
+      "body": "已超期 3 天，当前进度 70.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-003:U004"
+    },
+    {
+      "reminder_id": "RM-011",
+      "user_id": "U002",
+      "target_type": "task",
+      "target_id": "T-003",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：核心校验引擎（SMART + 完整度 + 对齐度）",
+      "body": "已超期 3 天，当前进度 70.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-003:U002"
+    },
+    {
+      "reminder_id": "RM-010",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-010",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：P95 性能压测与优化",
+      "body": "已超期 4 天，当前进度 35.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-010:U004"
+    },
+    {
+      "reminder_id": "RM-009",
+      "user_id": "U006",
+      "target_type": "task",
+      "target_id": "T-010",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：P95 性能压测与优化",
+      "body": "已超期 4 天，当前进度 35.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-010:U006"
+    },
+    {
+      "reminder_id": "RM-008",
+      "user_id": "U004",
+      "target_type": "task",
+      "target_id": "T-002",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：拆解树前端页面（PC + 移动端）",
+      "body": "已超期 4 天，当前进度 60.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-002:U004"
+    },
+    {
+      "reminder_id": "RM-007",
+      "user_id": "U007",
+      "target_type": "task",
+      "target_id": "T-002",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：拆解树前端页面（PC + 移动端）",
+      "body": "已超期 4 天，当前进度 60.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-002:U007"
+    },
+    {
+      "reminder_id": "RM-006",
+      "user_id": "U002",
+      "target_type": "task",
+      "target_id": "T-002",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：拆解树前端页面（PC + 移动端）",
+      "body": "已超期 4 天，当前进度 60.0%，请更新进度或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-15T16:37:58",
+      "read_at": "",
+      "ack_at": "",
+      "trigger_id": "",
+      "role": "",
+      "dedupe_key": "alert:AL-overdue-T-002:U002"
+    },
+    {
+      "reminder_id": "RM-001",
+      "user_id": "U006",
+      "target_type": "task",
+      "target_id": "T-011",
+      "alert_type": "overdue",
+      "level": "red",
+      "title": "任务已超期：缺陷清理专项",
+      "body": "T-011 的计划结束已达 2 天，当前进度 0%，请更新或发起变更。",
+      "status": "未读",
+      "created_at": "2026-10-05T06:00:00",
+      "read_at": "",
+      "ack_at": ""
+    },
+    {
+      "reminder_id": "RM-002",
+      "user_id": "U002",
+      "target_type": "task",
+      "target_id": "T-006",
+      "alert_type": "deviation",
+      "level": "yellow",
+      "title": "进度偏差：三视图 SVG 组件阻塞",
+      "body": "T-006 阻塞 3 天，位于关键路径（T-001 → T-003 → T-005 → T-006）。",
+      "status": "未读",
+      "created_at": "2026-10-05T06:00:00",
+      "read_at": "",
+      "ack_at": ""
+    },
+    {
+      "reminder_id": "RM-003",
+      "user_id": "U010",
+      "target_type": "daily_plan",
+      "target_id": "",
+      "alert_type": "daily_streak",
+      "level": "red",
+      "title": "连续 3 天未更新任务进度",
+      "body": "何佳已连续 3 天无通过审核的日计划，请及时更新或说明原因。",
+      "status": "未读",
+      "created_at": "2026-10-06T06:00:00",
+      "read_at": "",
+      "ack_at": ""
+    },
+    {
+      "reminder_id": "RM-004",
+      "user_id": "U003",
+      "target_type": "user",
+      "target_id": "U010",
+      "alert_type": "daily_streak",
+      "level": "yellow",
+      "title": "成员连续 3 天未更新进度",
+      "body": "何佳（市场部）连续 3 天未更新任务进度，请关注并跟进。",
+      "status": "未读",
+      "created_at": "2026-10-06T06:00:00",
+      "read_at": "",
+      "ack_at": ""
+    },
+    {
+      "reminder_id": "RM-005",
+      "user_id": "U007",
+      "target_type": "daily_plan",
+      "target_id": "DP-004",
+      "alert_type": "checkpoint",
+      "level": "yellow",
+      "title": "今日日计划尚未提交",
+      "body": "距离今日结束不足 6 小时，请完成日计划提交。",
+      "status": "已读",
+      "created_at": "2026-10-06T12:00:00",
+      "read_at": "2026-10-06T13:00:00",
+      "ack_at": ""
+    }
+  ],
+  "staff_profile": [
+    {
+      "profile_id": "SP-001",
+      "user_id": "U004",
+      "position_code": "backend",
+      "ability_tags": [
+        "Python",
+        "Flask",
+        "AI应用"
+      ],
+      "base_capacity_hours": 480,
+      "current_load_hours": 0,
+      "saturation": 0.0,
+      "updated_at": "2026-10-05T06:00:00"
+    },
+    {
+      "profile_id": "SP-001",
+      "user_id": "U005",
+      "position_code": "data",
+      "ability_tags": [
+        "SQL",
+        "数据可视化",
+        "Python"
+      ],
+      "base_capacity_hours": 480,
+      "current_load_hours": 0,
+      "saturation": 0.0,
+      "updated_at": "2026-10-05T06:00:00"
+    },
+    {
+      "profile_id": "SP-001",
+      "user_id": "U006",
+      "position_code": "backend",
+      "ability_tags": [
+        "Python",
+        "性能优化",
+        "监控"
+      ],
+      "base_capacity_hours": 480,
+      "current_load_hours": 0,
+      "saturation": 0.0,
+      "updated_at": "2026-10-05T06:00:00"
+    },
+    {
+      "profile_id": "SP-001",
+      "user_id": "U007",
+      "position_code": "frontend",
+      "ability_tags": [
+        "前端工程",
+        "数据可视化",
+        "SVG"
+      ],
+      "base_capacity_hours": 480,
+      "current_load_hours": 0,
+      "saturation": 0.0,
+      "updated_at": "2026-10-05T06:00:00"
+    },
+    {
+      "profile_id": "SP-001",
+      "user_id": "U008",
+      "position_code": "product",
+      "ability_tags": [
+        "项目管理",
+        "客户沟通"
+      ],
+      "base_capacity_hours": 480,
+      "current_load_hours": 0,
+      "saturation": 0.0,
+      "updated_at": "2026-10-05T06:00:00"
+    },
+    {
+      "profile_id": "SP-001",
+      "user_id": "U009",
+      "position_code": "market",
+      "ability_tags": [
+        "活动策划",
+        "渠道投放"
+      ],
+      "base_capacity_hours": 480,
+      "current_load_hours": 0,
+      "saturation": 0.0,
+      "updated_at": "2026-10-05T06:00:00"
+    },
+    {
+      "profile_id": "SP-001",
+      "user_id": "U010",
+      "position_code": "market",
+      "ability_tags": [
+        "渠道投放",
+        "内容运营"
+      ],
+      "base_capacity_hours": 480,
+      "current_load_hours": 0,
+      "saturation": 0.0,
+      "updated_at": "2026-10-05T06:00:00"
+    }
+  ],
+  "dict_item": [
+    {
+      "dict_id": "DICT-001",
+      "dict_type": "position",
+      "dict_code": "backend",
+      "dict_name": "后端工程师",
+      "sort_no": 1,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-002",
+      "dict_type": "position",
+      "dict_code": "frontend",
+      "dict_name": "前端工程师",
+      "sort_no": 2,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-003",
+      "dict_type": "position",
+      "dict_code": "data",
+      "dict_name": "数据工程师",
+      "sort_no": 3,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-004",
+      "dict_type": "position",
+      "dict_code": "product",
+      "dict_name": "产品经理",
+      "sort_no": 4,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-005",
+      "dict_type": "position",
+      "dict_code": "market",
+      "dict_name": "市场专员",
+      "sort_no": 5,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-006",
+      "dict_type": "position",
+      "dict_code": "manager",
+      "dict_name": "部门负责人",
+      "sort_no": 6,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-007",
+      "dict_type": "position",
+      "dict_code": "super_admin",
+      "dict_name": "系统管理员",
+      "sort_no": 7,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-008",
+      "dict_type": "ability",
+      "dict_code": "Python",
+      "dict_name": "Python",
+      "sort_no": 1,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-009",
+      "dict_type": "ability",
+      "dict_code": "Flask",
+      "dict_name": "Flask",
+      "sort_no": 2,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-010",
+      "dict_type": "ability",
+      "dict_code": "SQL",
+      "dict_name": "SQL",
+      "sort_no": 3,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-011",
+      "dict_type": "ability",
+      "dict_code": "数据可视化",
+      "dict_name": "数据可视化",
+      "sort_no": 4,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-012",
+      "dict_type": "ability",
+      "dict_code": "AI应用",
+      "dict_name": "AI 应用",
+      "sort_no": 5,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-013",
+      "dict_type": "ability",
+      "dict_code": "客户沟通",
+      "dict_name": "客户沟通",
+      "sort_no": 6,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-014",
+      "dict_type": "ability",
+      "dict_code": "项目管理",
+      "dict_name": "项目管理",
+      "sort_no": 7,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-015",
+      "dict_type": "ability",
+      "dict_code": "性能优化",
+      "dict_name": "性能优化",
+      "sort_no": 8,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-016",
+      "dict_type": "ability",
+      "dict_code": "监控",
+      "dict_name": "监控",
+      "sort_no": 9,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-017",
+      "dict_type": "ability",
+      "dict_code": "前端工程",
+      "dict_name": "前端工程",
+      "sort_no": 10,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-018",
+      "dict_type": "ability",
+      "dict_code": "SVG",
+      "dict_name": "SVG",
+      "sort_no": 11,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-019",
+      "dict_type": "ability",
+      "dict_code": "活动策划",
+      "dict_name": "活动策划",
+      "sort_no": 12,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-020",
+      "dict_type": "ability",
+      "dict_code": "渠道投放",
+      "dict_name": "渠道投放",
+      "sort_no": 13,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-021",
+      "dict_type": "ability",
+      "dict_code": "内容运营",
+      "dict_name": "内容运营",
+      "sort_no": 14,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-022",
+      "dict_type": "reason",
+      "dict_code": "需求变更",
+      "dict_name": "需求变更",
+      "sort_no": 1,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-023",
+      "dict_type": "reason",
+      "dict_code": "排期偏差",
+      "dict_name": "排期偏差",
+      "sort_no": 2,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-024",
+      "dict_type": "reason",
+      "dict_code": "依赖阻塞",
+      "dict_name": "依赖阻塞",
+      "sort_no": 3,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-025",
+      "dict_type": "reason",
+      "dict_code": "资源冲突",
+      "dict_name": "资源冲突",
+      "sort_no": 4,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-026",
+      "dict_type": "reason",
+      "dict_code": "优先级调整",
+      "dict_name": "优先级调整",
+      "sort_no": 5,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-027",
+      "dict_type": "channel",
+      "dict_code": "站内",
+      "dict_name": "站内",
+      "sort_no": 1,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-028",
+      "dict_type": "channel",
+      "dict_code": "企微",
+      "dict_name": "企业微信",
+      "sort_no": 2,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-029",
+      "dict_type": "channel",
+      "dict_code": "钉钉",
+      "dict_name": "钉钉",
+      "sort_no": 3,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-030",
+      "dict_type": "channel",
+      "dict_code": "邮件",
+      "dict_name": "邮件",
+      "sort_no": 4,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-031",
+      "dict_type": "grade",
+      "dict_code": "A",
+      "dict_name": "A（100 分档）",
+      "sort_no": 1,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-032",
+      "dict_type": "grade",
+      "dict_code": "B",
+      "dict_name": "B（85 分档）",
+      "sort_no": 2,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-033",
+      "dict_type": "grade",
+      "dict_code": "C",
+      "dict_name": "C（70 分档）",
+      "sort_no": 3,
+      "status": "启用"
+    },
+    {
+      "dict_id": "DICT-034",
+      "dict_type": "grade",
+      "dict_code": "D",
+      "dict_name": "D（50 分档）",
+      "sort_no": 4,
+      "status": "启用"
+    }
+  ],
+  "setting": [
+    {
+      "setting_key": "smart_weights",
+      "setting_value": {
+        "S": 20,
+        "M": 20,
+        "A": 20,
+        "R": 20,
+        "T": 20
+      },
+      "value_type": "json",
+      "group_name": "smart",
+      "updated_by": "U001",
+      "updated_at": "2026-09-07T18:00:00"
+    },
+    {
+      "setting_key": "smart_min_score",
+      "setting_value": 12,
+      "value_type": "number",
+      "group_name": "smart",
+      "updated_by": "U001",
+      "updated_at": "2026-09-07T18:00:00"
+    },
+    {
+      "setting_key": "warn_thresholds",
+      "setting_value": {
+        "green": 90,
+        "yellow": 110
+      },
+      "value_type": "json",
+      "group_name": "assign",
+      "updated_by": "U001",
+      "updated_at": "2026-09-07T18:00:00"
+    },
+    {
+      "setting_key": "saturation_limit",
+      "setting_value": 90,
+      "value_type": "number",
+      "group_name": "assign",
+      "updated_by": "U001",
+      "updated_at": "2026-09-07T18:00:00"
+    },
+    {
+      "setting_key": "streak_days",
+      "setting_value": 3,
+      "value_type": "number",
+      "group_name": "warning",
+      "updated_by": "U001",
+      "updated_at": "2026-09-07T18:00:00"
+    },
+    {
+      "setting_key": "checkpoint_days",
+      "setting_value": [
+        7,
+        3,
+        1
+      ],
+      "value_type": "json",
+      "group_name": "warning",
+      "updated_by": "U001",
+      "updated_at": "2026-09-07T18:00:00"
+    },
+    {
+      "setting_key": "due_soon_days",
+      "setting_value": 2,
+      "value_type": "number",
+      "group_name": "warning",
+      "updated_by": "U001",
+      "updated_at": "2026-09-07T18:00:00"
+    },
+    {
+      "setting_key": "grade_map",
+      "setting_value": {
+        "A": 100,
+        "B": 85,
+        "C": 70,
+        "D": 50
+      },
+      "value_type": "json",
+      "group_name": "review",
+      "updated_by": "U001",
+      "updated_at": "2026-09-07T18:00:00"
+    },
+    {
+      "setting_key": "llm_timeout",
+      "setting_value": 8,
+      "value_type": "number",
+      "group_name": "ai",
+      "updated_by": "U001",
+      "updated_at": "2026-09-07T18:00:00"
+    }
+  ],
+  "audit_log": [
+    {
+      "log_id": "LOG-1001",
+      "operator_id": "U002",
+      "operator_name": "李敏",
+      "action": "发布目标",
+      "target_type": "objective",
+      "target_id": "O-001",
+      "before": {
+        "status": "confirmed"
+      },
+      "after": {
+        "status": "published"
+      },
+      "ip": "127.0.0.1",
+      "created_at": "2026-09-24T10:00:00"
+    },
+    {
+      "log_id": "LOG-1002",
+      "operator_id": "U002",
+      "operator_name": "李敏",
+      "action": "强制下发（超载豁免）",
+      "target_type": "work_task",
+      "target_id": "T-018",
+      "before": {
+        "assignee": ""
+      },
+      "after": {
+        "assignee": "U007",
+        "reason": "季度工作包整体规划，饱和度已备案"
+      },
+      "ip": "127.0.0.1",
+      "created_at": "2026-09-28T11:00:00"
+    },
+    {
+      "log_id": "LOG-1003",
+      "operator_id": "U001",
+      "operator_name": "陈北峰",
+      "action": "角色授权",
+      "target_type": "role",
+      "target_id": "R002",
+      "before": {
+        "perm_count": 40
+      },
+      "after": {
+        "perm_count": 44
+      },
+      "ip": "127.0.0.1",
+      "created_at": "2026-09-08T09:00:00"
+    },
+    {
+      "log_id": "LOG-1004",
+      "operator_id": "U001",
+      "operator_name": "陈北峰",
+      "action": "配置变更",
+      "target_type": "setting",
+      "target_id": "saturation_limit",
+      "before": {
+        "value": 100
+      },
+      "after": {
+        "value": 90
+      },
+      "ip": "127.0.0.1",
+      "created_at": "2026-09-07T10:00:00"
+    },
+    {
+      "log_id": "LOG-1005",
+      "operator_id": "U002",
+      "operator_name": "李敏",
+      "action": "结果归档",
+      "target_type": "objective",
+      "target_id": "O-103",
+      "before": {
+        "status": "reviewed"
+      },
+      "after": {
+        "status": "archived"
+      },
+      "ip": "127.0.0.1",
+      "created_at": "2026-09-18T16:00:00"
+    }
+  ]
+}
