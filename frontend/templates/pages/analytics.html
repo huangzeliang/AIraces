@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% block title %}数据报表 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/analytics.css') }}">{% endblock %}
+{% block content %}
+<section class="page-heading"><div><p class="eyebrow">INSIGHTS / ANALYTICS</p><h1>数据报表</h1><p class="subtitle">用简明的数据视图，快速发现团队协作中的信号。</p></div><div class="range-tabs"><button class="active">7 天</button><button>30 天</button><button>90 天</button></div></section>
+<section class="report-stats"><article><small>用户总数</small><strong>{{ total }}</strong><span>↑ 工作空间成员</span></article><article><small>启用比例</small><strong>{{ ((active / total * 100) if total else 0)|round|int }}%</strong><span>● 当前可用成员</span></article><article><small>管理员数量</small><strong>{{ admins }}</strong><span>安全权限已分配</span></article></section>
+<section class="chart-panel"><div><h2>成员活跃趋势</h2><p>近 7 天工作空间成员状态概览（演示数据）</p></div><div class="chart" aria-label="成员活跃趋势图"><i style="--h:42%"></i><i style="--h:55%"></i><i style="--h:48%"></i><i style="--h:72%"></i><i style="--h:68%"></i><i style="--h:85%"></i><i style="--h:76%"></i></div><div class="chart-labels"><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>今天</span></div></section>
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/analytics.js') }}"></script>{% endblock %}

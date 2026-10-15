@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7ff">
+  <title>{% block title %}Northstar 工作台{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components/modal.css') }}">
+  {% block page_css %}{% endblock %}
+</head>
+<body>
+  <div class="app-shell">
+    {% include 'components/sidebar.html' %}
+    <div class="main-area">
+      {% include 'components/topbar.html' %}
+      <main class="content">{% block content %}{% endblock %}</main>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/components/modal.js') }}"></script>
+  {% block page_js %}{% endblock %}
+</body>
+</html>

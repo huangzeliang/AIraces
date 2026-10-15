@@ -1,0 +1,143 @@
+{% extends 'layout.html' %}
+{% block title %}提醒中心 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reminders.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">WORKBENCH / REMINDERS</p>
+    <h1>提醒中心</h1>
+    <p class="subtitle">B2 · 后台巡检按设置间隔扫描任务，临期、逾期与依赖冲突都会在这里出现；未读置顶高亮，标记已读会让顶栏角标实时递减。</p>
+  </div>
+  <div class="heading-actions">
+    <label class="switch notify-switch" title="开启后新提醒会在系统层面弹出（需浏览器授权）">
+      <input type="checkbox" id="desktop-notify">
+      <span class="switch-track" aria-hidden="true"></span>
+    </label>
+    <span class="notify-label" id="notify-label">桌面通知</span>
+    <a class="button button-secondary" href="{{ url_for('reminders_export') }}{{ ('?' + request.query_string.decode()) if request.query_string else '' }}">导出 CSV</a>
+    <form method="post" action="{{ url_for('reminders_scan') }}" class="inline-form">
+      <input type="hidden" name="next" value="{{ next_query }}">
+      <button class="button button-secondary" type="submit">立即巡检</button>
+    </form>
+    <button class="button button-primary" type="button" id="read-all">全部已读</button>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="stats" aria-label="提醒概览">
+  <article class="stat-card"><span>未读提醒</span><strong>{{ stats.unread }}</strong><small>顶栏角标实时同步</small></article>
+  <article class="stat-card is-conflict"><span>风险提醒</span><strong>{{ stats.risk }}</strong><small>临期 / 逾期 / 依赖冲突（未读）</small></article>
+  <article class="stat-card"><span>今日触发</span><strong>{{ stats.today }}</strong><small>按触发时间统计</small></article>
+  <article class="stat-card"><span>累计提醒</span><strong>{{ stats.total }}</strong><small>巡检间隔 {{ settings.reminder_interval_minutes }} 分钟</small></article>
+</section>
+
+{% if risk_preview %}
+<section class="risk-banner" role="status">
+  <strong>检测到 {{ stats.risk }} 条未读风险提醒</strong>（临期 / 逾期 / 依赖冲突），请优先处理：
+  <ul>
+    {% for item in risk_preview %}<li>{{ item.content }}</li>{% endfor %}
+    {% if stats.risk > risk_preview|length %}<li>……其余 {{ stats.risk - risk_preview|length }} 条已在列表中置顶。</li>{% endif %}
+  </ul>
+  <small>上次巡检：{{ stats.last_scan_disp }}{% if stats.last_created %} · 新增 {{ stats.last_created }} 条{% endif %}</small>
+</section>
+{% endif %}
+
+<section class="panel filter-panel">
+  <form class="filter-form" method="get" action="{{ url_for('reminders') }}" id="reminder-filter">
+    <input type="hidden" name="f" value="1">
+    <div class="filter-row">
+      <span class="filter-label">状态</span>
+      <div class="chip-group">
+        {% for value, label in status_chips %}
+        <label class="chip"><input type="checkbox" name="status" value="{{ value }}" {% if value in checked_status %}checked{% endif %}><span>{{ label }}</span></label>
+        {% endfor %}
+      </div>
+      <span class="filter-label">渠道</span>
+      <div class="chip-group">
+        {% for channel in channels %}
+        <label class="chip"><input type="checkbox" name="channel" value="{{ channel }}" {% if channel in checked_channel %}checked{% endif %}><span>{{ channel }}</span></label>
+        {% endfor %}
+      </div>
+      <button class="button button-secondary" type="submit">筛选</button>
+      <a class="filter-reset" href="{{ url_for('reminders') }}">重置</a>
+    </div>
+  </form>
+</section>
+
+<section class="panel list-panel">
+  <div class="panel-heading">
+    <div>
+      <h2>提醒记录（{{ pagination.total }} 条，未读置顶）</h2>
+      <p>标记已读 / 忽略会即时更新状态；删除过的任务在提醒里会标注「任务不存在」。</p>
+    </div>
+    {% if pagination.enabled %}<span class="page-info">第 {{ pagination.page }} / {{ pagination.pages }} 页 · 每页 20 条</span>{% endif %}
+  </div>
+
+  {% if reminders %}
+  <div class="reminder-list">
+    {% for reminder in reminders %}
+    <article class="reminder-card kind-{{ reminder.kind }} {% if reminder.is_unread %}is-unread{% endif %} {% if reminder.is_risk and reminder.is_unread %}is-risk{% endif %}">
+      <div class="reminder-main">
+        <div class="reminder-head">
+          <span class="kind-tag kind-tag-{{ reminder.kind }}">{{ reminder.kind_label }}</span>
+          <span class="channel-tag">{{ reminder.channel }}</span>
+          <span class="status-tag status-{{ reminder.status_key }}"><span class="dot"></span>{{ reminder.status }}</span>
+          <time class="trigger-time">触发 {{ reminder.trigger_disp }}</time>
+          <span class="row-id">{{ reminder.reminder_id }}</span>
+        </div>
+        <p class="reminder-content">{{ reminder.content }}</p>
+        <div class="reminder-meta">
+          {% if reminder.task_missing %}
+          <span class="missing-tag">任务不存在</span>
+          <small>原任务 {{ reminder.task_id }} 已被删除，本记录保留追溯。</small>
+          {% else %}
+          <a class="task-link" href="{{ url_for('tasks', focus=reminder.task_id) }}">查看任务：{{ reminder.task_id }} · {{ reminder.task_title }}</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="reminder-actions">
+        {% if reminder.status == '未读' %}
+        <form method="post" action="{{ url_for('reminder_read', reminder_id=reminder.reminder_id) }}"><input type="hidden" name="next" value="{{ next_query }}"><button class="mini-btn" type="submit">标记已读</button></form>
+        <form method="post" action="{{ url_for('reminder_ignore', reminder_id=reminder.reminder_id) }}"><input type="hidden" name="next" value="{{ next_query }}"><button class="mini-btn" type="submit">忽略</button></form>
+        {% elif reminder.status == '已读' %}
+        <form method="post" action="{{ url_for('reminder_ignore', reminder_id=reminder.reminder_id) }}"><input type="hidden" name="next" value="{{ next_query }}"><button class="mini-btn" type="submit">忽略</button></form>
+        <form method="post" action="{{ url_for('reminder_unread', reminder_id=reminder.reminder_id) }}"><input type="hidden" name="next" value="{{ next_query }}"><button class="mini-btn" type="submit">标记未读</button></form>
+        {% else %}
+        <form method="post" action="{{ url_for('reminder_read', reminder_id=reminder.reminder_id) }}"><input type="hidden" name="next" value="{{ next_query }}"><button class="mini-btn" type="submit">标记已读</button></form>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  {% if pagination.enabled %}
+  <nav class="pagination" aria-label="分页">
+    {% if pagination.page > 1 %}<a class="page-link" href="{{ page_links.prev }}">← 上一页</a>{% else %}<span class="page-link is-disabled">← 上一页</span>{% endif %}
+    <span class="page-info">第 {{ pagination.page }} / {{ pagination.pages }} 页</span>
+    {% if pagination.page < pagination.pages %}<a class="page-link" href="{{ page_links.next }}">下一页 →</a>{% else %}<span class="page-link is-disabled">下一页 →</span>{% endif %}
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-state">
+    <p class="empty-icon">♢</p>
+    <h2>当前没有提醒</h2>
+    <p>后台巡检会按设置间隔自动扫描；也可以点右上角「立即巡检」马上生成一批。</p>
+  </div>
+  {% endif %}
+</section>
+
+<script type="application/json" id="reminders-config">{{ {
+  'urls': urls,
+  'next': next_query,
+  'unread': stats.unread,
+  'risk': stats.risk,
+  'dnd_start': settings.dnd_start,
+  'dnd_end': settings.dnd_end
+}|tojson }}</script>
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/reminders.js') }}"></script>{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'layout.html' %}
+{% block title %}智能排期 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/schedule.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">PLAN FLOW / SCHEDULE</p>
+    <h1>智能排期</h1>
+    <p class="subtitle">全部计划的未完成任务统一展示在一张日程表；拖拽时间条与截止游标可手调，与已有排期冲突时会提示并阻止保存。</p>
+  </div>
+  <form method="post" action="{{ url_for('schedule_save') }}" id="save-form" class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('schedule_export') }}"><span aria-hidden="true">⤓</span>导出排期</a>
+    <button class="button button-primary" type="submit" id="save-button" {% if not view.rows %}disabled{% endif %}>保存排期</button>
+  </form>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+{% if not view.rows %}
+<section class="panel empty-state">
+  <p class="empty-icon" aria-hidden="true">▤</p>
+  <h2>暂无可排期的任务</h2>
+  <p>先在「计划录入」描述一段计划，确认并拆解为任务后，这里会自动汇总全部计划的排期。</p>
+  <a class="button button-primary" href="{{ url_for('plan_input') }}">去录入计划</a>
+</section>
+{% else %}
+
+<section class="stats" aria-label="排期概览">
+  <article class="stat-card"><span>任务总数</span><strong id="stat-total">{{ view.stats.total }}</strong><small>覆盖 {{ view.stats.plans }} 个计划的未完成任务</small></article>
+  <article class="stat-card"><span>已排期</span><strong id="stat-scheduled">{{ view.stats.scheduled }}</strong><small>沿用既有安排</small></article>
+  <article class="stat-card"><span>待安排</span><strong id="stat-unscheduled">{{ view.stats.unscheduled }}</strong><small>按截止倒推自动生成</small></article>
+  <article class="stat-card is-conflict"><span>冲突</span><strong id="stat-conflicts">{{ view.stats.conflicts }}</strong><small>时间重叠 / 依赖未满足</small></article>
+  <article class="stat-card is-overdue"><span>超期</span><strong id="stat-overdue">{{ view.stats.overdue }}</strong><small>计划完成晚于截止</small></article>
+</section>
+
+<div class="conflict-banner" id="conflict-banner" role="alert" hidden></div>
+
+{% if view.suggestions %}
+<section class="panel suggestions-panel" id="suggestions-panel">
+  <div class="panel-heading">
+    <div><h2>重排建议</h2><p>基于最近一次加载的数据生成；采纳后立即落库并重新校验</p></div>
+    <span class="badge-demo">F-206 · 动态重排</span>
+  </div>
+  <div class="suggestion-list">
+    {% for item in view.suggestions %}
+    <article class="suggestion-card" data-task-id="{{ item.task_id }}" data-suggest-start="{{ item.start_iso }}">
+      <span class="suggestion-icon" aria-hidden="true">✦</span>
+      <div class="suggestion-main">
+        <strong>{{ item.title }}</strong>
+        <p>{{ item.reason }}</p>
+        <small>建议安排：{{ item.start.strftime('%m-%d %H:%M') }} → {{ item.finish.strftime('%m-%d %H:%M') }}</small>
+      </div>
+      <div class="suggestion-actions">
+        <form method="post" action="{{ url_for('schedule_suggest_apply') }}">
+          <input type="hidden" name="task_id" value="{{ item.task_id }}">
+          <button class="button button-primary" type="submit">采纳</button>
+        </form>
+        <button class="button button-secondary suggestion-ignore" type="button">忽略</button>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="panel timeline-panel">
+  <div class="panel-heading">
+    <div><h2>统一日程表</h2><p>全部计划的任务汇总展示，行内标注所属计划；拖拽时间条调整开始时间、拖拽橙色截止游标调整截止时间，「预计耗时」与「优先级」可直接修改</p></div>
+    <div class="timeline-tools">
+      <span class="dirty-chip" id="dirty-chip" hidden>● 有未保存的修改</span>
+      <span class="legend">
+        <i class="swatch swatch-ready"></i>待执行
+        <i class="swatch swatch-doing"></i>进行中
+        <i class="swatch swatch-delayed"></i>已延期
+        <i class="swatch swatch-generated"></i>待安排·自动生成
+        <i class="swatch swatch-due"></i>截止游标
+      </span>
+    </div>
+  </div>
+
+  <div class="timeline-sticky">
+    <div class="timeline-ruler">
+      <span class="ruler-corner">任务 / 时间</span>
+      <div class="ruler-viewport">
+        <div class="ruler-track" id="ruler-track">
+          {% for day in view.span.days %}
+          <span class="ruler-day{% if day.weekend %} is-weekend{% endif %}" style="left:{{ day.left_pct }}%">{{ day.label }}<em>周{{ day.weekday }}</em></span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-scroll" id="timeline-scroll">
+    <div class="timeline">
+
+      <div class="timeline-rows" id="timeline-rows">
+        {% for row in view.rows %}
+        <div class="timeline-item{% if row.conflicts %} conflict{% endif %}{% if row.overdue %} overdue{% endif %}"
+             data-task-id="{{ row.task_id }}"
+             data-conflict="{{ 'true' if row.conflicts else 'false' }}"
+             data-overdue="{{ 'true' if row.overdue else 'false' }}">
+          <div class="row-info">
+            <div class="row-title">
+              <strong title="{{ row.title }}">{{ row.title }}</strong>
+              <span class="row-flags">
+                {% if row.conflicts %}<span class="flag flag-conflict" title="{{ row.conflicts | join('；') }}">⚠ 冲突</span>{% endif %}
+                {% if row.overdue %}<span class="flag flag-overdue" title="计划完成时间点晚于截止时间">超期</span>{% endif %}
+                {% if row.generated %}<span class="flag flag-generated" title="按截止时间倒推自动生成，保存后落库">自动生成</span>{% endif %}
+              </span>
+            </div>
+            <div class="row-meta">
+              <span class="plan-tag" title="所属计划：{{ row.plan_title }}">{{ row.plan_title | truncate(10, true, '…') }}</span>
+              <span class="row-id">{{ row.task_id }}</span>
+              <label class="meta-field">优先级
+                <select class="row-priority" aria-label="{{ row.title }}的优先级">
+                  {% for option in ['高', '中', '低'] %}<option value="{{ option }}" {% if row.priority == option %}selected{% endif %}>{{ option }}</option>{% endfor %}
+                </select>
+              </label>
+              <label class="meta-field">耗时
+                <input class="row-estimate" type="number" min="1" max="600" step="15" value="{{ row.estimate_minutes }}" aria-label="{{ row.title }}的预计耗时（分钟）" inputmode="numeric"><i>分钟</i>
+              </label>
+              <span class="status-tag status-{{ row.status_key }}"><i class="dot"></i>{{ row.status }}</span>
+            </div>
+            <div class="row-times">
+              <span class="time-range"><b class="row-start">{{ row.start_disp }}</b><em aria-hidden="true">→</em><b class="row-finish">{{ row.finish_disp }}</b></span>
+              <span class="due-text">截止 {{ row.due_disp }}</span>
+              {% for dep in row.depends_on %}
+              <span class="dep-chip" title="依赖任务：{{ dep_titles.get(dep, dep) }}">依赖 {{ dep }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="row-track">
+            {% for day in view.span.days %}
+            <span class="track-line{% if day.weekend %} is-weekend{% endif %}" style="left:{{ day.left_pct }}%;width:{{ day.width_pct }}%" aria-hidden="true"></span>
+            {% endfor %}
+            {% if row.due_at %}<span class="due-marker" style="left:{{ row.due_left_pct }}%" title="截止时间 {{ row.due_disp }}，可拖拽调整" tabindex="0" aria-label="{{ row.title }}的截止时间 {{ row.due_disp }}，可拖拽或使用左右方向键调整"></span>{% endif %}
+            <div class="time-bar bar-{{ row.status_key }}" style="left:{{ row.left_pct }}%;width:{{ row.width_pct }}%"
+                 role="img" tabindex="0"
+                 aria-label="{{ row.title }}：{{ row.start_disp }} 至 {{ row.finish_disp }}，可拖拽调整"
+                 title="{{ row.title }} · {{ row.start_disp }} → {{ row.finish_disp }}"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% if view.span and view.span.capped %}
+  <p class="timeline-note">时间跨度较长，视图截取前 {{ view.span.days | length }} 天展示；导出排期不受影响。</p>
+  {% endif %}
+</section>
+
+<section class="panel basis-panel">
+  <details class="basis-fold">
+    <summary>查看依据</summary>
+    <ul class="basis-list">
+      {% for line in basis_lines %}<li>{{ line }}</li>{% endfor %}
+    </ul>
+  </details>
+</section>
+
+<script type="application/json" id="schedule-data">{{ {"span": view.span, "tasks": view.rows} | tojson }}</script>
+
+{% endif %}
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/schedule.js') }}"></script>{% endblock %}

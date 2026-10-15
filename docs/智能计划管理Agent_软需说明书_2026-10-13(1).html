@@ -1,0 +1,1348 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f6f7ff">
+<title>智能计划管理 Agent · 软需说明书</title>
+<style>
+:root{--font:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;--bg:#f6f7ff;--surface:#fff;--side:#fff;--top:#ffffffeb;--text:#171a3b;--muted:#626d88;--subtle:#748099;--border:#dce0ef;--accent:#3d55ed;--accent-soft:#edf0ff;--focus:#efaa42;--green:#188a70;--green-soft:#def9ed;--orange:#d16b47;--orange-soft:rgba(209,107,71,.1);--purple:#9d62ef;--purple-soft:#f3eaff;--card-shadow:3px 3px 0 #e3e6f4;--hero:#F9E47E;--hero-2:#FF91A0;--radius:18px;
+--p0:#d92d3a;--p0bg:rgba(217,45,58,.07);--p1:#d16b47;--p1bg:rgba(209,107,71,.08);--p2:#3d55ed;--p2bg:rgba(61,85,237,.07);--p3:#748099;--p3bg:rgba(116,128,153,.09);
+--la:#3d55ed;--la-soft:#edf0ff;--lb:#188a70;--lb-soft:#def9ed;--lc:#9d62ef;--lc-soft:#f3eaff;--ld:#d16b47;--ld-soft:rgba(209,107,71,.12);}
+[data-theme="night"]{--font:Inter,"SF Pro Display","PingFang SC","Microsoft YaHei",system-ui,sans-serif;--bg:#080d1a;--surface:#111c2e;--side:#0b1322;--top:#0b1526eb;--text:#f1f6ff;--muted:#a1b0c6;--subtle:#8798b1;--border:#24344b;--accent:#4ce1cf;--accent-soft:#103d43;--focus:#3de0ce;--green:#57deaa;--green-soft:#15392d;--orange:#ffa96f;--orange-soft:rgba(255,169,111,.12);--purple:#b39bff;--purple-soft:#292344;--card-shadow:0 8px 24px #0003;--hero:#112B3B;--hero-2:#101B36;--radius:15px;
+--p0:#ff6b6b;--p0bg:rgba(255,107,107,.12);--p1:#ffa96f;--p1bg:rgba(255,169,111,.12);--p2:#4ce1cf;--p2bg:rgba(76,225,207,.12);--p3:#8798b1;--p3bg:rgba(135,152,177,.14);
+--la:#4ce1cf;--la-soft:#103d43;--lb:#57deaa;--lb-soft:#15392d;--lc:#b39bff;--lc-soft:#292344;--ld:#ffa96f;--ld-soft:rgba(255,169,111,.12);}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 var(--font);transition:background .25s,color .25s}
+a{color:var(--accent);text-decoration:none}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:4px}
+code{background:var(--accent-soft);color:var(--accent);padding:2px 7px;border-radius:6px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;height:62px;padding:0 22px;background:var(--top);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.breadcrumbs{font-size:14px;color:var(--muted)}
+.breadcrumbs span{margin:0 8px;color:var(--subtle)}
+.breadcrumbs strong{color:var(--text)}
+.top-actions{display:flex;align-items:center;gap:12px}
+.theme-toggle{display:flex;align-items:center;gap:7px;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-weight:700;transition:transform .15s,box-shadow .15s}
+.theme-toggle:hover{box-shadow:var(--card-shadow);transform:translateY(-1px)}
+.top-avatar{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--accent);color:#fff;font-weight:800}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 80px}
+
+.hero{margin:34px 0 22px;padding:36px 34px;border-radius:24px;background:linear-gradient(135deg,var(--hero),var(--hero-2));color:#171a3b;position:relative;overflow:hidden}
+[data-theme="night"] .hero{color:#eaf6ff}
+.hero h1{margin:0 0 10px;font-size:31px;letter-spacing:-.5px}
+.hero p{margin:0;max-width:820px;font-size:15px;font-weight:600;opacity:.9}
+.hero .pill{display:inline-block;margin-top:16px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.55);font-size:12px;font-weight:800;color:#171a3b}
+[data-theme="night"] .hero .pill{background:rgba(76,225,207,.18);color:#bff6ee}
+
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+nav.toc a{padding:7px 14px;border:1px solid var(--border);border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);background:var(--surface);transition:.15s}
+nav.toc a:hover{color:var(--accent);border-color:var(--accent)}
+section{margin-bottom:46px;scroll-margin-top:80px}
+section>h2{display:flex;align-items:center;gap:10px;font-size:23px;margin:0 0 6px;letter-spacing:-.3px}
+section>h2 .no{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-size:15px;font-weight:900}
+section>.lead{margin:0 0 18px;color:var(--muted);font-size:14px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--card-shadow);padding:20px 22px}
+.card+h3{margin:26px 0 12px;font-size:17px}
+h3.lineh{margin:26px 0 10px;font-size:18px;display:flex;align-items:center;gap:9px}
+h3.lineh .lt{font-size:11px;font-weight:900;padding:3px 10px;border-radius:999px}
+.lt.a{background:var(--la-soft);color:var(--la)}.lt.b{background:var(--lb-soft);color:var(--lb)}.lt.c{background:var(--lc-soft);color:var(--lc)}.lt.d{background:var(--ld-soft);color:var(--ld)}
+.lt.t{background:var(--accent-soft);color:var(--accent)}
+
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 11px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--subtle);font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;background:var(--surface)}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--accent-soft)}
+td.id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:700;white-space:nowrap}
+td.k{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--accent);white-space:nowrap}
+td.fn{font-weight:700}
+td.time{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted)}
+td.nw{white-space:nowrap}
+tbody tr.grp td{background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.3px;padding:6px 11px}
+tbody tr.grp em{font-style:normal;font-weight:700;opacity:.7;margin-left:6px}
+
+.doc-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:20px}
+.doc-meta .mi{border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--card-shadow);padding:12px 15px}
+.doc-meta .mi b{display:block;font-size:11px;color:var(--subtle);font-weight:800;letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px}
+.doc-meta .mi span{font-size:13px}
+
+.conds{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:0 0 8px}
+.cond{border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--card-shadow);padding:13px 15px}
+.cond b{display:flex;align-items:center;gap:7px;font-size:13px;margin-bottom:4px}
+.cond b .n{width:20px;height:20px;border-radius:6px;background:var(--accent);color:#fff;font-size:11px;display:grid;place-items:center;font-weight:900}
+.cond p{margin:0;font-size:12.5px;color:var(--muted)}
+
+/* 页面规格块 */
+.spec{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--card-shadow);margin:16px 0;overflow:hidden}
+.spec-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--border);background:var(--accent-soft)}
+.spec-h .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:900;color:#fff;background:var(--accent);border-radius:8px;padding:3px 9px}
+.spec-h h3{margin:0;font-size:17px}
+.spec-h .route{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
+.spec-h .regs{margin-left:auto;font-size:11.5px;font-weight:800;color:var(--accent);white-space:nowrap}
+.spec-b{padding:15px 18px}
+.spec h4{margin:15px 0 7px;font-size:13px;color:var(--accent);font-weight:800;display:flex;align-items:center;gap:7px}
+.spec h4::before{content:"";width:3px;height:13px;border-radius:2px;background:var(--accent)}
+.oneline{margin:0;border-left:3px solid var(--accent);background:var(--accent-soft);padding:9px 13px;border-radius:0 10px 10px 0;font-size:13.5px}
+.oneline b{color:var(--text)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:11px 13px;border:1px dashed var(--border);border-radius:12px;background:var(--bg);margin:0}
+.flow .fs{padding:4px 11px;border:1px solid var(--border);border-radius:999px;font-size:12px;background:var(--surface);color:var(--muted);font-weight:700;white-space:nowrap}
+.flow .fs.cur{background:var(--accent);color:#fff;border-color:var(--accent)}
+.flow .fs.ext{border-style:dashed;border-color:var(--green);color:var(--green)}
+.flow i{color:var(--subtle);font-style:normal;font-weight:800}
+.flow .lbl{font-size:11px;color:var(--subtle);font-weight:800;margin-right:2px}
+.rules{margin:0;padding-left:19px;font-size:13px;color:var(--muted);line-height:1.85}
+.rules li b{color:var(--text)}
+.acc{margin:12px 0 0;font-size:12px;color:var(--muted)}
+.acc b{color:var(--accent);font-weight:800}
+.chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:800;border:1px solid currentColor;margin-right:5px}
+.chip.p0{color:var(--p0)}.chip.p1{color:var(--p1)}.chip.p2{color:var(--p2)}.chip.p3{color:var(--p3)}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:800}
+.tag .dot{width:7px;height:7px;border-radius:50%}
+.tag.on{background:var(--green-soft);color:var(--green)}.tag.on .dot{background:var(--green)}
+.tag.off{background:var(--orange-soft);color:var(--orange)}.tag.off .dot{background:var(--orange)}
+.tag.warn{background:var(--purple-soft);color:var(--purple)}.tag.warn .dot{background:var(--purple)}
+
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 17px;border-radius:0 12px 12px 0;font-size:13px;margin-top:12px}
+.callout.warn{border-color:var(--orange);background:var(--orange-soft)}
+.callout b{color:var(--text)}
+ul.plain{color:var(--muted);font-size:13.5px;line-height:1.85;margin:0;padding-left:20px}
+ul.plain li b,ul.plain li strong{color:var(--text)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:860px){.two{grid-template-columns:1fr}.hero{padding:24px 20px}.hero h1{font-size:25px}}
+footer{max-width:1180px;margin:0 auto;padding:24px;color:var(--subtle);font-size:12px;text-align:center;border-top:1px solid var(--border)}
+.note{font-size:12px;color:var(--subtle);margin-top:8px}
+
+/* ===== 左侧章节导航 ===== */
+.layout{max-width:1440px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:252px minmax(0,1fr);gap:30px;align-items:start}
+.layout>.wrap{max-width:none;margin:0;padding:0 0 40px}
+nav.toc{display:none}
+.sidebar{position:sticky;top:78px;max-height:calc(100vh - 100px);overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--card-shadow);padding:14px 12px 16px}
+.sidebar::-webkit-scrollbar{width:7px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:999px}
+.sb-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:0 8px 10px;border-bottom:1px solid var(--border);margin-bottom:9px}
+.sb-head .sb-t{font-size:12px;font-weight:900;letter-spacing:.5px;color:var(--text)}
+.sb-head .sb-c{font-size:11px;color:var(--subtle);font-weight:700}
+.sb-grp+.sb-grp{margin-top:2px}
+.sb-l1{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:10px;font-size:13px;font-weight:800;color:var(--muted);transition:.15s}
+.sb-l1 .n{width:20px;height:20px;border-radius:6px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:900;display:grid;place-items:center;flex:none}
+.sb-l1 .tx{line-height:1.3}
+.sb-l1:hover{background:var(--accent-soft);color:var(--accent)}
+.sb-l1.active,.sb-l1.parent-active{background:var(--accent);color:#fff}
+.sb-l1.active .n,.sb-l1.parent-active .n{background:rgba(255,255,255,.25);color:#fff}
+.sb-sub{display:grid;gap:1px;margin:3px 0 6px;padding-left:12px;border-left:1px solid var(--border)}
+.sb-sub a{padding:5px 9px;border-radius:8px;font-size:12.5px;color:var(--muted);line-height:1.4;transition:.15s}
+.sb-sub a:hover{color:var(--accent);background:var(--accent-soft)}
+.sb-sub a.active{color:var(--accent);background:var(--accent-soft);font-weight:800}
+.sb-sub a .rt{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--subtle);margin-left:5px}
+.sb-sub a.active .rt{color:var(--accent)}
+.sb-foot{margin-top:12px;padding:10px 9px 0;border-top:1px solid var(--border);font-size:11px;color:var(--subtle);line-height:1.6}
+.progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+section,article.spec,h3.lineh{scroll-margin-top:78px}
+@media(max-width:1080px){.layout{display:block;padding:0 24px 60px}.sidebar{display:none}nav.toc{display:flex}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="breadcrumbs">AI 编码极客挑战赛 <span>/</span> <strong>智能计划管理 Agent · 软需说明书</strong></div>
+  <div class="top-actions">
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="切换到夜晚模式">
+      <span id="theme-icon">☀</span><span id="theme-label">白天</span>
+    </button>
+    <span class="top-avatar">清</span>
+  </div>
+  <div class="progress" aria-hidden="true"><i id="pg"></i></div>
+</header>
+
+<div class="layout">
+
+  <aside class="sidebar" aria-label="章节导航">
+    <div class="sb-head"><span class="sb-t">章节导航</span><span class="sb-c">7 章 · 52 功能点</span></div>
+    <nav class="sb-nav">
+
+      <div class="sb-grp">
+        <a class="sb-l1" href="#c1"><span class="n">1</span><span class="tx">总则与全局约定</span></a>
+        <div class="sb-sub">
+          <a href="#s1-1">1.1 前提条件落地映射</a>
+          <a href="#s1-2">1.2 交付形态与技术约束</a>
+          <a href="#s1-3">1.3 术语与字段口径统一</a>
+          <a href="#s1-4">1.4 全局交互规范</a>
+          <a href="#s1-5">1.5 公共骨架（冻结项）</a>
+        </div>
+      </div>
+
+      <div class="sb-grp">
+        <a class="sb-l1" href="#c2"><span class="n">2</span><span class="tx">分工 A · 计划与解析线</span></a>
+        <div class="sb-sub">
+          <a href="#a1">A1 计划录入<span class="rt">/plan/input</span></a>
+          <a href="#a2">A2 提炼确认<span class="rt">/plan/confirm</span></a>
+          <a href="#a3">A3 智能排期<span class="rt">/schedule</span></a>
+        </div>
+      </div>
+
+      <div class="sb-grp">
+        <a class="sb-l1" href="#c3"><span class="n">3</span><span class="tx">分工 B · 执行与巡检线</span></a>
+        <div class="sb-sub">
+          <a href="#b1">B1 任务列表<span class="rt">/tasks</span></a>
+          <a href="#b2">B2 提醒中心<span class="rt">/reminders</span></a>
+          <a href="#b3">B3 后台定时巡检<span class="rt">线程</span></a>
+          <a href="#b4">B4 反馈与二次确认<span class="rt">组件</span></a>
+        </div>
+      </div>
+
+      <div class="sb-grp">
+        <a class="sb-l1" href="#c4"><span class="n">4</span><span class="tx">分工 C · 看板 / 数据 / 体验</span></a>
+        <div class="sb-sub">
+          <a href="#cc1">C1 驾驶舱<span class="rt">/dashboard</span></a>
+          <a href="#cc2">C2 数据管理<span class="rt">/data</span></a>
+          <a href="#cc3">C3 系统设置<span class="rt">/settings</span></a>
+        </div>
+      </div>
+
+      <div class="sb-grp">
+        <a class="sb-l1" href="#c5"><span class="n">5</span><span class="tx">Demo 大章节（D1~D10）</span></a>
+      </div>
+
+      <div class="sb-grp">
+        <a class="sb-l1" href="#c6"><span class="n">6</span><span class="tx">AI 测试与验收</span></a>
+        <div class="sb-sub">
+          <a href="#s6-1">6.1 测试策略</a>
+          <a href="#s6-2">6.2 测试用例矩阵</a>
+          <a href="#s6-3">6.3 AI 自动化执行方式</a>
+          <a href="#s6-4">6.4 验收锚点索引（AC）</a>
+          <a href="#s6-5">6.5 待确认项</a>
+        </div>
+      </div>
+
+      <div class="sb-grp">
+        <a class="sb-l1" href="#c7"><span class="n">7</span><span class="tx">需求追溯与交付</span></a>
+        <div class="sb-sub">
+          <a href="#s7-1">7.1 功能点 ↔ 菜单 ↔ 需求 ↔ 页面</a>
+          <a href="#s7-2">7.2 交付物清单</a>
+          <a href="#s7-3">7.3 分工协作与冻结约定</a>
+        </div>
+      </div>
+
+    </nav>
+    <div class="sb-foot">依据《生成功能清单提示词 V1.1》· 源材料 52 项功能点清单<br>呈现层文档 · PRD 主稿为唯一权威源</div>
+  </aside>
+
+  <div class="wrap">
+
+  <div class="hero">
+    <h1>智能计划管理 Agent · 软需说明书</h1>
+    <p>把功能点清单（52 项）下沉为「可照表开发」的软件需求：每个菜单给出一句话介绍、跨菜单业务流程图、界面字段、字段交互与控制规则、查询/导出/下载等按钮清单、异常恢复与验收锚点。全文按 <b>三份开发分工 A/B/C ＋ Demo 大章节 ＋ AI 测试</b> 组织。</p>
+    <span class="pill">依据《生成功能清单提示词 V1.1》· 源材料 52 项功能点清单 · 落地方案 Flask MPA（app.py 单入口）</span>
+  </div>
+
+  <div class="doc-meta">
+    <div class="mi"><b>文档类型</b><span>软需说明书（详细版 · 可开发级）</span></div>
+    <div class="mi"><b>依据与题源</b><span>《生成功能清单提示词 V1.1》· 押题《智能计划管理 Agent》</span></div>
+    <div class="mi"><b>覆盖范围</b><span>52 功能点 · 3 一级菜单 · 8 二级菜单 · 10 项 Demo</span></div>
+    <div class="mi"><b>结构</b><span>7 章：总则 / A线 / B线 / C线 / Demo / AI测试 / 追溯</span></div>
+    <div class="mi"><b>交付形态</b><span>Flask MPA，<code>app.py</code> 唯一入口，<code>data/*.json</code> 持久化</span></div>
+    <div class="mi"><b>版本 / 日期</b><span>v1 · 2026-10-13</span></div>
+  </div>
+
+  <nav class="toc">
+    <a href="#c1">1 · 总则与全局约定</a>
+    <a href="#c2">2 · 分工 A 计划线</a>
+    <a href="#c3">3 · 分工 B 执行与巡检线</a>
+    <a href="#c4">4 · 分工 C 看板数据体验线</a>
+    <a href="#c5">5 · Demo 大章节</a>
+    <a href="#c6">6 · AI 测试与验收</a>
+    <a href="#c7">7 · 需求追溯与交付</a>
+  </nav>
+
+  <!-- ============ 1 总则 ============ -->
+  <section id="c1">
+    <h2><span class="no">1</span>总则与全局约定</h2>
+    <p class="lead">本章锁定"前提条件落地、交付形态、字段口径、全局交互"四条底座。后面各章不再重复，只写菜单差异。</p>
+
+    <h3 class="lineh" id="s1-1"><span class="lt t">1.1</span>前提条件落地映射（对提示词 V1.1）</h3>
+    <div class="conds">
+      <div class="cond"><b><span class="n">1</span>开发时长 2h</b><p>全文按"2h 内可落地"裁剪：P0 保最小闭环，P1 提体验，P2/P3 视情况；不可落地的进第 5 章 Demo。</p></div>
+      <div class="cond"><b><span class="n">2</span>MVP 优先</b><p>所有页面只保"输入→拆解→排期→巡检→提醒→反馈"闭环所需的字段，不引入非必要配置项。</p></div>
+      <div class="cond"><b><span class="n">3</span>AI Coding 主力</b><p>字段键、控件、校验、按钮行为均写到"AI 可直接生成代码"的粒度；第 6 章附 AI 自测提示词模板。</p></div>
+      <div class="cond"><b><span class="n">4</span>Flask MPA 交付</b><p>每页标注路由与归属文件；前端分层 <code>templates/pages</code> + <code>static/css|js/pages</code>，后端按 <code>backend/</code> 路由模块拆分。</p></div>
+      <div class="cond"><b><span class="n">5</span>本地持久化</b><p>统一"读取 → 表单校验 → 加锁写入 → 页面刷新展示"闭环，载体 <code>data/users.json</code>、<code>data/plans.json</code>，不引入数据库。</p></div>
+    </div>
+
+    <h3 class="lineh" id="s1-2"><span class="lt t">1.2</span>交付形态与技术约束</h3>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>层</th><th>路径 / 载体</th><th>约定</th></tr></thead>
+      <tbody>
+        <tr><td class="nw">应用入口</td><td class="nw"><code>app.py</code></td><td>初始化、路由注册、通用校验、线程锁、数据读写（唯一启动入口）</td></tr>
+        <tr><td class="nw">后端路由</td><td class="nw"><code>backend/</code></td><td>按业务动作拆分：plan / schedule / task_ops / scheduler / feedback / stats / data_io / llm</td></tr>
+        <tr><td class="nw">公共骨架</td><td class="nw"><code>templates/layout.html</code> · <code>templates/components/</code></td><td>侧栏 + 顶栏 + 面包屑 + 主题按钮；组件复用</td></tr>
+        <tr><td class="nw">业务页面</td><td class="nw"><code>templates/pages/&lt;name&gt;.html</code></td><td>8 个二级菜单各一页</td></tr>
+        <tr><td class="nw">页面样式/脚本</td><td class="nw"><code>static/css/pages/&lt;name&gt;.css</code> · <code>static/js/pages/&lt;name&gt;.js</code></td><td>只改自己的页面文件，避免冲突</td></tr>
+        <tr><td class="nw">设计令牌 / 主题</td><td class="nw"><code>css/tokens.css</code> · <code>css/layout.css</code> · <code>js/theme.js</code></td><td>语义化变量、双主题；localStorage 键 <code>northstar-theme</code></td></tr>
+        <tr><td class="nw">数据</td><td class="nw"><code>data/users.json</code> · <code>data/plans.json</code></td><td>原子写入；请求线程与后台线程共用全局锁</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 class="lineh" id="s1-3"><span class="lt t">1.3</span>术语与字段口径统一（强制）</h3>
+    <p class="lead" style="margin-bottom:10px">同一语义全站唯一命名（中文名 + snake_case 键）；页面标签、表头、导出列、接口参数一律取自本字典，新增字段先入字典再使用。</p>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>统一术语</th><th>字段键</th><th>定义</th><th>禁止写法</th></tr></thead>
+      <tbody>
+        <tr><td>计划</td><td class="k">plan</td><td>一段自然语言输入及其结构化结果</td><td>方案、规划（作名词时）</td></tr>
+        <tr><td>待办</td><td class="k">todo</td><td><b>解析产物</b>：未经拆解的事项条目</td><td>事项、条目、任务（此阶段不叫任务）</td></tr>
+        <tr><td>任务</td><td class="k">task</td><td><b>拆解后的可执行单元</b>（含属性/状态）</td><td>待办、事项、工单</td></tr>
+        <tr><td>子任务</td><td class="k">subtask</td><td>任务的层级拆分（parent_task_id 关联）</td><td>二级任务、分任务</td></tr>
+        <tr><td>执行安排</td><td class="k">schedule</td><td>任务在时间轴上的安排</td><td>排程、时间表</td></tr>
+        <tr><td>提醒</td><td class="k">reminder</td><td>巡检产生的一条待触达事项</td><td>通知（通知泛指渠道投递）、警报</td></tr>
+        <tr><td>反馈</td><td class="k">feedback</td><td>用户对任务的完成 / 延期 / 取消反馈</td><td>回执、评价</td></tr>
+        <tr><td>指标</td><td class="k">metric</td><td>驾驶舱与北极星体系中的统计口径</td><td>数据项、数值</td></tr>
+        <tr><td>通知渠道</td><td class="k">channel</td><td>提醒投递通道（页面弹窗 / 桌面通知 / 企业微信 / 钉钉）</td><td>通路、渠道配置（配置对象为 ChannelConfig）</td></tr>
+        <tr><td>视图角色</td><td class="k">view_role</td><td>普通用户 / 管理员（模拟）</td><td>权限角色、账号类型</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout"><b>阶段区分红线：</b>「待办」与「任务」是<b>两个阶段</b>的对象——解析阶段产出<b>待办</b>，拆解后成为<b>任务</b>；两者不得混用，映射关系写入 <code>todo_id → task_id[]</code>。</div>
+
+    <h4 style="font-size:14px;margin:20px 0 8px">数据字典（核心对象字段）</h4>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>对象</th><th>字段名</th><th>字段键</th><th>类型</th><th>必填</th><th>默认</th><th>枚举 / 格式</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="8">Plan（计划）</td></tr>
+        <tr><td>Plan</td><td>计划ID</td><td class="k">plan_id</td><td>string</td><td>是</td><td>系统生成</td><td><code>P</code>+时间戳</td><td>主键</td></tr>
+        <tr><td>Plan</td><td>用户标识</td><td class="k">user_id</td><td>string</td><td>是</td><td>当前用户</td><td>—</td><td>归属用户</td></tr>
+        <tr><td>Plan</td><td>原始文本</td><td class="k">raw_text</td><td>text</td><td>是</td><td>空</td><td>≤2000 字符</td><td>自然语言输入（上限见 Q-08）</td></tr>
+        <tr><td>Plan</td><td>目标</td><td class="k">goal</td><td>string</td><td>是</td><td>解析填充</td><td>≤200 字符</td><td>提炼出的总目标</td></tr>
+        <tr><td>Plan</td><td>创建时间</td><td class="k">created_at</td><td>datetime</td><td>是</td><td>当前时间</td><td>ISO8601</td><td>—</td></tr>
+        <tr class="grp"><td colspan="8">Task（任务）</td></tr>
+        <tr><td>Task</td><td>任务ID</td><td class="k">task_id</td><td>string</td><td>是</td><td>系统生成</td><td><code>T</code>+序号</td><td>主键</td></tr>
+        <tr><td>Task</td><td>所属计划ID</td><td class="k">plan_id</td><td>string</td><td>是</td><td>—</td><td>—</td><td>外键 → Plan</td></tr>
+        <tr><td>Task</td><td>父任务ID</td><td class="k">parent_task_id</td><td>string</td><td>否</td><td>空</td><td>—</td><td>空=顶层；非空=子任务</td></tr>
+        <tr><td>Task</td><td>任务标题</td><td class="k">title</td><td>string</td><td>是</td><td>空</td><td>≤80 字符</td><td>—</td></tr>
+        <tr><td>Task</td><td>任务说明</td><td class="k">detail</td><td>text</td><td>否</td><td>空</td><td>≤500 字符</td><td>—</td></tr>
+        <tr><td>Task</td><td>优先级</td><td class="k">priority</td><td>enum</td><td>是</td><td>中</td><td>高 / 中 / 低</td><td>—</td></tr>
+        <tr><td>Task</td><td>预计耗时（分钟）</td><td class="k">estimate_minutes</td><td>int</td><td>是</td><td>60</td><td>&gt;0</td><td>单位统一为分钟</td></tr>
+        <tr><td>Task</td><td>截止时间</td><td class="k">due_at</td><td>datetime</td><td>是</td><td>—</td><td>ISO8601</td><td>任务必须完成的最晚时间</td></tr>
+        <tr><td>Task</td><td>计划开始时间</td><td class="k">scheduled_start_at</td><td>datetime</td><td>否</td><td>排期生成</td><td>ISO8601</td><td>排期结果</td></tr>
+        <tr><td>Task</td><td>计划完成时间点</td><td class="k">planned_finish_at</td><td>datetime</td><td>否</td><td>排期生成</td><td>ISO8601</td><td>排期结果；≠实际完成</td></tr>
+        <tr><td>Task</td><td>状态</td><td class="k">status</td><td>enum</td><td>是</td><td>待安排</td><td>见枚举字典</td><td>—</td></tr>
+        <tr><td>Task</td><td>进度</td><td class="k">progress</td><td>int</td><td>是</td><td>0</td><td>0–100</td><td>百分比整数</td></tr>
+        <tr><td>Task</td><td>依赖任务ID</td><td class="k">depends_on</td><td>list</td><td>否</td><td>空</td><td>task_id 列表</td><td>进阶（Demo）</td></tr>
+        <tr><td>Task</td><td>延期次数</td><td class="k">delay_count</td><td>int</td><td>是</td><td>0</td><td>≥0</td><td>—</td></tr>
+        <tr><td>Task</td><td>延期原因</td><td class="k">delay_reason</td><td>text</td><td>否</td><td>空</td><td>≤200 字符</td><td>延期时填写</td></tr>
+        <tr><td>Task</td><td>完成时间</td><td class="k">completed_at</td><td>datetime</td><td>否</td><td>空</td><td>ISO8601</td><td>实际完成时刻</td></tr>
+        <tr><td>Task</td><td>是否演示级</td><td class="k">is_demo</td><td>bool</td><td>是</td><td>false</td><td>—</td><td>标记 Demo 数据</td></tr>
+        <tr><td>Task</td><td>创建 / 更新时间</td><td class="k">created_at / updated_at</td><td>datetime</td><td>是</td><td>当前时间</td><td>ISO8601</td><td>—</td></tr>
+        <tr class="grp"><td colspan="8">Reminder（提醒）· Feedback（反馈）· 配置类</td></tr>
+        <tr><td>Reminder</td><td>提醒ID / 关联任务ID</td><td class="k">reminder_id / task_id</td><td>string</td><td>是</td><td>—</td><td><code>R</code>+序号 / 外键</td><td>—</td></tr>
+        <tr><td>Reminder</td><td>触发时间 / 渠道 / 状态 / 内容</td><td class="k">trigger_at / channel / status / content</td><td>—</td><td>是</td><td>巡检命中 / 页面弹窗 / 未读</td><td>ISO8601 / 枚举 / 枚举 / ≤120 字符</td><td>—</td></tr>
+        <tr><td>Feedback</td><td>反馈ID / 任务ID / 类型 / 备注</td><td class="k">feedback_id / task_id / feedback_type / comment</td><td>—</td><td>是</td><td>—</td><td><code>F</code>+序号 / 外键 / 完成·延期·取消 / ≤200 字符</td><td>延期备注必填</td></tr>
+        <tr><td>Metric</td><td>指标键 / 名称 / 值 / 周期 / 单位</td><td class="k">metric_key / metric_name / value / period / unit</td><td>—</td><td>是</td><td>—</td><td>今日·本周·本月 / 次·%·项</td><td>Q-10 / Q-11</td></tr>
+        <tr><td>Channel</td><td>渠道键 / 名称 / 启用 / Webhook</td><td class="k">channel_key / channel_name / enabled / webhook_url</td><td>—</td><td>是</td><td>false</td><td>页面弹窗·桌面通知·企业微信·钉钉 / URL（占位）</td><td>不真实投递</td></tr>
+        <tr><td>Settings</td><td>显示名 / 视图角色 / 主题</td><td class="k">display_name / view_role / theme</td><td>—</td><td>是</td><td>普通用户 / day</td><td>普通用户·管理员 / day·night</td><td>—</td></tr>
+        <tr><td>Settings</td><td>巡检间隔 / 免打扰起止</td><td class="k">reminder_interval_minutes / dnd_start / dnd_end</td><td>int / time</td><td>是 / 否</td><td>240 / 空</td><td>&gt;0 / HH:mm</td><td>Q-02</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h4 style="font-size:14px;margin:20px 0 8px">枚举字典（统一取值）</h4>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>枚举</th><th>取值（唯一）</th><th>禁止</th></tr></thead>
+      <tbody>
+        <tr><td>任务状态 status</td><td>待安排 / 待执行 / 进行中 / 已完成 / 已延期 / 已取消</td><td>处理中、完成、closed</td></tr>
+        <tr><td>优先级 priority</td><td>高 / 中 / 低</td><td>紧急、High、P0</td></tr>
+        <tr><td>提醒状态</td><td>未读 / 已读 / 已忽略</td><td>已处理、done</td></tr>
+        <tr><td>反馈类型 feedback_type</td><td>完成 / 延期 / 取消</td><td>完成反馈、delay</td></tr>
+        <tr><td>提醒渠道 channel</td><td>页面弹窗 / 桌面通知 / 企业微信 / 钉钉</td><td>弹窗、toast、wechat</td></tr>
+        <tr><td>视图角色 view_role</td><td>普通用户 / 管理员</td><td>user、admin、超级管理员</td></tr>
+        <tr><td>主题 theme</td><td>day / night</td><td>light、dark、白天模式</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h4 style="font-size:14px;margin:20px 0 8px">命名红线（同义异名对照）</h4>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>❌ 禁止</th><th>✅ 统一使用</th></tr></thead>
+      <tbody>
+        <tr><td>待办 / 事项 / 工单 混指可执行单元</td><td>任务（task）</td></tr>
+        <tr><td>截止时间 / 到期时间 / DDL / 最终期限</td><td>截止时间（due_at）</td></tr>
+        <tr><td>完成时间 / 结束时间 / 计划完成 混用</td><td>计划端「计划完成时间点」(planned_finish_at)；实际端「完成时间」(completed_at)</td></tr>
+        <tr><td>优先级 / 优先等级 / 级别</td><td>优先级（priority）</td></tr>
+        <tr><td>预计耗时 / 预估时长 / 预估工时</td><td>预计耗时（分钟）(estimate_minutes)</td></tr>
+        <tr><td>进度 / 完成度 / 百分比</td><td>进度（progress）</td></tr>
+        <tr><td>巡检间隔 / 检查频率 / 轮询周期</td><td>巡检间隔（分钟）(reminder_interval_minutes)</td></tr>
+        <tr><td>机构 / 机构名称（本域无机构）</td><td>如出现组织归属统一「所属单位」(org_name)</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 class="lineh" id="s1-4"><span class="lt t">1.4</span>全局交互规范（所有菜单遵守）</h3>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>规范项</th><th>统一规则</th></tr></thead>
+      <tbody>
+        <tr><td class="nw">查询 / 筛选</td><td>列表页统一「筛选条（chips 可多选）+ 关键词搜索 + 重置」；筛选即时生效（前端过滤或 GET 参数回传），URL 保留筛选态以便刷新/分享保持结果。</td></tr>
+        <tr><td class="nw">排序</td><td>列表表头可点排序（优先级 / 截止时间 / 进度）；默认按「截止时间升序、进行中优先」。</td></tr>
+        <tr><td class="nw">分页</td><td>数据 &gt; 50 条启用分页（每页 20 条），否则不显示分页条。</td></tr>
+        <tr><td class="nw">导出</td><td>列表页右上「导出」按钮，格式 JSON / CSV 二选（由 C 线 <code>data_io</code> 统一实现）；<b>导出内容 = 当前筛选结果</b>，列取数据字典；文件名 <code>{菜单}_{YYYYMMDD-HHmm}.csv</code>。</td></tr>
+        <tr><td class="nw">下载</td><td>导出即触发浏览器下载（<code>Content-Disposition: attachment</code>）；导入页提供「下载模板」<code>template_import.csv</code>。</td></tr>
+        <tr><td class="nw">二次确认</td><td>删除 / 取消 / 清空 / 覆盖导入 一律弹确认框（B4 组件），确认后才执行；破坏性按钮用警示色。</td></tr>
+        <tr><td class="nw">空态</td><td>无数据时显示空态文案 + 引导按钮（如「去录入计划」）。</td></tr>
+        <tr><td class="nw">加载态</td><td>异步操作按钮进入 loading 且禁用，防重复提交。</td></tr>
+        <tr><td class="nw">提示（Toast）</td><td>成功=绿、失败=红、警告=橙；文案统一（"已保存""操作失败，请重试"）。</td></tr>
+        <tr><td class="nw">权限（模拟）</td><td><code>view_role=普通用户</code> 隐藏「导入 / 清理 / 删除他人」等管理操作；<code>管理员</code> 显示。仅演示，非真实鉴权。</td></tr>
+        <tr><td class="nw">主题 / 无障碍</td><td>双主题即时切换并记忆；焦点可见（3px 描边）；尊重 <code>prefers-reduced-motion</code>。</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 class="lineh" id="s1-5"><span class="lt t">1.5</span>公共骨架（开工前 20min 三人共同锁定，之后冻结）</h3>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>项</th><th>归属文件</th><th>约定</th></tr></thead>
+      <tbody>
+        <tr><td class="nw">应用入口</td><td class="nw"><code>app.py</code></td><td>路由注册 / 通用校验 / 线程锁 / 读写；由 A 维护，B/C 以 blueprint 注册</td></tr>
+        <tr><td class="nw">公共骨架与组件</td><td class="nw"><code>layout.html</code> · <code>components/</code></td><td>侧栏 + 顶栏 + 面包屑；主题按钮在顶栏右侧</td></tr>
+        <tr><td class="nw">设计令牌</td><td class="nw"><code>css/tokens.css</code> · <code>css/layout.css</code></td><td>语义化变量，双主题</td></tr>
+        <tr><td class="nw">主题逻辑</td><td class="nw"><code>js/theme.js</code></td><td>localStorage 键 <code>northstar-theme</code></td></tr>
+        <tr><td class="nw">数据读写</td><td class="nw"><code>data/users.json</code> · <code>data/plans.json</code></td><td>读 → 校验 → 加锁写 → 刷新</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout warn"><b>冻结约定：</b>公共骨架锁定后，每人只在 <code>backend/</code> 下新增自己的路由模块（由 <code>app.py</code> 统一 import），只改自己页面的 <code>pages/&lt;name&gt;.*</code> 与 <code>css|js/pages/&lt;name&gt;.*</code>，以尽量不产生代码冲突。</div>
+  </section>
+
+  <!-- ============ 2 分工 A ============ -->
+  <section id="c2">
+    <h2><span class="no">2</span>工作清单 A · 计划线与解析线</h2>
+    <p class="lead">一级菜单「计划流程」— 二级菜单「计划录入 / 提炼确认 / 智能排期」。这是<b>系统心脏</b>：把自然语言变成可排期任务，闭环能否跑通完全由这条线决定。归属 <code>backend/plan.py</code> · <code>backend/schedule.py</code>。</p>
+
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>二级菜单</th><th>路由</th><th>功能ID</th><th>需求单元</th><th>归属文件</th></tr></thead>
+      <tbody>
+        <tr><td class="fn">计划录入</td><td class="nw"><code>/plan/input</code></td><td class="id">F-101 · F-801 · F-805</td><td class="id">REQ-001 / 014 / 017</td><td class="nw"><code>pages/plan_input.*</code></td></tr>
+        <tr><td class="fn">提炼确认</td><td class="nw"><code>/plan/confirm</code></td><td class="id">F-102 · F-103 · F-104</td><td class="id">REQ-002 / 003</td><td class="nw"><code>pages/plan_confirm.*</code></td></tr>
+        <tr><td class="fn">智能排期</td><td class="nw"><code>/schedule</code></td><td class="id">F-201~206 · F-502</td><td class="id">REQ-004 / 005 / 031</td><td class="nw"><code>pages/schedule.*</code> · <code>backend/schedule.py</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <!-- A1 -->
+    <article class="spec" id="a1">
+      <div class="spec-h"><span class="code">A1</span><h3>计划录入</h3><span class="route">/plan/input</span><span class="regs">REQ-001/014/017 · F-101/801/805</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>提供自然语言计划录入入口，把用户的一段话交给 AI 解析，是整条闭环的唯一入口与起点。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">主链</span><span class="fs cur">计划录入</span><i>→</i><span class="fs">提炼确认</span><i>→</i><span class="fs">智能排期</span><i>→</i><span class="fs">任务列表</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">跨菜单</span><span class="fs cur">计划录入·一句话办事</span><i>→ 意图命中 →</i><span class="fs ext">任务列表</span><span class="fs ext">驾驶舱</span><i>／</i><span class="fs cur">依据说明(A5)</span><i>被</i><span class="fs ext">提炼确认 / 智能排期</span><i>复用</i>
+        </div>
+
+        <h4>界面交互字段</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>字段名</th><th>字段键</th><th>控件</th><th>必填</th><th>默认</th><th>校验 / 控制规则</th></tr></thead>
+          <tbody>
+            <tr><td>原始文本</td><td class="k">raw_text</td><td>多行文本域（带计数）</td><td>是</td><td>空</td><td>非空；≤2000 字符；实时字数计数，超限置灰提交并提示</td></tr>
+            <tr><td>指令文本（A4 一句话办事）</td><td class="k">query</td><td>单行输入</td><td>否</td><td>空</td><td>非空才可提交；仅识别受支持指令集合</td></tr>
+            <tr><td>依据文本（A5）</td><td class="k">basis_text</td><td>折叠只读</td><td>否</td><td>空</td><td>只读；由解析结果生成</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>字段交互逻辑与控制规则</h4>
+        <ul class="rules">
+          <li><b>raw_text 输入时</b>：实时更新右下角字数计数；达到上限（2000）后停止接受输入并高亮计数为警示色。</li>
+          <li><b>点击「解析计划」</b>：前端先做非空校验 → 不通过则聚焦文本域并提示，不发起请求；通过则按钮进入 loading 并禁用，POST <code>/plan/parse</code>。</li>
+          <li><b>「填充示例」按钮</b>：仅前端把示例文本写入 raw_text，不落库、不自动提交。</li>
+          <li><b>解析成功</b>：跳转 <code>/plan/confirm?plan_id=xxx</code>；<b>失败</b>：留在本页，以 toast 提示且<b>保留已输入文本</b>。</li>
+          <li><b>一句话办事（A4）</b>：提交 <code>query</code> → 意图识别 → 命中受支持查询/操作则返回结果或跳转对应菜单；不支持则给出可选项提示（不静默失败）。</li>
+        </ul>
+
+        <h4>按钮 / 操作清单</h4>
+        <div class="tbl-wrap"><table class="btn-t">
+          <thead><tr><th>按钮</th><th>类型</th><th>触发行为</th><th>反馈 / 校验</th></tr></thead>
+          <tbody>
+            <tr><td>填充示例 ×2–3</td><td>次要</td><td>写入 raw_text</td><td>即时生效</td></tr>
+            <tr><td>清空</td><td>次要</td><td>清空 raw_text 与计数</td><td>文本非空时二次确认</td></tr>
+            <tr><td>解析计划</td><td>主按钮</td><td>POST <code>/plan/parse</code></td><td>loading 防重复；成功跳转 / 失败 toast</td></tr>
+            <tr><td>一句话办事·执行</td><td>主按钮</td><td>POST <code>/plan/command</code> 意图识别</td><td>命中返回/跳转；不支持给可选项</td></tr>
+            <tr><td>查看依据</td><td>折叠</td><td>展开 A5 依据说明</td><td>只读展示</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>解析超时 → 提示"稍后重试"，保留原文，可重复提交。</li>
+          <li>网络失败 → 文本不丢，toast 报错。</li>
+          <li>LLM 返回非结构化 → 由 <code>backend/llm.py</code> schema 校验 + 规则兜底，失败时不落半成品数据。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-01</b>（空拦截/超长提示/正常进入解析）· <b>AC-14</b>（一句话办事）· <b>AC-17</b>（依据说明）</p>
+      </div>
+    </article>
+
+    <!-- A2 -->
+    <article class="spec" id="a2">
+      <div class="spec-h"><span class="code">A2</span><h3>提炼确认</h3><span class="route">/plan/confirm</span><span class="regs">REQ-002/003 · F-102/103/104</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>展示并可修订 AI 提炼出的目标 / 待办 / 关键时间，人工确认后入库并进入任务拆解。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">上游</span><span class="fs ext">计划录入</span><i>→ parse →</i><span class="fs cur">提炼确认</span><i>→ confirm → 拆解 →</i><span class="fs">智能排期</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">依据</span><span class="fs cur">依据说明(A5)</span><i>展开于本页 →</i><span class="fs ext">说明拆解 / 时间 / 提醒依据</span><i>；</i><span class="fs ext">返回重录</span><i>→ 回</i><span class="fs ext">计划录入</span><i>（带原文）</i>
+        </div>
+
+        <h4>界面交互字段</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>字段名</th><th>字段键</th><th>控件</th><th>必填</th><th>默认</th><th>校验 / 控制规则</th></tr></thead>
+          <tbody>
+            <tr><td>计划ID</td><td class="k">plan_id</td><td>只读</td><td>—</td><td>URL 参数</td><td>—</td></tr>
+            <tr><td>原始文本</td><td class="k">raw_text</td><td>折叠只读</td><td>—</td><td>库中值</td><td>保留来源，编辑后不脱钩</td></tr>
+            <tr><td>目标</td><td class="k">goal</td><td>单行输入</td><td>是</td><td>解析填充</td><td>非空；≤200 字符</td></tr>
+            <tr><td>待办内容</td><td class="k">todo[].content</td><td>单行输入（列表）</td><td>是</td><td>解析填充</td><td>非空；每行可增删</td></tr>
+            <tr><td>待办·关键时间</td><td class="k">todo[].key_time</td><td>日期时间</td><td>否</td><td>空</td><td>合法时间；早于当前时间给提示</td></tr>
+            <tr><td>待办ID</td><td class="k">todo[].todo_id</td><td>隐藏</td><td>是</td><td>系统生成</td><td>写入 <code>todo_id → task_id[]</code> 映射</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>字段交互逻辑与控制规则</h4>
+        <ul class="rules">
+          <li><b>goal 编辑</b>：失焦校验非空与长度；为空时确认按钮置灰并高亮该栏。</li>
+          <li><b>待办列表</b>：每行右侧「删除」；底部「添加待办」新增空行并聚焦。任意时刻<b>待办数 ≥1</b>，全删则禁止确认并提示。</li>
+          <li><b>key_time</b>：日期时间控件；留空允许（后续由拆解补），非法格式拦截。</li>
+          <li><b>确认</b>：校验 goal 非空且待办 ≥1 → POST <code>/plan/confirm</code> → 触发拆解（REQ-004）→ 跳 <code>/schedule?plan_id=xxx</code>。</li>
+          <li><b>返回重录</b>：回 A1 并把 raw_text 带入，已编辑内容不落库。</li>
+          <li><b>空态</b>：解析结果缺失某栏时显示空态并提示"解析可能不完整"。</li>
+        </ul>
+
+        <h4>按钮 / 操作清单</h4>
+        <div class="tbl-wrap"><table class="btn-t">
+          <thead><tr><th>按钮</th><th>类型</th><th>触发行为</th><th>反馈 / 校验</th></tr></thead>
+          <tbody>
+            <tr><td>添加待办</td><td>次要</td><td>列表尾部新增空行并聚焦</td><td>即时</td></tr>
+            <tr><td>删除（行内）</td><td>图标</td><td>移除该待办行</td><td>待办仅剩 1 条时禁用</td></tr>
+            <tr><td>查看依据</td><td>折叠</td><td>展开 A5</td><td>只读</td></tr>
+            <tr><td>确认并生成排期</td><td>主按钮</td><td>POST <code>/plan/confirm</code> → 拆解</td><td>校验 goal/待办；loading 防重复</td></tr>
+            <tr><td>返回重录</td><td>次要</td><td>回 A1（带 raw_text）</td><td>已编辑内容不落库</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>待办全删 → 禁止确认并提示"至少保留一条待办"。</li>
+          <li>确认失败 → 保留编辑态，可重试。</li>
+          <li>关键时间早于当前 → 警示但允许（交排期裁决）。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-02</b>（结构化提炼 + 兜底）· <b>AC-03</b>（三栏可编辑/确认/保留来源）· <b>AC-17</b>（依据说明）</p>
+      </div>
+    </article>
+
+    <!-- A3 -->
+    <article class="spec" id="a3">
+      <div class="spec-h"><span class="code">A3</span><h3>智能排期</h3><span class="route">/schedule</span><span class="regs">REQ-004/005/031 · F-201~206/502</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>把任务按截止时间与依赖排入时间轴，支持手动调整、冲突高亮与重排建议，是计划落成执行的枢纽。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">主链</span><span class="fs ext">提炼确认</span><i>→ 拆解 →</i><span class="fs cur">智能排期</span><i>→ 落库 →</i><span class="fs">任务列表</span><i>→</i><span class="fs">提醒中心</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">回环</span><span class="fs ext">任务列表·延期反馈</span><i>→ 动态重排 →</i><span class="fs cur">智能排期</span><i>→ 更新安排 →</i><span class="fs ext">任务列表 / 提醒中心</span>
+        </div>
+
+        <h4>界面交互字段（时间轴项，取自 Task）</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>字段名</th><th>字段键</th><th>控件</th><th>必填</th><th>默认</th><th>校验 / 控制规则</th></tr></thead>
+          <tbody>
+            <tr><td>任务标题</td><td class="k">title</td><td>只读 / 可编辑</td><td>是</td><td>拆解值</td><td>≤80 字符</td></tr>
+            <tr><td>优先级</td><td class="k">priority</td><td>下拉</td><td>是</td><td>中</td><td>枚举：高 / 中 / 低</td></tr>
+            <tr><td>预计耗时（分钟）</td><td class="k">estimate_minutes</td><td>数字</td><td>是</td><td>60</td><td>&gt;0 整数</td></tr>
+            <tr><td>计划开始时间</td><td class="k">scheduled_start_at</td><td>日期时间 / 拖拽</td><td>否</td><td>排期生成</td><td>ISO8601；不早于依赖任务结束</td></tr>
+            <tr><td>计划完成时间点</td><td class="k">planned_finish_at</td><td>日期时间 / 拖拽</td><td>否</td><td>排期生成</td><td>≥ 计划开始时间</td></tr>
+            <tr><td>截止时间</td><td class="k">due_at</td><td>日期时间</td><td>是</td><td>解析值</td><td>ISO8601；超期即冲突</td></tr>
+            <tr><td>依赖任务ID</td><td class="k">depends_on</td><td>多选</td><td>否</td><td>空</td><td>仅 Demo（REQ-031）；不可选自身</td></tr>
+            <tr><td>冲突标记</td><td class="k">conflict_flag</td><td>只读</td><td>—</td><td>计算值</td><td>布尔；时间重叠或依赖不满足即 true</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>字段交互逻辑与控制规则</h4>
+        <ul class="rules">
+          <li><b>进入页</b>：按「截止时间倒推 + 依赖约束」生成时间轴，逐任务渲染时间条。</li>
+          <li><b>拖拽 / 改时间</b>：调整 scheduled_start_at、planned_finish_at；松手后即时重算 conflict_flag。</li>
+          <li><b>冲突检测</b>：时间重叠或依赖不满足 → 该行高亮 conflict_flag 并给提示；不允许静默保存冲突。</li>
+          <li><b>保存排期</b>：POST <code>/schedule/save</code> 落库；失败回滚到上一次安排。</li>
+          <li><b>重排建议</b>：计划变化时展示建议卡，「采纳」写入新安排、「忽略」保留当前。</li>
+        </ul>
+
+        <h4>按钮 / 操作清单</h4>
+        <div class="tbl-wrap"><table class="btn-t">
+          <thead><tr><th>按钮</th><th>类型</th><th>触发行为</th><th>反馈 / 校验</th></tr></thead>
+          <tbody>
+            <tr><td>保存排期</td><td>主按钮</td><td>POST <code>/schedule/save</code></td><td>冲突未处理给提示；失败回滚</td></tr>
+            <tr><td>拖拽调整</td><td>直接操作</td><td>改时间并重算冲突</td><td>实时高亮</td></tr>
+            <tr><td>重排建议·采纳</td><td>次要</td><td>应用建议的新安排</td><td>更新后 toast</td></tr>
+            <tr><td>重排建议·忽略</td><td>次要</td><td>保留当前安排</td><td>卡片收起</td></tr>
+            <tr><td>查看依据</td><td>折叠</td><td>展开 A5（说明排期依据）</td><td>只读</td></tr>
+            <tr><td>导出排期</td><td>次要</td><td>导出当前时间轴 CSV</td><td>触发下载</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>保存失败 → 回滚至上一次成功安排，toast 提示。</li>
+          <li>依赖成环 → 拒绝保存并提示「依赖关系存在循环」。</li>
+          <li>时间轴渲染数据量大 → 折叠非当前周期任务（性能提示见 F-906）。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-04</b>（拆解带优先级/耗时/时间点）· <b>AC-05</b>（时间轴/手调/冲突/重排建议）· <b>AC-31</b>（依赖图 Demo）</p>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ============ 3 分工 B ============ -->
+  <section id="c3">
+    <h2><span class="no">3</span>工作清单 B · 执行线与巡检线</h2>
+    <p class="lead">一级菜单「工作台」— 二级菜单「任务列表 / 提醒中心」，外加后台定时巡检。这是<b>手脚</b>：让计划真正落成行动，并把"该做什么"按时推给人。归属 <code>backend/task_ops.py</code> · <code>scheduler.py</code> · <code>feedback.py</code>。</p>
+
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>二级菜单 / 后台</th><th>路由</th><th>功能ID</th><th>需求单元</th><th>归属文件</th></tr></thead>
+      <tbody>
+        <tr><td class="fn">任务列表</td><td class="nw"><code>/tasks</code></td><td class="id">F-301~307 · F-501 · F-905 · F-906</td><td class="id">REQ-006/007/010/021/022</td><td class="nw"><code>pages/tasks.*</code> · <code>backend/task_ops.py</code></td></tr>
+        <tr><td class="fn">提醒中心</td><td class="nw"><code>/reminders</code></td><td class="id">F-403~405 · F-503 · F-903</td><td class="id">REQ-009/019/032</td><td class="nw"><code>pages/reminders.*</code></td></tr>
+        <tr><td class="fn">后台定时巡检</td><td class="nw">—（线程）</td><td class="id">F-401 · F-402</td><td class="id">REQ-008</td><td class="nw"><code>backend/scheduler.py</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <!-- B1 -->
+    <article class="spec" id="b1">
+      <div class="spec-h"><span class="code">B1</span><h3>任务列表</h3><span class="route">/tasks</span><span class="regs">REQ-006/007/010/021/022 · F-301~307/501/905/906</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>任务的统一执行台——筛选查看、更新状态与进度、发起完成/延期/取消反馈，是使用频次最高的页面。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">上游</span><span class="fs ext">智能排期</span><i>→ 任务入库 →</i><span class="fs cur">任务列表</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">下游</span><span class="fs cur">任务列表</span><i>→ 完成/延期/取消 →</i><span class="fs ext">反馈 → 动态重排 → 智能排期</span><i>；</i><span class="fs cur">任务列表</span><i>→ 数据 →</i><span class="fs ext">驾驶舱</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">提醒</span><span class="fs ext">后台巡检</span><i>→</i><span class="fs ext">提醒中心</span><i>→ 点击查看 →</i><span class="fs cur">任务列表</span>
+        </div>
+
+        <h4>界面交互字段（筛选 + 列表 + 编辑表单）</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>字段名</th><th>字段键</th><th>控件</th><th>默认</th><th>校验 / 控制规则</th></tr></thead>
+          <tbody>
+            <tr class="grp"><td colspan="5">筛选区</td></tr>
+            <tr><td>状态</td><td class="k">status</td><td>多选 chips</td><td>全部未完成</td><td>取枚举字典</td></tr>
+            <tr><td>优先级</td><td class="k">priority</td><td>多选 chips</td><td>全部</td><td>高 / 中 / 低</td></tr>
+            <tr><td>截止时间·起</td><td class="k">due_from</td><td>日期</td><td>空</td><td>≤ due_to</td></tr>
+            <tr><td>截止时间·止</td><td class="k">due_to</td><td>日期</td><td>空</td><td>≥ due_from</td></tr>
+            <tr><td>关键词</td><td class="k">keyword</td><td>搜索框</td><td>空</td><td>匹配 title / detail</td></tr>
+            <tr class="grp"><td colspan="5">列表列（取自 Task）</td></tr>
+            <tr><td>任务ID / 标题 / 优先级 / 状态</td><td class="k">task_id / title / priority / status</td><td>文本 / 标签</td><td>—</td><td>状态标签带圆点</td></tr>
+            <tr><td>进度</td><td class="k">progress</td><td>进度条 + 滑块</td><td>0</td><td>0–100 整数</td></tr>
+            <tr><td>截止时间 / 计划完成时间点</td><td class="k">due_at / planned_finish_at</td><td>文本</td><td>—</td><td>超期标红</td></tr>
+            <tr><td>延期次数</td><td class="k">delay_count</td><td>文本</td><td>0</td><td>&gt;0 标警示色</td></tr>
+            <tr class="grp"><td colspan="5">编辑表单 / 弹窗</td></tr>
+            <tr><td>任务标题</td><td class="k">title</td><td>单行输入</td><td>现值</td><td>非空；≤80 字符</td></tr>
+            <tr><td>任务说明</td><td class="k">detail</td><td>多行文本</td><td>现值</td><td>≤500 字符</td></tr>
+            <tr><td>优先级</td><td class="k">priority</td><td>下拉</td><td>现值</td><td>枚举</td></tr>
+            <tr><td>预计耗时（分钟）</td><td class="k">estimate_minutes</td><td>数字</td><td>现值</td><td>&gt;0</td></tr>
+            <tr><td>截止时间</td><td class="k">due_at</td><td>日期时间</td><td>现值</td><td>ISO8601</td></tr>
+            <tr><td>延期原因</td><td class="k">delay_reason</td><td>多行文本</td><td>空</td><td>延期时<b>必填</b>；≤200 字符</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>字段交互逻辑与控制规则</h4>
+        <ul class="rules">
+          <li><b>完成</b>：status → 已完成、写 <code>completed_at</code> → 触发反馈（REQ-010）→ toast，行状态即时刷新。</li>
+          <li><b>延期</b>：弹窗必填 <code>delay_reason</code> → <code>delay_count+1</code>、status → 已延期 → 触发重排建议（REQ-005）。</li>
+          <li><b>取消</b>：二次确认（REQ-021）→ status → 已取消。</li>
+          <li><b>进度</b>：滑块或输入 0–100；拖到 100 自动置为已完成。</li>
+          <li><b>编辑 / 删除</b>：编辑走任务表单；删除需二次确认并写状态日志。</li>
+          <li><b>筛选联动</b>：任一筛选变化即时过滤；URL 保留筛选参数以便刷新/分享；「重置」清空全部筛选。</li>
+          <li><b>排序</b>：点表头在「截止时间 / 优先级 / 进度」间切换升降序。</li>
+        </ul>
+
+        <h4>按钮 / 操作清单</h4>
+        <div class="tbl-wrap"><table class="btn-t">
+          <thead><tr><th>按钮</th><th>类型</th><th>触发行为</th><th>反馈 / 校验</th></tr></thead>
+          <tbody>
+            <tr><td>筛选 chips</td><td>筛选</td><td>多选过滤列表</td><td>即时；分组空则隐</td></tr>
+            <tr><td>搜索</td><td>查询</td><td>关键词过滤 title/detail</td><td>输入防抖</td></tr>
+            <tr><td>重置</td><td>次要</td><td>清空筛选与搜索</td><td>即时</td></tr>
+            <tr><td>排序（表头）</td><td>直接操作</td><td>切换排序字段/方向</td><td>箭头指示</td></tr>
+            <tr><td>完成</td><td>行内</td><td>status→已完成</td><td>写 completed_at + 反馈</td></tr>
+            <tr><td>延期</td><td>行内</td><td>弹窗填延期原因</td><td>原因必填；触发重排</td></tr>
+            <tr><td>取消</td><td>行内</td><td>二次确认后取消</td><td>警示色</td></tr>
+            <tr><td>进度</td><td>行内</td><td>滑块/输入更新 progress</td><td>100 自动完成</td></tr>
+            <tr><td>编辑</td><td>行内</td><td>打开任务表单</td><td>校验后落库</td></tr>
+            <tr><td>删除</td><td>行内</td><td>二次确认后删除</td><td>写状态日志</td></tr>
+            <tr><td>新增任务</td><td>主按钮</td><td>手动补录一条任务</td><td>校验 title/due_at</td></tr>
+            <tr><td>导出</td><td>次要</td><td>导出当前筛选结果为 CSV/JSON</td><td>浏览器下载</td></tr>
+            <tr><td>分页</td><td>分页</td><td>切换页（&gt;50 条时）</td><td>每页 20</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>操作失败 → 回滚状态并 toast；并发写由全局锁保护（AC-23）。</li>
+          <li>大数据量渲染 → 分页 + 性能提示（F-906）。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-06</b>（状态/进度/编辑删除生效）· <b>AC-07</b>（状态日志）· <b>AC-21</b>（二次确认）· <b>AC-22</b>（性能提示）</p>
+      </div>
+    </article>
+
+    <!-- B2 -->
+    <article class="spec" id="b2">
+      <div class="spec-h"><span class="code">B2</span><h3>提醒中心</h3><span class="route">/reminders</span><span class="regs">REQ-009/019/032 · F-403~405/503/903</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>汇总巡检产生的提醒，支持已读 / 忽略 / 跳转任务与免打扰设置，是"到点提醒"的落点。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">上游</span><span class="fs ext">后台巡检（每 4h）</span><i>→ 命中临期/逾期/冲突 →</i><span class="fs cur">提醒中心</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">下游</span><span class="fs cur">提醒中心</span><i>→ 标记已读/忽略 →</i><span class="fs ext">状态回写</span><i>；</i><span class="fs cur">提醒中心</span><i>→ 查看任务 →</i><span class="fs ext">任务列表</span><i>；</i><span class="fs ext">系统设置</span><i>→ 免打扰/渠道 →</i><span class="fs cur">提醒中心</span>
+        </div>
+
+        <h4>界面交互字段</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>字段名</th><th>字段键</th><th>控件</th><th>默认</th><th>校验 / 控制规则</th></tr></thead>
+          <tbody>
+            <tr><td>提醒ID</td><td class="k">reminder_id</td><td>只读</td><td>—</td><td>—</td></tr>
+            <tr><td>关联任务ID</td><td class="k">task_id</td><td>只读 / 链接</td><td>—</td><td>点击跳转任务列表并定位该任务</td></tr>
+            <tr><td>触发时间</td><td class="k">trigger_at</td><td>只读</td><td>—</td><td>ISO8601</td></tr>
+            <tr><td>提醒渠道</td><td class="k">channel</td><td>只读</td><td>页面弹窗</td><td>枚举字典</td></tr>
+            <tr><td>提醒状态</td><td class="k">status</td><td>只读</td><td>未读</td><td>未读 / 已读 / 已忽略</td></tr>
+            <tr><td>提醒内容</td><td class="k">content</td><td>只读</td><td>系统生成</td><td>≤120 字符</td></tr>
+            <tr><td>筛选·提醒状态</td><td class="k">status</td><td>chips</td><td>未读优先</td><td>—</td></tr>
+            <tr><td>筛选·渠道</td><td class="k">channel</td><td>chips</td><td>全部</td><td>—</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>字段交互逻辑与控制规则</h4>
+        <ul class="rules">
+          <li><b>列表</b>：未读置顶并高亮；点击条目展开详情或跳转任务。</li>
+          <li><b>标记已读 / 忽略</b>：更新 <code>status</code>；导航角标数字实时递减。</li>
+          <li><b>桌面通知</b>：开启时请求浏览器授权；<b>被拒 → 降级为页面弹窗</b>，不报错。</li>
+          <li><b>免打扰时段</b>：跳转 C3 系统设置；时段内不弹窗但记录进提醒中心。</li>
+          <li><b>风险警示（F-903）</b>：临期/逾期/依赖冲突以警示样式呈现。</li>
+        </ul>
+
+        <h4>按钮 / 操作清单</h4>
+        <div class="tbl-wrap"><table class="btn-t">
+          <thead><tr><th>按钮</th><th>类型</th><th>触发行为</th><th>反馈 / 校验</th></tr></thead>
+          <tbody>
+            <tr><td>筛选（状态/渠道）</td><td>筛选</td><td>过滤提醒列表</td><td>即时</td></tr>
+            <tr><td>标记已读</td><td>行内</td><td>status→已读</td><td>角标减一</td></tr>
+            <tr><td>忽略</td><td>行内</td><td>status→已忽略</td><td>角标减一</td></tr>
+            <tr><td>全部已读</td><td>次要</td><td>批量置已读</td><td>二次确认</td></tr>
+            <tr><td>查看任务</td><td>链接</td><td>跳转任务列表定位任务</td><td>—</td></tr>
+            <tr><td>桌面通知开关</td><td>开关</td><td>请求授权并开启</td><td>被拒降级</td></tr>
+            <tr><td>免打扰设置</td><td>次要</td><td>跳转 /settings</td><td>—</td></tr>
+            <tr><td>导出提醒记录</td><td>次要</td><td>导出提醒历史 CSV</td><td>浏览器下载</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>通知授权被拒 → 降级页面弹窗，不阻断流程。</li>
+          <li>提醒对应的任务已删除 → 条目标注「任务不存在」并禁止跳转。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-09</b>（弹窗/已读/免打扰/降级）· <b>AC-19</b>（风险警示触发）</p>
+      </div>
+    </article>
+
+    <!-- B3 -->
+    <article class="spec" id="b3">
+      <div class="spec-h"><span class="code">B3</span><h3>后台定时巡检（非页面）</h3><span class="route">scheduler 线程</span><span class="regs">REQ-008/019 · F-401/402/903</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>后台线程按固定间隔扫描任务，命中「待执行 / 临期 / 逾期 / 依赖冲突」即生成提醒与风险警示。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">触发</span><span class="fs ext">系统设置·巡检间隔</span><i>→</i><span class="fs cur">定时器（每 240min）</span><i>→ 扫描任务 →</i><span class="fs ext">生成 Reminder</span><i>→</i><span class="fs ext">提醒中心</span><i>／</i><span class="fs ext">风险警示</span>
+        </div>
+
+        <h4>关键字段与规则</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>项</th><th>字段键 / 值</th><th>规则</th></tr></thead>
+          <tbody>
+            <tr><td>巡检间隔（分钟）</td><td class="k">reminder_interval_minutes</td><td>默认 240，可在系统设置修改；&gt;0</td></tr>
+            <tr><td>命中条件</td><td>status · due_at · depends_on</td><td>待执行 / 临近截止 / 已逾期 / 依赖未满足</td></tr>
+            <tr><td>产出</td><td class="k">trigger_at · channel · status · content</td><td>生成 Reminder（默认未读、页面弹窗）</td></tr>
+            <tr><td>并发与容错</td><td>全局锁</td><td>与 Web 请求线程共用锁；线程异常<b>不阻塞</b> Web；重复提醒去重</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>线程崩溃 → 记录日志并自动重启下一次巡检，不影响页面。</li>
+          <li>同一任务同一周期只生成一条提醒（去重），避免轰炸。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-08</b>（到点触发且线程异常不阻塞 Web）· <b>AC-19</b>（风险警示）</p>
+      </div>
+    </article>
+
+    <!-- B4 -->
+    <article class="spec" id="b4">
+      <div class="spec-h"><span class="code">B4</span><h3>反馈与二次确认（公共组件）</h3><span class="route">components/</span><span class="regs">REQ-010/021 · F-501/502/905</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>统一承载"完成 / 延期 / 取消"反馈的采集与危险操作的二次确认，是闭环回写数据的公共出口。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">回环</span><span class="fs ext">任务列表</span><i>→ 触发反馈 →</i><span class="fs cur">反馈组件</span><i>→ 写 Feedback →</i><span class="fs ext">动态重排 → 智能排期</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">确认</span><span class="fs ext">删除 / 取消 / 清空 / 覆盖导入</span><i>→</i><span class="fs cur">二次确认弹窗</span><i>→ 确认后才执行</i>
+        </div>
+
+        <h4>关键字段与规则</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>字段名</th><th>字段键</th><th>类型</th><th>规则</th></tr></thead>
+          <tbody>
+            <tr><td>反馈ID / 关联任务ID</td><td class="k">feedback_id / task_id</td><td>string</td><td>系统生成 / 外键</td></tr>
+            <tr><td>反馈类型</td><td class="k">feedback_type</td><td>enum</td><td>完成 / 延期 / 取消，与任务状态联动</td></tr>
+            <tr><td>反馈备注</td><td class="k">comment</td><td>text</td><td>延期必填（复用 delay_reason）；≤200 字符</td></tr>
+            <tr><td>确认弹窗文案</td><td>—</td><td>UI</td><td>标题 + 影响说明 + 确认/取消；破坏性按钮用警示色</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>反馈失败 → 回滚任务状态，toast 提示。</li>
+          <li>确认弹窗「取消」→ 不执行任何写操作。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-10</b>（反馈后安排更新且可撤销）· <b>AC-21</b>（二次确认）</p>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ============ 4 分工 C ============ -->
+  <section id="c4">
+    <h2><span class="no">4</span>工作清单 C · 看板 / 数据 / 体验线</h2>
+    <p class="lead">一级菜单「工作台 · 驾驶舱」＋「数据与设置」— 二级菜单「驾驶舱 / 数据管理 / 系统设置」。这是<b>仪表盘与后勤</b>：让成果看得见、让数据进得来出得去、让体验可配置。归属 <code>backend/stats.py</code> · <code>data_io.py</code>。</p>
+
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>二级菜单</th><th>路由</th><th>功能ID</th><th>需求单元</th><th>归属文件</th></tr></thead>
+      <tbody>
+        <tr><td class="fn">驾驶舱</td><td class="nw"><code>/dashboard</code></td><td class="id">F-601~604 · F-701/702 · F-1102</td><td class="id">REQ-011/012/013/028</td><td class="nw"><code>pages/dashboard.*</code> · <code>backend/stats.py</code></td></tr>
+        <tr><td class="fn">数据管理</td><td class="nw"><code>/data</code></td><td class="id">F-901/902/904/906 · F-1001~1003</td><td class="id">REQ-018/020/024</td><td class="nw"><code>pages/data_mgmt.*</code> · <code>backend/data_io.py</code></td></tr>
+        <tr><td class="fn">系统设置</td><td class="nw"><code>/settings</code></td><td class="id">F-1004/1005/1101/1103/1104</td><td class="id">REQ-025/026/027/029/030</td><td class="nw"><code>pages/settings.*</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <!-- C1 -->
+    <article class="spec" id="cc1">
+      <div class="spec-h"><span class="code">C1</span><h3>驾驶舱</h3><span class="route">/dashboard</span><span class="regs">REQ-011/012/013/028 · F-601~604/701/702/1102</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>以核心 KPI、趋势/分布图与北极星拆解树，一屏呈现计划执行效果，是答辩的主舞台。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">数据源</span><span class="fs ext">任务列表（Task）</span><span class="fs ext">提醒中心</span><i>→ 聚合 →</i><span class="fs cur">驾驶舱</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">拆解</span><span class="fs cur">指标定义</span><i>→</i><span class="fs cur">子指标拆解</span><i>→</i><span class="fs ext">拆解树可视化(D3)</span><i>；</i><span class="fs ext">统计周期</span><i>由</i><span class="fs cur">驾驶舱</span><i>切换</i>
+        </div>
+
+        <h4>界面交互字段（取自 Metric）</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>字段名</th><th>字段键</th><th>控件 / 形态</th><th>规则</th></tr></thead>
+          <tbody>
+            <tr><td>统计周期</td><td class="k">period</td><td>chips：今日 / 本周 / 本月</td><td>切换即时重算全部图表</td></tr>
+            <tr><td>任务总数</td><td class="k">task_total</td><td>KPI 卡</td><td>整数；口径见 Q-10</td></tr>
+            <tr><td>今日到期</td><td class="k">due_today</td><td>KPI 卡</td><td>按 due_at 当日</td></tr>
+            <tr><td>完成率</td><td class="k">completion_rate</td><td>KPI 卡（%）</td><td>已完成 / 总数</td></tr>
+            <tr><td>延期数</td><td class="k">delay_count</td><td>KPI 卡</td><td>delay_count&gt;0 的任务数</td></tr>
+            <tr><td>趋势数据</td><td class="k">trend[].date / .completed</td><td>折线图（原生 SVG）</td><td>禁外部图表库</td></tr>
+            <tr><td>分布数据</td><td class="k">dist[].dimension / .count</td><td>饼图 / 柱图</td><td>维度：优先级 / 状态 / 菜单</td></tr>
+            <tr><td>排行数据</td><td class="k">rank[].task_id / .value</td><td>排行榜列表</td><td>最耗时 / 最常延期</td></tr>
+            <tr><td>北极星指标</td><td class="k">north_star_metric</td><td>指标卡</td><td>如"计划按时完成率"</td></tr>
+            <tr><td>子指标</td><td class="k">sub_metrics[]</td><td>层级拆解</td><td>完成 / 延期 / 使用频次 </td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>字段交互逻辑与控制规则</h4>
+        <ul class="rules">
+          <li><b>进入页</b>：实时聚合展示 KPI + 图表（原生 SVG 手写）。</li>
+          <li><b>切换统计周期</b>：重算所有图表与 KPI；保持当前选择（URL 参数）。</li>
+          <li><b>图表 hover</b>：折线/饼柱显示数值明细；拆解树 hover 高亮链路。</li>
+          <li><b>数据动画（F-1102）</b>：数字滚动 + 图表入场动画；尊重 <code>prefers-reduced-motion</code> 降级为静态。</li>
+          <li><b>空态</b>：无任务数据时显示引导按钮「去录入计划」。</li>
+        </ul>
+
+        <h4>按钮 / 操作清单</h4>
+        <div class="tbl-wrap"><table class="btn-t">
+          <thead><tr><th>按钮</th><th>类型</th><th>触发行为</th><th>反馈 / 校验</th></tr></thead>
+          <tbody>
+            <tr><td>周期切换 chips</td><td>筛选</td><td>今日/本周/本月重算</td><td>即时</td></tr>
+            <tr><td>刷新</td><td>次要</td><td>重新聚合数据</td><td>loading</td></tr>
+            <tr><td>导出报表</td><td>次要</td><td>导出当前指标 + 图表数据 CSV/JSON</td><td>浏览器下载</td></tr>
+            <tr><td>生成周报（Demo）</td><td>次要</td><td>展示预生成样例周报</td><td>不接实时 LLM</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>图表数据为空 → 显示空态而非断裂坐标轴。</li>
+          <li>聚合失败 → 保留上一次成功结果并 toast。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-11</b>（KPI 一致）· <b>AC-12</b>（原生 SVG 图表）· <b>AC-13</b>（拆解树层级）· <b>AC-28</b>（动画可降级）</p>
+      </div>
+    </article>
+
+    <!-- C2 -->
+    <article class="spec" id="cc2">
+      <div class="spec-h"><span class="code">C2</span><h3>数据管理</h3><span class="route">/data</span><span class="regs">REQ-018/020/024 · F-901/902/904/906/1001~1003</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>计划数据的导入导出、敏感信息脱敏与异常数据处置，是数据的出入口与"质检站"。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">导入</span><span class="fs ext">外部 CSV / Excel</span><i>→ 校验 →</i><span class="fs cur">数据管理</span><i>→ 入库 →</i><span class="fs ext">任务列表 / 驾驶舱</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">异常</span><span class="fs ext">解析失败 / 时间冲突</span><i>→</i><span class="fs cur">异常数据区</span><i>→ 补录/修正 →</i><span class="fs ext">入库</span><i>；</i><span class="lbl">导出</span><span class="fs cur">数据管理</span><i>→ 下载</i>
+        </div>
+
+        <h4>界面交互字段</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>字段名</th><th>字段键</th><th>控件</th><th>必填</th><th>默认</th><th>校验 / 控制规则</th></tr></thead>
+          <tbody>
+            <tr><td>导入文件</td><td class="k">import_file</td><td>文件上传 / 拖拽</td><td>否</td><td>空</td><td>仅 CSV / Excel；编码与表头兼容校验</td></tr>
+            <tr><td>导出格式</td><td class="k">export_format</td><td>下拉</td><td>是</td><td>JSON</td><td>JSON / CSV</td></tr>
+            <tr><td>脱敏开关</td><td class="k">mask_enabled</td><td>开关</td><td>是</td><td>关</td><td>布尔；开启后敏感字段脱敏展示（规则见 Q-12）</td></tr>
+            <tr><td>异常项</td><td class="k">exception_item</td><td>卡片列表</td><td>—</td><td>空</td><td>含原始行 + 异常原因 + 处置入口</td></tr>
+            <tr><td>落库载体</td><td class="k">plans.json</td><td>—</td><td>—</td><td>—</td><td>读→校验→加锁写→刷新（F-1001）</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>字段交互逻辑与控制规则</h4>
+        <ul class="rules">
+          <li><b>上传</b>：选择/拖入文件 → 前端校验扩展名与大小 → POST 解析 → 展示校验预览（表头映射、行数、异常行）。</li>
+          <li><b>确认导入</b>：合法行入库；异常行进「异常数据区」；覆盖导入需二次确认。</li>
+          <li><b>导出</b>：按 <code>export_format</code> 生成文件并触发下载；导出内容 = 当前筛选结果，列取数据字典。</li>
+          <li><b>脱敏</b>：开启后表格与导出同时脱敏（一致），关闭还原。</li>
+          <li><b>异常处置</b>：补录（缺字段）/ 修正（值错）/ 忽略（不处理）/ 删除（丢弃该行）。</li>
+        </ul>
+
+        <h4>按钮 / 操作清单</h4>
+        <div class="tbl-wrap"><table class="btn-t">
+          <thead><tr><th>按钮</th><th>类型</th><th>触发行为</th><th>反馈 / 校验</th></tr></thead>
+          <tbody>
+            <tr><td>选择文件 / 拖拽</td><td>次要</td><td>载入待导入文件</td><td>扩展名校验</td></tr>
+            <tr><td>下载模板</td><td>链接</td><td>下载 <code>template_import.csv</code></td><td>浏览器下载</td></tr>
+            <tr><td>校验预览</td><td>次要</td><td>解析并展示表头映射/异常行</td><td>不落库</td></tr>
+            <tr><td>确认导入</td><td>主按钮</td><td>合法行入库、异常行进异常区</td><td>覆盖时二次确认</td></tr>
+            <tr><td>导出（JSON/CSV）</td><td>次要</td><td>按格式生成并下载</td><td>内容=当前筛选</td></tr>
+            <tr><td>脱敏开关</td><td>开关</td><td>切换表格/导出脱敏</td><td>即时</td></tr>
+            <tr><td>补录 / 修正 / 忽略 / 删除</td><td>行内</td><td>处置异常数据</td><td>删除二次确认</td></tr>
+            <tr><td>刷新</td><td>次要</td><td>重新读取库中数据</td><td>loading</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>编码 / 表头不兼容 → 给出对应提示，不入库。</li>
+          <li>导入中途失败 → 事务性回滚，不留半成品数据。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-18</b>（异常入异常区并可补录/修正）· <b>AC-20</b>（脱敏展示）· <b>AC-24</b>（导入兼容/导出完整）</p>
+      </div>
+    </article>
+
+    <!-- C3 -->
+    <article class="spec" id="cc3">
+      <div class="spec-h"><span class="code">C3</span><h3>系统设置</h3><span class="route">/settings</span><span class="regs">REQ-025/026/027/029/030 · F-1004/1005/1101/1103/1104</span></div>
+      <div class="spec-b">
+        <p class="oneline"><b>一句话介绍：</b>主题、视图角色、巡检间隔、免打扰与通知渠道的集中配置，是全局行为的控制台。</p>
+
+        <h4>与其他菜单的业务逻辑流程</h4>
+        <div class="flow">
+          <span class="lbl">广播</span><span class="fs cur">系统设置</span><i>→ theme →</i><span class="fs ext">全局主题</span><i>；</i><span class="fs cur">系统设置</span><i>→ view_role →</i><span class="fs ext">全站视图</span>
+        </div>
+        <div class="flow" style="margin-top:7px">
+          <span class="lbl">参数</span><span class="fs cur">系统设置</span><i>→ 巡检间隔 →</i><span class="fs ext">后台巡检</span><i>；</i><span class="fs cur">系统设置</span><i>→ 渠道/免打扰 →</i><span class="fs ext">提醒中心</span>
+        </div>
+
+        <h4>界面交互字段</h4>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>字段名</th><th>字段键</th><th>控件</th><th>必填</th><th>默认</th><th>校验 / 控制规则</th></tr></thead>
+          <tbody>
+            <tr><td>主题</td><td class="k">theme</td><td>切换</td><td>是</td><td>day</td><td>day / night；即时生效并写 localStorage</td></tr>
+            <tr><td>视图角色</td><td class="k">view_role</td><td>下拉</td><td>是</td><td>普通用户</td><td>普通用户 / 管理员；即时切换视图（模拟）</td></tr>
+            <tr><td>巡检间隔（分钟）</td><td class="k">reminder_interval_minutes</td><td>数字</td><td>是</td><td>240</td><td>&gt;0 整数；保存后作用于后台巡检</td></tr>
+            <tr><td>免打扰开始</td><td class="k">dnd_start</td><td>时间</td><td>否</td><td>空</td><td>HH:mm；≤ dnd_end</td></tr>
+            <tr><td>免打扰结束</td><td class="k">dnd_end</td><td>时间</td><td>否</td><td>空</td><td>HH:mm；≥ dnd_start</td></tr>
+            <tr><td>通知渠道·启用</td><td class="k">channel[].enabled</td><td>开关</td><td>是</td><td>false</td><td>页面弹窗 / 桌面通知 / 企业微信 / 钉钉</td></tr>
+            <tr><td>通知渠道·Webhook</td><td class="k">channel[].webhook_url</td><td>输入</td><td>否</td><td>空</td><td>URL 格式；占位，不真实投递</td></tr>
+            <tr><td>显示名</td><td class="k">display_name</td><td>输入</td><td>是</td><td>—</td><td>顶栏展示</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>字段交互逻辑与控制规则</h4>
+        <ul class="rules">
+          <li><b>主题切换</b>：即时生效并存 localStorage；刷新保持。</li>
+          <li><b>角色切换</b>：即时切换视图——普通用户隐藏管理操作，管理员显示。</li>
+          <li><b>巡检间隔</b>：非正整数拦截；保存后通知后台巡检线程热更新。</li>
+          <li><b>通知渠道</b>：开关 + Webhook；「测试发送」为占位（提示"演示环境不真实投递"）。</li>
+          <li><b>保存 / 恢复默认</b>：保存经表单 POST 落库；恢复默认需二次确认。</li>
+          <li><b>快捷键 / 无障碍（F-1104）</b>：提供快捷键说明与焦点可见；时间不足可舍弃。</li>
+        </ul>
+
+        <h4>按钮 / 操作清单</h4>
+        <div class="tbl-wrap"><table class="btn-t">
+          <thead><tr><th>按钮</th><th>类型</th><th>触发行为</th><th>反馈 / 校验</th></tr></thead>
+          <tbody>
+            <tr><td>主题切换</td><td>开关</td><td>切换 day/night</td><td>即时 + 记忆</td></tr>
+            <tr><td>视图角色下拉</td><td>下拉</td><td>切换视图</td><td>即时</td></tr>
+            <tr><td>保存设置</td><td>主按钮</td><td>POST 落库全部配置</td><td>校验后 toast</td></tr>
+            <tr><td>恢复默认</td><td>次要</td><td>重置为默认值</td><td>二次确认</td></tr>
+            <tr><td>渠道开关 / 测试发送</td><td>开关 / 次要</td><td>启用渠道 / 占位测试</td><td>提示不真实投递</td></tr>
+            <tr><td>快捷键说明</td><td>折叠</td><td>展示快捷键列表</td><td>只读</td></tr>
+            <tr><td>导出配置</td><td>次要</td><td>导出当前设置为 JSON</td><td>浏览器下载</td></tr>
+          </tbody>
+        </table></div>
+
+        <h4>异常与恢复</h4>
+        <ul class="rules">
+          <li>保存失败 → 保留编辑态并 toast。</li>
+          <li>免打扰起止非法（起 &gt; 止）→ 拦截并提示。</li>
+        </ul>
+        <p class="acc">验收锚点：<b>AC-25</b>（视图差异）· <b>AC-26</b>（渠道开关/Webhook 可保存）· <b>AC-27</b>（双主题保持）· <b>AC-29</b>（吉祥物状态）· <b>AC-30</b>（快捷键/焦点）</p>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ============ 5 Demo ============ -->
+  <section id="c5">
+    <h2><span class="no">5</span>Demo 大章节（2h 内不可落地 → 演示呈现）</h2>
+    <p class="lead">以下 10 项 2h 内难以完整落地，改为"可演示"呈现——用静态页、mock 数据、预置样例或配置占位展示设计思路。<b>统一约束：</b>页面显式标注「进阶 / 演示级」，数据置 <code>is_demo=true</code>，不接真实外部服务。</p>
+
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>编号</th><th>功能ID</th><th>Demo 功能</th><th>一句话介绍</th><th>演示形态</th><th>关联字段</th><th>验收</th></tr></thead>
+      <tbody>
+        <tr><td class="id">D1</td><td class="id">F-205</td><td class="fn">任务依赖关系识别</td><td>识别任务间依赖，避免不合理安排</td><td>预置依赖关系图 + 一条"会冲突的排期"样例</td><td class="k">depends_on</td><td class="id">AC-31</td></tr>
+        <tr><td class="id">D2</td><td class="id">F-503</td><td class="fn">基于用户习惯的个性化</td><td>结合历史习惯调整时间与提醒频率</td><td>mock「习惯画像」卡片（常用时段 / 平均完成时长）</td><td class="k">habit_profile</td><td class="id">AC-32</td></tr>
+        <tr><td class="id">D3</td><td class="id">F-703</td><td class="fn">北极星拆解树可视化</td><td>把核心指标层层拆成可执行子指标</td><td>SVG 静态/轻交互拆解树（按时完成率→完成/延期/频次）</td><td class="k">north_star_metric / sub_metrics[]</td><td class="id">AC-13</td></tr>
+        <tr><td class="id">D4</td><td class="id">F-802</td><td class="fn">AI 周报 / 月报</td><td>自动汇总本周/月执行情况成文</td><td>预生成样例（文本 + 关键指标），按钮"生成"不接实时 LLM</td><td class="k">report_text</td><td class="id">AC-15</td></tr>
+        <tr><td class="id">D5</td><td class="id">F-803</td><td class="fn">智能推荐</td><td>推荐"下一步做什么"</td><td>固定返回 3 条"下一步建议"卡片 + 推荐理由</td><td class="k">recommend[]</td><td class="id">AC-15</td></tr>
+        <tr><td class="id">D6</td><td class="id">F-804</td><td class="fn">智能机器人</td><td>问答式机器人入口</td><td>对话窗壳 + 预设 2 轮问答，作为架构预留入口</td><td class="k">dialog[]</td><td class="id">AC-16</td></tr>
+        <tr><td class="id">D7</td><td class="id">F-902</td><td class="fn">补处理 / 补录</td><td>异常数据的补处理与补录入口</td><td>异常卡上"补录"按钮，弹表单壳（不真写逻辑）</td><td class="k">exception_item</td><td class="id">AC-18</td></tr>
+        <tr><td class="id">D8</td><td class="id">F-903</td><td class="fn">风险引擎 / 警示</td><td>临期/逾期/依赖冲突的前置预警</td><td>预置 2 条风险事件在提醒中心静态展示</td><td class="k">reminder.content</td><td class="id">AC-19</td></tr>
+        <tr><td class="id">D9</td><td class="id">F-1005</td><td class="fn">企业微信 / 钉钉接入</td><td>展示与外部系统的生态融合架构</td><td>设置页渠道开关 + Webhook 输入框（占位，不真发）</td><td class="k">channel[].enabled / webhook_url</td><td class="id">AC-26</td></tr>
+        <tr><td class="id">D10</td><td class="id">F-1103</td><td class="fn">AI 吉祥物</td><td>提供情绪价值的状态角色</td><td>SVG 静态 3 表情（空闲/繁忙/警告），按钮切换演示状态映射</td><td class="k">mascot_state</td><td class="id">AC-29</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout warn"><b>演示提示：</b>Demo 项集中在「驾驶舱（D3/D4/D5/D6）+ 提醒中心（D8）+ 系统设置（D9/D10）」。答辩被深挖时统一口径：<b>「本项为进阶能力，2h 内以 mock/静态方式展示设计思路与数据形态，落地路线已在 PRD 中标注。」</b></div>
+  </section>
+
+  <!-- ============ 6 AI 测试 ============ -->
+  <section id="c6">
+    <h2><span class="no">6</span>AI 测试与验收</h2>
+    <p class="lead">因"AI Coding 为核心主力"，测试同样以 AI 自动化为主：每条用例给出可被 AI 直接执行的步骤与断言，验收锚点与全文一致。</p>
+
+    <h3 class="lineh" id="s6-1"><span class="lt t">6.1</span>测试策略</h3>
+    <div class="conds">
+      <div class="cond"><b><span class="n">A</span>接口断言</b><p>对 Flask 路由用 HTTP 断言（状态码 + JSON 字段 + 落库结果），覆盖写操作闭环。</p></div>
+      <div class="cond"><b><span class="n">B</span>DOM 断言</b><p>页面渲染后用 DOM 探针校验关键元素/字段/标签存在与取值。</p></div>
+      <div class="cond"><b><span class="n">C</span>截图验收</b><p>Edge 无头渲染双主题截图，核对布局、对比度、无重叠无裁切。</p></div>
+      <div class="cond"><b><span class="n">D</span>边界与异常</b><p>空输入、超长、非法时间、通知被拒、依赖成环等异常路径必测。</p></div>
+    </div>
+
+    <h3 class="lineh" id="s6-2"><span class="lt t">6.2</span>测试用例矩阵</h3>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>编号</th><th>菜单</th><th>关联</th><th>前置</th><th>步骤</th><th>预期结果</th><th>类型</th><th>优先</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="8">A 线 · 计划与解析</td></tr>
+        <tr><td class="id">TC-001</td><td class="nw">计划录入</td><td class="id">F-101/REQ-001</td><td>打开 /plan/input</td><td>留空点「解析计划」</td><td>拦截并聚焦文本域，不发起请求</td><td>异常</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-002</td><td class="nw">计划录入</td><td class="id">F-101/REQ-001</td><td>—</td><td>输入超 2000 字</td><td>计数警示、提交按钮置灰</td><td>边界</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-003</td><td class="nw">计划录入</td><td class="id">F-101/REQ-001</td><td>—</td><td>填示例后解析</td><td>跳 /plan/confirm 并带 plan_id</td><td>冒烟</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-004</td><td class="nw">计划录入</td><td class="id">F-101/REQ-001</td><td>模拟解析报错</td><td>提交解析</td><td>留在本页、toast、原文不丢</td><td>异常</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-005</td><td class="nw">提炼确认</td><td class="id">F-102/REQ-002</td><td>—</td><td>解析合法输入</td><td>生成 goal + 待办 + 关键时间结构</td><td>功能</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-006</td><td class="nw">提炼确认</td><td class="id">F-102/REQ-002</td><td>LLM 返回非法 JSON</td><td>解析</td><td>走兜底并提示，不落半成品</td><td>异常</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-007</td><td class="nw">提炼确认</td><td class="id">F-104/REQ-003</td><td>待办仅 1 条</td><td>删待办后确认</td><td>禁止确认并提示"至少保留一条"</td><td>边界</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-008</td><td class="nw">智能排期</td><td class="id">F-203/REQ-005</td><td>确认后</td><td>进入 /schedule 并拖动时间条</td><td>重算冲突、冲突行高亮</td><td>功能</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-009</td><td class="nw">智能排期</td><td class="id">F-204/REQ-005</td><td>有冲突</td><td>点「保存排期」</td><td>未解冲突给提示，失败回滚</td><td>异常</td><td><span class="chip p1">P1</span></td></tr>
+        <tr class="grp"><td colspan="8">B 线 · 执行与巡检</td></tr>
+        <tr><td class="id">TC-010</td><td class="nw">任务列表</td><td class="id">F-302/REQ-006</td><td>有未完成任务</td><td>点「完成」</td><td>status→已完成、写 completed_at、产生反馈</td><td>冒烟</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-011</td><td class="nw">任务列表</td><td class="id">F-303/REQ-006</td><td>—</td><td>点「延期」不填原因</td><td>拦截必填；填写后 delay_count+1</td><td>异常</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-012</td><td class="nw">任务列表</td><td class="id">F-304/REQ-021</td><td>—</td><td>点「取消」</td><td>弹二次确认，取消则不执行</td><td>功能</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-013</td><td class="nw">任务列表</td><td class="id">F-305/REQ-006</td><td>—</td><td>进度滑块拖到 100</td><td>自动置为已完成</td><td>功能</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-014</td><td class="nw">任务列表</td><td class="id">F-301</td><td>—</td><td>多选筛选 + 关键词</td><td>列表即时过滤，URL 保留筛选态</td><td>功能</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-015</td><td class="nw">任务列表</td><td class="id">F-306/REQ-007</td><td>—</td><td>删除任务</td><td>二次确认后删除并写状态日志</td><td>功能</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-016</td><td class="nw">提醒中心</td><td class="id">F-403/REQ-009</td><td>到巡检点</td><td>等待/触发巡检</td><td>出现弹窗提醒；已读后角标减一</td><td>冒烟</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-017</td><td class="nw">提醒中心</td><td class="id">F-405/REQ-009</td><td>—</td><td>开桌面通知并拒绝授权</td><td>降级为页面弹窗，不报错</td><td>异常</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-018</td><td class="nw">后台巡检</td><td class="id">F-401/REQ-008</td><td>—</td><td>制造线程异常</td><td>Web 不受阻，巡检自动恢复</td><td>异常</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-019</td><td class="nw">反馈闭环</td><td class="id">F-501/502/REQ-010</td><td>延期一条任务</td><td>查看后续安排</td><td>安排更新且可撤销</td><td>功能</td><td><span class="chip p0">P0</span></td></tr>
+        <tr class="grp"><td colspan="8">C 线 · 看板 / 数据 / 体验</td></tr>
+        <tr><td class="id">TC-020</td><td class="nw">驾驶舱</td><td class="id">F-601/REQ-011</td><td>有任务数据</td><td>核对 KPI 四项</td><td>与任务数据一致</td><td>功能</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-021</td><td class="nw">驾驶舱</td><td class="id">F-602/603/REQ-012</td><td>—</td><td>检查图表实现</td><td>原生 SVG、无外部库、数据正确</td><td>功能</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-022</td><td class="nw">驾驶舱</td><td class="id">F-701/702/REQ-013</td><td>—</td><td>查看拆解树</td><td>北极星→子指标层级完整</td><td>功能</td><td><span class="chip p2">P2</span></td></tr>
+        <tr><td class="id">TC-023</td><td class="nw">数据管理</td><td class="id">F-1002/REQ-024</td><td>准备含异常行 CSV</td><td>上传→校验→导入</td><td>合法行入库、异常行入异常区</td><td>功能</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-024</td><td class="nw">数据管理</td><td class="id">F-1003/REQ-024</td><td>—</td><td>点导出 CSV</td><td>触发下载，列完整且=数据字典</td><td>功能</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-025</td><td class="nw">数据管理</td><td class="id">F-904/REQ-020</td><td>—</td><td>开脱敏开关</td><td>表格与导出同步脱敏</td><td>功能</td><td><span class="chip p2">P2</span></td></tr>
+        <tr><td class="id">TC-026</td><td class="nw">系统设置</td><td class="id">F-1004/REQ-025</td><td>—</td><td>切换视图角色</td><td>管理操作显隐差异可见</td><td>功能</td><td><span class="chip p1">P1</span></td></tr>
+        <tr><td class="id">TC-027</td><td class="nw">系统设置</td><td class="id">F-1101/REQ-027</td><td>—</td><td>切主题后刷新</td><td>主题保持（localStorage）</td><td>功能</td><td><span class="chip p0">P0</span></td></tr>
+        <tr><td class="id">TC-028</td><td class="nw">系统设置</td><td class="id">F-1001/REQ-023</td><td>—</td><td>并发写入 / 保存设置</td><td>写后刷新一致，无并发写坏</td><td>异常</td><td><span class="chip p0">P0</span></td></tr>
+        <tr class="grp"><td colspan="8">D · Demo 与体验</td></tr>
+        <tr><td class="id">TC-029</td><td class="nw">驾驶舱</td><td class="id">F-703/REQ-013</td><td>—</td><td>打开拆解树</td><td>层级卡片 + 连线可 hover</td><td>演示</td><td><span class="chip p2">P2</span></td></tr>
+        <tr><td class="id">TC-030</td><td class="nw">智能排期</td><td class="id">F-205/REQ-031</td><td>—</td><td>打开依赖图</td><td>依赖关系图 + 冲突样例可演示</td><td>演示</td><td><span class="chip p2">P2</span></td></tr>
+        <tr><td class="id">TC-031</td><td class="nw">提醒中心</td><td class="id">F-903/REQ-019</td><td>—</td><td>查看风险警示</td><td>临期/逾期事件以警示样式展示</td><td>演示</td><td><span class="chip p2">P2</span></td></tr>
+        <tr><td class="id">TC-032</td><td class="nw">系统设置</td><td class="id">F-1005/REQ-026</td><td>—</td><td>开启企微/钉钉渠道</td><td>开关 + Webhook 可保存（占位）</td><td>演示</td><td><span class="chip p2">P2</span></td></tr>
+        <tr><td class="id">TC-033</td><td class="nw">全局</td><td class="id">F-1102/REQ-028</td><td>—</td><td>进入驾驶舱</td><td>数字滚动/图表入场；降级偏好下静态</td><td>体验</td><td><span class="chip p2">P2</span></td></tr>
+        <tr><td class="id">TC-034</td><td class="nw">全局</td><td class="id">F-1104/REQ-030</td><td>—</td><td>用键盘操作</td><td>快捷键生效、焦点可见</td><td>体验</td><td><span class="chip p3">P3</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="note">共 34 条用例，覆盖 P0 全部闭环路径 + 关键 P1 + Demo 演示项 + 边界/异常。</p>
+
+    <h3 class="lineh" id="s6-3"><span class="lt t">6.3</span>AI 自动化测试执行方式</h3>
+    <div class="two">
+      <div class="card">
+        <h4 style="margin:0 0 8px;font-size:13px;color:var(--accent)">执行手段</h4>
+        <ul class="plain">
+          <li><b>接口层</b>：<code>curl</code>/<code>requests</code> 断言路由状态码与返回 JSON 字段，并复查 <code>data/*.json</code> 落库结果。</li>
+          <li><b>页面层</b>：Edge 无头 <code>--headless=new --screenshot</code> 截图双主题，配合 <code>--virtual-time-budget</code> 规避时序竞态。</li>
+          <li><b>DOM 层</b>：注入探针脚本断言关键 id / 字段 / 标签存在与取值（如 <code>#c-all</code> 计数）。</li>
+          <li><b>回归层</b>：每次改动后跑一遍 34 条用例的"冒烟子集"（TC-003/010/016/027/028）。</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="margin:0 0 8px;font-size:13px;color:var(--accent)">AI 自测提示词模板</h4>
+        <ul class="plain">
+          <li>"按第 6.2 的 TC-### 逐条生成 pytest + playwright 脚本，断言与预期结果一致。"</li>
+          <li>"对改动页面用 Edge 无头出白天/夜晚两张图，核对无重叠、无裁切、对比度达标。"</li>
+          <li>"检查所有页面字段标签与导出列，是否都命中数据字典；列出越界项。"</li>
+          <li>"跑一遍 P0 闭环：录入→解析→确认→排期→完成→巡检→提醒→延期→重排，逐跳断言。"</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="lineh" id="s6-4"><span class="lt t">6.4</span>验收锚点索引（AC）</h3>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>锚点</th><th>验证点</th><th>锚点</th><th>验证点</th></tr></thead>
+      <tbody>
+        <tr><td class="id">AC-01</td><td>空输入拦截；超长提示；正常提交进入解析</td><td class="id">AC-17</td><td>拆解/时间/提醒各给出一句依据</td></tr>
+        <tr><td class="id">AC-02</td><td>合法 JSON 生成目标/待办/时间；非法走兜底</td><td class="id">AC-18</td><td>异常数据入异常区并可补录/修正</td></tr>
+        <tr><td class="id">AC-03</td><td>三栏展示；可编辑；确认后进入拆解并保留来源原文</td><td class="id">AC-19</td><td>临期/逾期/依赖冲突触发警示</td></tr>
+        <tr><td class="id">AC-04</td><td>复杂任务拆为子步骤且带优先级/耗时/时间点</td><td class="id">AC-20</td><td>敏感字段脱敏后展示</td></tr>
+        <tr><td class="id">AC-05</td><td>生成时间轴；手调落库；冲突高亮；变化给重排建议</td><td class="id">AC-21</td><td>删除/取消弹二次确认；确认后才执行</td></tr>
+        <tr><td class="id">AC-06</td><td>完成/延期/取消/进度/编辑删除生效且状态回写正确</td><td class="id">AC-22</td><td>超阈值给出性能提示</td></tr>
+        <tr><td class="id">AC-07</td><td>每次状态变更生成一条日志</td><td class="id">AC-23</td><td>写后刷新数据一致；无并发写坏</td></tr>
+        <tr><td class="id">AC-08</td><td>到点触发巡检并命中待提醒事项；线程异常不阻塞 Web</td><td class="id">AC-24</td><td>导入兼容校验；导出字段完整</td></tr>
+        <tr><td class="id">AC-09</td><td>弹窗出现；已读/免打扰生效；授权被拒降级</td><td class="id">AC-25</td><td>切换视图差异可见</td></tr>
+        <tr><td class="id">AC-10</td><td>反馈后安排更新且可撤销</td><td class="id">AC-26</td><td>渠道开关/Webhook 可保存（占位）</td></tr>
+        <tr><td class="id">AC-11</td><td>KPI 四项与任务数据一致</td><td class="id">AC-27</td><td>双主题切换且刷新保持</td></tr>
+        <tr><td class="id">AC-12</td><td>折线/饼柱/排行为原生 SVG 且数据正确</td><td class="id">AC-28</td><td>数字/图表有入场动画且尊重降级偏好</td></tr>
+        <tr><td class="id">AC-13</td><td>北极星→子指标拆解树层级完整</td><td class="id">AC-29</td><td>吉祥物随状态切换表情</td></tr>
+        <tr><td class="id">AC-14</td><td>受支持指令返回正确结果；不支持给可选项</td><td class="id">AC-30</td><td>快捷键生效、焦点可见</td></tr>
+        <tr><td class="id">AC-15</td><td>周报生成且含指标；推荐附理由</td><td class="id">AC-31</td><td>依赖图与冲突样例可演示</td></tr>
+        <tr><td class="id">AC-16</td><td>机器人入口可交互（预设轮次）</td><td class="id">AC-32</td><td>习惯画像卡片可演示</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 class="lineh" id="s6-5"><span class="lt t">6.5</span>待确认项（阻塞落地前须点亮）</h3>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>编号</th><th>待确认内容</th><th>影响范围</th><th>是否阻断</th></tr></thead>
+      <tbody>
+        <tr><td class="id">Q-01</td><td>LLM 提供方 / 是否允许联网</td><td>解析/拆解/AI 能力能否真跑</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-02</td><td>巡检间隔默认值与可配（暂定 240min）</td><td>REQ-008</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-03</td><td>是否需账号体系与真实登录</td><td>角色/权限/验收</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-04</td><td>通知渠道优先级</td><td>REQ-009</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-05</td><td>数据规模与性能边界</td><td>REQ-022、列表渲染</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-06</td><td>用户可用时间来源</td><td>REQ-005 排期准确性</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-07</td><td>任务拆解层级与粒度</td><td>REQ-004 质量</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-08</td><td>LLM 文本上限/超时/重试</td><td>REQ-001/002 稳定性</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-09</td><td>进度口径（0–100% 或分档）</td><td>REQ-006</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-10</td><td>KPI 公式与口径</td><td>REQ-011 自洽</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-11</td><td>北极星与子指标定义</td><td>REQ-013</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-12</td><td>脱敏规则范围</td><td>REQ-020</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+        <tr><td class="id">Q-13</td><td>时间存储精度与展示格式</td><td>REQ-005/008</td><td><span class="tag off"><span class="dot"></span>否</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout"><b>说明：</b>以上均为"细节未定"，<b>不阻断开工</b>；先用示例值实现，待用户确认后回写本文与 PRD 主稿。</div>
+  </section>
+
+  <!-- ============ 7 追溯 ============ -->
+  <section id="c7">
+    <h2><span class="no">7</span>需求追溯与交付</h2>
+
+    <h3 class="lineh" id="s7-1"><span class="lt t">7.1</span>功能点 ↔ 菜单 ↔ 需求 ↔ 页面 追溯</h3>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>一级菜单</th><th>二级菜单</th><th>功能ID</th><th>需求单元</th><th>页面 / 交付</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="5">工作台</td></tr>
+        <tr><td>工作台</td><td class="fn">驾驶舱</td><td class="id">F-601~604 · F-701/702 · F-1102</td><td class="id">REQ-011/012/013/028</td><td>C1 · <code>/dashboard</code></td></tr>
+        <tr><td>工作台</td><td class="fn">驾驶舱</td><td class="id">F-703 · F-802 · F-803 · F-804</td><td class="id">REQ-013/015/016</td><td>D3 · D4 · D5 · D6</td></tr>
+        <tr><td>工作台</td><td class="fn">任务列表</td><td class="id">F-301~307 · F-501 · F-905 · F-906</td><td class="id">REQ-006/007/010/021/022</td><td>B1 · <code>/tasks</code></td></tr>
+        <tr><td>工作台</td><td class="fn">提醒中心</td><td class="id">F-403~405 · F-903</td><td class="id">REQ-009/019</td><td>B2 · <code>/reminders</code></td></tr>
+        <tr><td>工作台</td><td class="fn">提醒中心</td><td class="id">F-503</td><td class="id">REQ-032</td><td>D2</td></tr>
+        <tr class="grp"><td colspan="5">计划流程</td></tr>
+        <tr><td>计划流程</td><td class="fn">计划录入</td><td class="id">F-101 · F-801 · F-805</td><td class="id">REQ-001/014/017</td><td>A1 · <code>/plan/input</code></td></tr>
+        <tr><td>计划流程</td><td class="fn">提炼确认</td><td class="id">F-102 · F-103 · F-104</td><td class="id">REQ-002/003</td><td>A2 · <code>/plan/confirm</code></td></tr>
+        <tr><td>计划流程</td><td class="fn">智能排期</td><td class="id">F-201~204 · F-206 · F-502</td><td class="id">REQ-004/005/010</td><td>A3 · <code>/schedule</code></td></tr>
+        <tr><td>计划流程</td><td class="fn">智能排期</td><td class="id">F-205</td><td class="id">REQ-031</td><td>D1</td></tr>
+        <tr class="grp"><td colspan="5">数据与设置</td></tr>
+        <tr><td>数据与设置</td><td class="fn">数据管理</td><td class="id">F-901 · F-904 · F-906 · F-1001~1003</td><td class="id">REQ-018/020/023/024</td><td>C2 · <code>/data</code></td></tr>
+        <tr><td>数据与设置</td><td class="fn">数据管理</td><td class="id">F-902</td><td class="id">REQ-018</td><td>D7</td></tr>
+        <tr><td>数据与设置</td><td class="fn">系统设置</td><td class="id">F-1004 · F-1101 · F-1104</td><td class="id">REQ-025/027/030</td><td>C3 · <code>/settings</code></td></tr>
+        <tr><td>数据与设置</td><td class="fn">系统设置</td><td class="id">F-1005 · F-1103</td><td class="id">REQ-026/029</td><td>D9 · D10</td></tr>
+        <tr><td>公共</td><td class="fn">后台巡检</td><td class="id">F-401 · F-402</td><td class="id">REQ-008</td><td>B3 · <code>backend/scheduler.py</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 class="lineh" id="s7-2"><span class="lt t">7.2</span>交付物清单</h3>
+    <div class="two">
+      <div class="card">
+        <h4 style="margin:0 0 8px;font-size:13px;color:var(--accent)">代码与资源</h4>
+        <ul class="plain">
+          <li><code>app.py</code>（唯一启动入口）</li>
+          <li><code>backend/</code>（plan / schedule / task_ops / scheduler / feedback / stats / data_io / llm）</li>
+          <li><code>templates/layout.html</code> + <code>templates/components/</code> + <code>templates/pages/*</code></li>
+          <li><code>static/css/tokens.css</code> · <code>layout.css</code> · <code>css|js/pages/*</code> · <code>js/theme.js</code></li>
+          <li><code>data/users.json</code> · <code>data/plans.json</code>（示例数据）</li>
+          <li><code>backend/requirements.txt</code> · <code>README</code>（启动说明）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="margin:0 0 8px;font-size:13px;color:var(--accent)">文档与验收</h4>
+        <ul class="plain">
+          <li>本文（软需说明书）：8 个菜单规格 + 10 项 Demo + 34 条测试用例</li>
+          <li>功能点清单（52 项 · 3×8 菜单）</li>
+          <li>PRD 主稿（唯一权威源，含数据字典与命名红线）</li>
+          <li>高保真原型（8 页可交互）</li>
+          <li>验收对照：AC-01~32 逐条核验</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 class="lineh" id="s7-3"><span class="lt t">7.3</span>分工协作与冻结约定</h3>
+    <div class="tbl-wrap card" style="padding:0;overflow:hidden">
+    <table>
+      <thead><tr><th>线</th><th>菜单归属</th><th>文件归属</th><th>约时</th></tr></thead>
+      <tbody>
+        <tr><td><span class="lt a">A</span></td><td>计划流程（计划录入 / 提炼确认 / 智能排期）</td><td class="nw"><code>backend/plan.py</code> · <code>schedule.py</code> · <code>pages/plan_* · schedule.*</code></td><td class="time">≈182min</td></tr>
+        <tr><td><span class="lt b">B</span></td><td>工作台（任务列表 / 提醒中心）+ 后台巡检</td><td class="nw"><code>backend/task_ops.py</code> · <code>scheduler.py</code> · <code>feedback.py</code> · <code>pages/tasks.* · reminders.*</code></td><td class="time">≈190min</td></tr>
+        <tr><td><span class="lt c">C</span></td><td>工作台·驾驶舱 + 数据与设置</td><td class="nw"><code>backend/stats.py</code> · <code>data_io.py</code> · <code>pages/dashboard.* · data_mgmt.* · settings.*</code></td><td class="time">≈168min</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout warn"><b>合并前必查（防字段口径漂移）：</b>逐页比对「字段标签 / 表头 / 导出列」是否命中第 1.3 数据字典；任何越界字段先入字典再合并。A 线为核心链路，建议最先跑通端到端。</div>
+    <div class="callout"><b>与主稿关系：</b>本文是《功能点清单》的下沉详化版（呈现层）；字段口径与 REQ/AC 编号继承自 PRD 主稿（<code>20261013智能计划管理AgentPRD-v1.md</code>）。若主稿变更，本文需同步一次。</div>
+  </section>
+
+
+</div>
+
+</div>
+
+<footer>智能计划管理 Agent · 软需说明书 · 依据《生成功能清单提示词 V1.1》与 52 项功能点清单生成 · 单文件 HTML 可直接双击打开</footer>
+
+<script>
+// 主题切换（复刻 theme.js：localStorage 键 northstar-theme）
+const themeToggle = document.querySelector('#theme-toggle');
+const themeLabel = document.querySelector('#theme-label');
+const themeIcon = document.querySelector('#theme-icon');
+function applyTheme(theme){
+  const isNight = theme === 'night';
+  document.documentElement.dataset.theme = isNight ? 'night' : 'day';
+  document.querySelector('meta[name="theme-color"]').content = isNight ? '#080d1a' : '#f6f7ff';
+  themeToggle.setAttribute('aria-pressed', String(isNight));
+  themeToggle.setAttribute('aria-label', isNight ? '切换到白天模式' : '切换到夜晚模式');
+  themeLabel.textContent = isNight ? '夜晚' : '白天';
+  themeIcon.textContent = isNight ? '☾' : '☀';
+}
+applyTheme(localStorage.getItem('northstar-theme') === 'night' ? 'night' : 'day');
+themeToggle.addEventListener('click', () => {
+  const next = document.documentElement.dataset.theme === 'night' ? 'day' : 'night';
+  localStorage.setItem('northstar-theme', next);
+  applyTheme(next);
+});
+
+// ===== 左侧章节导航：滚动联动 + 进度条 =====
+(function(){
+  var sidebar = document.querySelector('.sidebar');
+  var links = [].slice.call(document.querySelectorAll('.sb-nav a'));
+  var items = links.map(function(a){
+    return {a:a, el:document.getElementById((a.getAttribute('href')||'').slice(1))};
+  }).filter(function(x){ return x.el; });
+  var pg = document.getElementById('pg');
+
+  function absTop(el){ return el.getBoundingClientRect().top + window.pageYOffset; }
+
+  function spy(){
+    var y = window.pageYOffset + 120, cur = null, i;
+    for(i=0; i<items.length; i++){
+      if(absTop(items[i].el) <= y){ cur = items[i].a; } else { break; }
+    }
+    if(!cur) cur = items.length ? items[0].a : null;
+    links.forEach(function(a){ a.classList.remove('active'); a.removeAttribute('aria-current'); });
+    if(cur){ cur.classList.add('active'); cur.setAttribute('aria-current','true'); }
+
+    document.querySelectorAll('.sb-grp').forEach(function(g){
+      var h = g.querySelector('.sb-l1');
+      if(!h) return;
+      h.classList.toggle('parent-active', !!g.querySelector('a.active'));
+    });
+
+    if(cur && sidebar && sidebar.scrollHeight > sidebar.clientHeight + 4){
+      var t = cur.offsetTop, hgt = cur.offsetHeight, st = sidebar.scrollTop, ch = sidebar.clientHeight;
+      if(t < st + 6){ sidebar.scrollTop = Math.max(0, t - 6); }
+      else if(t + hgt > st + ch - 6){ sidebar.scrollTop = t + hgt - ch + 6; }
+    }
+
+    if(pg){
+      var dh = document.documentElement.scrollHeight - window.innerHeight;
+      pg.style.width = (dh > 0 ? Math.min(100, window.pageYOffset / dh * 100) : 0) + '%';
+    }
+  }
+
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){ ticking = false; spy(); });
+  }, {passive:true});
+  window.addEventListener('resize', spy);
+  spy();
+})();
+</script>
+</body>
+</html>

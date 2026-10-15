@@ -1,0 +1,196 @@
+{% extends 'layout.html' %}
+{% block title %}数据管理 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/data_mgmt.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">DATA &amp; SETTINGS / DATA</p>
+    <h1>数据管理</h1>
+    <p class="subtitle">计划数据的出入口与质检站：导入校验、异常处置、脱敏展示与导出。</p>
+  </div>
+  <div class="heading-actions">
+    <label class="switch">
+      <input type="checkbox" id="mask-toggle" {% if masked %}checked{% endif %}>
+      <span class="switch-track" aria-hidden="true"></span>
+      <span class="switch-text">脱敏展示</span>
+    </label>
+    <a class="button button-secondary" href="{{ url_for('export_data', format='json', q=keyword, status=status_filter, priority=priority_filter, mask=('1' if masked else '0')) }}">导出 JSON</a>
+    <a class="button button-secondary" href="{{ url_for('export_data', format='csv', q=keyword, status=status_filter, priority=priority_filter, mask=('1' if masked else '0')) }}"><span aria-hidden="true">⤓</span>导出 CSV</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="panel import-panel">
+  <div class="panel-heading">
+    <div><h2>数据导入</h2><p>支持 CSV；表头需匹配数据字典，异常行自动进入异常数据区</p></div>
+    <a class="link-action" href="{{ url_for('import_template') }}">下载模板 template_import.csv</a>
+  </div>
+  <label class="dropzone" id="dropzone">
+    <input type="file" id="import-file" accept=".csv" hidden>
+    <strong>点击选择文件，或把 CSV 拖拽到这里</strong>
+    <small>仅支持 .csv，编码 UTF-8 / GBK 均可；导入前会先做校验预览，不落库</small>
+  </label>
+  <p class="file-name" id="file-name" hidden></p>
+  <div class="import-actions">
+    <button class="button button-secondary" type="button" id="preview-btn" disabled>校验预览</button>
+    <button class="button button-primary" type="button" id="confirm-btn" disabled>确认导入</button>
+    <span class="import-status" id="import-status" role="status"></span>
+  </div>
+  <div class="preview-result" id="preview-result" hidden></div>
+</section>
+
+<section class="panel exception-panel">
+  <div class="panel-heading">
+    <div><h2>异常数据区</h2><p>未通过校验的原始行，可补录 / 修正、忽略或删除</p></div>
+    <span class="record-count">共 {{ exceptions|length }} 条</span>
+  </div>
+  <div class="exception-list">
+    {% for item in exceptions %}
+    <article class="exception-card" data-status="{{ item.status }}">
+      <header>
+        <span class="status-dot" aria-hidden="true"></span>
+        <strong>{{ item.reason }}</strong>
+        <em class="status-tag">{{ item.status }}</em>
+      </header>
+      <p class="exception-source">来源 {{ item.source }} · {{ item.created_at }} · {{ item.exception_id }}</p>
+      <dl class="exception-raw">
+        {% for key, value in item.raw.items() %}
+        <div><dt>{{ key }}</dt><dd>{{ value if value else '—' }}</dd></div>
+        {% endfor %}
+      </dl>
+      {% if item.status == '待处置' %}
+      <div class="exception-actions">
+        <button class="button button-secondary fix-btn" type="button"
+          data-id="{{ item.exception_id }}"
+          data-reason="{{ item.reason }}"
+          data-title="{{ item.raw.get('title', '') }}"
+          data-priority="{{ item.raw.get('priority', '中') }}"
+          data-estimate="{{ item.raw.get('estimate_minutes', '') }}"
+          data-due="{{ item.raw.get('due_at', '') }}">补录 / 修正</button>
+        <form method="post" action="{{ url_for('resolve_exception', exception_id=item.exception_id) }}">
+          <input type="hidden" name="action" value="ignore">
+          <button class="button button-secondary" type="submit">忽略</button>
+        </form>
+        <form method="post" action="{{ url_for('resolve_exception', exception_id=item.exception_id) }}"
+              onsubmit="return confirm('确定删除这条异常数据吗？删除后无法恢复。')">
+          <input type="hidden" name="action" value="delete">
+          <button class="button button-danger" type="submit">删除</button>
+        </form>
+      </div>
+      {% endif %}
+    </article>
+    {% else %}
+    <p class="empty-line">当前没有异常数据，导入质量良好。</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>数据表</h2><p>共 {{ total }} 条任务，当前筛选 {{ filtered_total }} 条；导出内容 = 当前筛选结果</p></div>
+  </div>
+
+  <form class="filters" method="get">
+    <label class="search-field">
+      <span aria-hidden="true">⌕</span>
+      <input name="q" value="{{ keyword }}" placeholder="搜索任务标题或说明" aria-label="搜索任务">
+    </label>
+    <select name="status" aria-label="筛选状态">
+      <option value="全部" {% if status_filter == '全部' %}selected{% endif %}>全部状态</option>
+      {% for option in status_options %}
+      <option value="{{ option }}" {% if status_filter == option %}selected{% endif %}>{{ option }}</option>
+      {% endfor %}
+    </select>
+    <select name="priority" aria-label="筛选优先级">
+      <option value="全部" {% if priority_filter == '全部' %}selected{% endif %}>全部优先级</option>
+      {% for option in priority_options %}
+      <option value="{{ option }}" {% if priority_filter == option %}selected{% endif %}>{{ option }}</option>
+      {% endfor %}
+    </select>
+    {% if masked %}<input type="hidden" name="mask" value="1">{% endif %}
+    <button class="button button-filter" type="submit">筛选</button>
+    {% if keyword or status_filter != '全部' or priority_filter != '全部' %}
+    <a class="clear-filter" href="{{ url_for('data_manage', mask=('1' if masked else '0')) }}">重置</a>
+    {% endif %}
+  </form>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>任务ID</th><th>所属计划ID</th><th>任务标题</th><th>优先级</th>
+          <th>预计耗时（分钟）</th><th>截止时间</th><th>计划完成时间点</th>
+          <th>状态</th><th>进度</th><th>延期次数</th><th>完成时间</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td class="mono">{{ task.task_id }}</td>
+          <td class="mono subtle">{{ task.plan_id or '—' }}</td>
+          <td class="cell-title">{{ task.title }}</td>
+          <td><span class="prio prio-{{ {'高': 'high', '中': 'mid', '低': 'low'}[task.priority] }}">{{ task.priority }}</span></td>
+          <td class="mono">{{ task.estimate_minutes }}</td>
+          <td class="mono subtle">{{ task.due_at or '—' }}</td>
+          <td class="mono subtle">{{ task.planned_finish_at or '—' }}</td>
+          <td><span class="status-tag status-{{ {'待安排': 'todo', '待执行': 'ready', '进行中': 'doing', '已完成': 'done', '已延期': 'delayed', '已取消': 'canceled'}[task.status] }}">{{ task.status }}</span></td>
+          <td class="mono">{{ task.progress }}%</td>
+          <td class="mono {% if task.delay_count %}is-warn{% endif %}">{{ task.delay_count }}</td>
+          <td class="mono subtle">{{ task.completed_at or '—' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="11" class="empty-line">没有符合条件的数据，试试调整筛选或导入新数据。</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if total_pages > 1 %}
+  <nav class="pagination" aria-label="分页导航">
+    {% if page > 1 %}
+    <a class="page-link" href="{{ url_for('data_manage', q=keyword, status=status_filter, priority=priority_filter, mask=('1' if masked else '0'), page=page-1) }}">← 上一页</a>
+    {% else %}
+    <span class="page-link is-disabled">← 上一页</span>
+    {% endif %}
+    <span class="page-info">第 <b>{{ page }}</b> / {{ total_pages }} 页 · 每页 {{ page_size }} 条 · 共筛出 {{ filtered_total }} 条</span>
+    {% if page < total_pages %}
+    <a class="page-link" href="{{ url_for('data_manage', q=keyword, status=status_filter, priority=priority_filter, mask=('1' if masked else '0'), page=page+1) }}">下一页 →</a>
+    {% else %}
+    <span class="page-link is-disabled">下一页 →</span>
+    {% endif %}
+  </nav>
+  {% endif %}
+  {% if masked %}<p class="mask-hint">已开启脱敏：手机号、身份证号与邮箱按规则遮蔽，导出文件同步脱敏。</p>{% endif %}
+</section>
+
+<dialog id="fix-dialog" aria-labelledby="fix-title">
+  <form method="post" id="fix-form">
+    <div class="dialog-heading">
+      <div><p class="eyebrow">EXCEPTION FIX</p><h2 id="fix-title">补录 / 修正</h2><p id="fix-reason"></p></div>
+      <button class="close-button" type="button" id="fix-close" aria-label="关闭">×</button>
+    </div>
+    <div class="form-body">
+      <label>任务标题 <span>*</span><input name="title" required maxlength="80"></label>
+      <div class="form-row">
+        <label>优先级 <span>*</span>
+          <select name="priority" required>
+            {% for option in priority_options %}<option value="{{ option }}">{{ option }}</option>{% endfor %}
+          </select>
+        </label>
+        <label>预计耗时（分钟） <span>*</span><input name="estimate_minutes" type="number" min="1" required></label>
+      </div>
+      <label>截止时间 <span>*</span><input name="due_at" type="datetime-local" required></label>
+      <label>任务说明<input name="detail" maxlength="500" placeholder="选填"></label>
+    </div>
+    <div class="dialog-footer">
+      <button type="button" class="button button-secondary" id="fix-cancel">取消</button>
+      <button type="submit" class="button button-primary">保存并入库</button>
+    </div>
+  </form>
+</dialog>
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/data_mgmt.js') }}"></script>{% endblock %}

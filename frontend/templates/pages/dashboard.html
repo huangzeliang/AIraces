@@ -1,0 +1,162 @@
+{% extends 'layout.html' %}
+{% block title %}驾驶舱 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/dashboard.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">WORKBENCH / DASHBOARD</p>
+    <h1>驾驶舱</h1>
+    <p class="subtitle">统计口径：任务截止时间落入所选周期；完成率 = 周期内已完成 ÷ 周期内总数。</p>
+  </div>
+  <div class="heading-actions">
+    <div class="chips" aria-label="统计周期">
+      {% for item in periods %}
+      <a class="chip {% if item == period %}is-active{% endif %}" href="{{ url_for('dashboard', period=item) }}" {% if item == period %}aria-current="page"{% endif %}>{{ item }}</a>
+      {% endfor %}
+    </div>
+    <a class="button button-secondary" href="{{ url_for('export_dashboard', period=period) }}"><span aria-hidden="true">⤓</span>导出报表</a>
+  </div>
+</section>
+
+{% if not has_data %}
+<section class="panel empty-state">
+  <p class="empty-icon" aria-hidden="true">▦</p>
+  <h2>还没有可统计的任务</h2>
+  <p>先在数据管理里导入一份任务数据，驾驶舱会自动完成聚合。</p>
+  <a class="button button-primary" href="{{ url_for('data_manage') }}">去数据管理导入</a>
+</section>
+{% else %}
+
+<section class="north-star" aria-label="北极星指标">
+  <div class="north-star-main">
+    <p class="eyebrow">NORTH STAR METRIC</p>
+    <h2>{{ north_star.north_star_metric }}</h2>
+    <p class="north-star-value"><strong data-count="{{ north_star.value }}">0</strong><span>{{ north_star.unit }}</span></p>
+    <p class="north-star-hint">{{ north_star.detail }}</p>
+  </div>
+  <div class="north-star-ring">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="52" class="ring-track"></circle>
+      <circle cx="60" cy="60" r="52" class="ring-value" data-ring="{{ north_star.value }}"></circle>
+    </svg>
+    <span>{{ north_star.value }}%</span>
+  </div>
+  <p class="north-star-range"><span>统计范围</span>{{ range.start }} ~ {{ range.end }}</p>
+</section>
+
+<section class="stats" aria-label="核心指标">
+  <article class="stat-card">
+    <div class="stat-top"><span>任务总数</span><b aria-hidden="true">▦</b></div>
+    <strong data-count="{{ kpi.task_total }}">0</strong>
+    <div><span>周期内截止的任务</span><em>{{ period }}</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>今日到期</span><b aria-hidden="true">◷</b></div>
+    <strong data-count="{{ kpi.due_today }}">0</strong>
+    <div><span>按截止时间当日统计</span><em>全局口径</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>完成率</span><b aria-hidden="true">✓</b></div>
+    <strong data-count="{{ kpi.completion_rate }}" data-suffix="%">0%</strong>
+    <div><span>已完成 ÷ 周期内总数</span><em>{{ period }}</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>延期数</span><b aria-hidden="true">⚠</b></div>
+    <strong data-count="{{ kpi.delay_count }}">0</strong>
+    <div><span>延期次数大于 0</span><em>{{ period }}</em></div>
+  </article>
+</section>
+
+<section class="chart-grid">
+  <article class="panel chart-card chart-wide">
+    <div class="panel-heading">
+      <div><h2>任务趋势</h2><p>周期内每日新增与完成数量</p></div>
+      <span class="legend"><i class="dot dot-created"></i>新增<i class="dot dot-completed"></i>完成</span>
+    </div>
+    <div class="chart-body" id="trend-chart" role="img" aria-label="任务趋势折线图"></div>
+  </article>
+
+  <article class="panel chart-card">
+    <div class="panel-heading"><div><h2>优先级分布</h2><p>按优先级统计任务数量</p></div></div>
+    <div class="chart-body" id="priority-chart" role="img" aria-label="优先级分布柱状图"></div>
+  </article>
+
+  <article class="panel chart-card">
+    <div class="panel-heading"><div><h2>状态分布</h2><p>按任务状态统计数量</p></div></div>
+    <div class="chart-body" id="status-chart" role="img" aria-label="状态分布环形图"></div>
+  </article>
+</section>
+
+<section class="rank-grid">
+  <article class="panel">
+    <div class="panel-heading"><div><h2>最耗时任务</h2><p>按预计耗时降序</p></div></div>
+    <ol class="rank-list">
+      {% for item in time_rank %}
+      <li><span class="rank-index">{{ loop.index }}</span><div><strong>{{ item.title }}</strong><small>{{ item.task_id }} · {{ item.status }}</small></div><em>{{ item.value }} 分钟</em></li>
+      {% else %}<li class="rank-empty">暂无数据</li>{% endfor %}
+    </ol>
+  </article>
+  <article class="panel">
+    <div class="panel-heading"><div><h2>最常延期任务</h2><p>按延期次数降序</p></div></div>
+    <ol class="rank-list">
+      {% for item in delayed_rank %}
+      <li><span class="rank-index">{{ loop.index }}</span><div><strong>{{ item.title }}</strong><small>{{ item.task_id }} · {{ item.status }}</small></div><em>{{ item.value }} 次</em></li>
+      {% else %}<li class="rank-empty">当前没有延期任务</li>{% endfor %}
+    </ol>
+  </article>
+</section>
+
+<section class="panel tree-panel">
+  <div class="panel-heading">
+    <div><h2>北极星拆解树</h2><p>核心指标 → 子指标 → 关键构成</p></div>
+    <span class="badge-demo">进阶 · 演示级</span>
+  </div>
+  <div class="tree-canvas" id="metric-tree" role="img" aria-label="北极星指标拆解树"></div>
+</section>
+
+<section class="ai-grid">
+  <article class="panel">
+    <div class="panel-heading">
+      <div><h2>AI 周报</h2><p>汇总本周期执行情况</p></div>
+      <button class="button button-secondary" type="button" id="report-toggle" aria-expanded="false" aria-controls="report-body">生成周报</button>
+    </div>
+    <div class="report-body" id="report-body" hidden>
+      <ul>{% for line in report.lines %}<li>{{ line }}</li>{% endfor %}</ul>
+      <div class="report-metrics">
+        {% for item in report.metrics %}
+        <span><small>{{ item.name }}</small><strong>{{ item.value }}{{ item.unit }}</strong></span>
+        {% endfor %}
+      </div>
+      <p class="report-stamp">生成于 {{ report.generated_at }} · <span class="badge-demo">演示级</span>不接实时大模型</p>
+    </div>
+  </article>
+
+  <article class="panel">
+    <div class="panel-heading"><div><h2>智能推荐</h2><p>下一步做什么</p></div><span class="badge-demo">演示级</span></div>
+    <ul class="recommend-list">
+      {% for item in recommend %}
+      <li><strong>{{ item.title }}</strong><p>{{ item.reason }}</p></li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="panel">
+    <div class="panel-heading"><div><h2>智能助手</h2><p>问答入口（架构预留）</p></div><span class="badge-demo">演示级</span></div>
+    <div class="bot-window" id="bot-window" aria-live="polite">
+      {% for item in bot_dialog %}
+      <p class="bot-line {{ 'from-user' if item.role == 'user' else 'from-bot' }}">{{ item.text }}</p>
+      {% endfor %}
+    </div>
+    <form class="bot-input" id="bot-form">
+      <input id="bot-text" placeholder="问点什么，比如「今天该做什么」" aria-label="向助手提问" autocomplete="off">
+      <button class="button button-primary" type="submit">发送</button>
+    </form>
+  </article>
+</section>
+
+{% endif %}
+
+<script type="application/json" id="dashboard-data">{{ {"trend": trend, "priority": priority_dist, "status": status_dist, "north_star": north_star} | tojson }}</script>
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/dashboard.js') }}"></script>{% endblock %}

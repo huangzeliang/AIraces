@@ -1,0 +1,120 @@
+{% extends 'layout.html' %}
+{% block title %}计划录入 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/plan_input.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">PLAN FLOW / INPUT</p>
+    <h1>计划录入</h1>
+    <p class="subtitle">用一段自然语言描述计划，AI 将提炼以「目标 / 待办 / 关键时间」；整条闭环从这里开始。</p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('schedule') }}"><span aria-hidden="true">▤</span>打开智能排期</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="input-grid">
+
+  <section class="panel compose-panel">
+    <div class="panel-heading">
+      <div><h2>原始文本</h2><p>支持多句自然语言描述；解析结果为「待办」，确认后才拆解为任务</p></div>
+      <span class="badge-demo">≤2000 字符</span>
+    </div>
+    <form method="post" action="{{ url_for('plan_parse') }}" id="parse-form" novalidate>
+      <label class="sr-only" for="raw-text">原始文本</label>
+      <textarea id="raw-text" name="raw_text" rows="7" maxlength="2000"
+                placeholder="例如：下周前完成项目立项：先整理立项材料，再组织评审会，最后把评审意见落实到方案里。">{{ prefill }}</textarea>
+      <div class="compose-meta">
+        <div class="example-chips" role="group" aria-label="填充示例">
+          {% for item in examples %}
+          <button class="chip example-chip" type="button" data-example="{{ item.text }}"><span aria-hidden="true">✦</span>填充示例 · {{ item.label }}</button>
+          {% endfor %}
+        </div>
+        <span class="char-count" id="char-count">0/2000</span>
+      </div>
+      <p class="field-error" id="raw-error" role="alert" hidden>原始文本不能为空，请先输入一段计划描述。</p>
+      <div class="compose-actions">
+        <button class="button button-primary" type="submit" id="parse-button">解析计划</button>
+        <button class="button button-secondary" type="button" id="clear-button">清空</button>
+      </div>
+    </form>
+
+    <details class="basis-fold">
+      <summary>查看依据</summary>
+      {% if last_basis %}
+      <p class="basis-caption">最近一次解析（目标：{{ last_basis.goal }}）</p>
+      <ul class="basis-list">
+        {% for line in last_basis.lines %}<li><b>{{ line.item }}</b><span>{{ line.detail }}</span></li>{% endfor %}
+      </ul>
+      {% else %}
+      <ul class="basis-list">
+        <li><b>解析引擎</b><span>规则引擎（本地兜底）；配置 LLM_BASE_URL / LLM_API_KEY 后自动优先调用大模型，返回结果需通过 JSON 结构校验。</span></li>
+        <li><b>目标</b><span>取自冒号前的总述短语，没有冒号时取首句。</span></li>
+        <li><b>待办</b><span>按句读拆分自然语言描述，剥离「下周 / 月底」等时间词后生成。</span></li>
+        <li><b>关键时间</b><span>识别「下周X / 月底 / 明天 / X月X日 / N天内」等中文时间表达，未识别到时使用默认截止（7 天后 18:00）。</span></li>
+      </ul>
+      {% endif %}
+    </details>
+  </section>
+
+  <aside class="side-stack">
+    <section class="panel command-panel">
+      <div class="panel-heading">
+        <div><h2>一句话办事</h2><p>自然语言指令操作系统，如「显示最紧急的任务」</p></div>
+        <span class="badge-demo">A4 · 进阶</span>
+      </div>
+      <form id="command-form" class="command-form" novalidate>
+        <label class="sr-only" for="command-input">指令</label>
+        <input id="command-input" name="query" placeholder="输入指令，例如：今天该做什么" autocomplete="off" maxlength="120">
+        <button class="button button-primary" type="submit" id="command-button">执行</button>
+      </form>
+      <div class="command-result" id="command-result" hidden aria-live="polite"></div>
+    </section>
+
+    <section class="panel recent-panel">
+      <div class="panel-heading">
+        <div><h2>最近计划</h2><p>继续处理待确认的解析结果，或查看排期</p></div>
+      </div>
+      <ul class="recent-list">
+        {% for item in recent %}
+        <li>
+          <div class="recent-main">
+            <strong title="{{ item.goal }}">{{ item.goal or '（未命名计划）' }}</strong>
+            <small>{{ item.plan_id }} · {{ item.created_at }} · 任务 {{ item.task_total }} 个<em>· 未完成 {{ item.pending }}</em></small>
+          </div>
+          {% if item.state == '待确认' %}
+          <a class="recent-link" href="{{ url_for('plan_confirm', plan_id=item.plan_id) }}">进入确认</a>
+          {% else %}
+          <a class="recent-link" href="{{ url_for('schedule', plan_id=item.plan_id) }}">查看排期</a>
+          {% endif %}
+        </li>
+        {% else %}
+        <li class="recent-empty">还没有计划，从上方输入第一段描述吧。</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </aside>
+
+</section>
+
+<dialog id="clear-dialog" aria-labelledby="clear-dialog-title">
+  <div class="dialog-heading">
+    <div>
+      <p class="eyebrow">CLEAR CONFIRM</p>
+      <h2 id="clear-dialog-title">清空原始文本？</h2>
+      <p>已输入的内容将被清除，且无法撤销。</p>
+    </div>
+  </div>
+  <div class="dialog-footer">
+    <button class="button button-secondary" type="button" id="clear-cancel">取消</button>
+    <button class="button button-danger" type="button" id="clear-confirm">确认清空</button>
+  </div>
+</dialog>
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/plan_input.js') }}"></script>{% endblock %}
