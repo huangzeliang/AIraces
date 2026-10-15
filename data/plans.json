@@ -2520,6 +2520,36 @@
       "content": "任务「啦啦啦发的啦谁反对」已逾期 2 天（截止 10-13 15:30），当前进度 0%，请尽快处理并说明延期原因",
       "kind": "overdue",
       "source": "scheduler"
+    },
+    {
+      "reminder_id": "R027",
+      "task_id": "T039",
+      "trigger_at": "2026-10-15T17:07:31",
+      "channel": "页面弹窗",
+      "status": "未读",
+      "content": "任务「修正校验发现的异常数据」已逾期 不到 1 小时（截止 10-15 17:00），当前进度 60%，请尽快处理并说明延期原因",
+      "kind": "overdue",
+      "source": "scheduler"
+    },
+    {
+      "reminder_id": "R028",
+      "task_id": "T052",
+      "trigger_at": "2026-10-15T17:07:31",
+      "channel": "页面弹窗",
+      "status": "未读",
+      "content": "任务「收集行内 AI 应用案例」将于 10-16 17:00 到期，还剩 23 小时，当前进度 0%，请确认能否按时完成",
+      "kind": "due_soon",
+      "source": "scheduler"
+    },
+    {
+      "reminder_id": "R029",
+      "task_id": "T061",
+      "trigger_at": "2026-10-15T17:07:31",
+      "channel": "页面弹窗",
+      "status": "未读",
+      "content": "任务「回归测试」将于 10-16 17:00 到期，还剩 23 小时，当前进度 40%，请确认能否按时完成",
+      "kind": "due_soon",
+      "source": "scheduler"
     }
   ],
   "feedbacks": [
@@ -2904,8 +2934,8 @@
     }
   ],
   "scan_state": {
-    "last_scan_at": "2026-10-15T16:50:09",
-    "last_created": 0,
-    "scans": 5
+    "last_scan_at": "2026-10-15T17:07:31",
+    "last_created": 3,
+    "scans": 6
   }
 }

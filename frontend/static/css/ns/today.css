@@ -59,6 +59,10 @@
 .td-cal.lv-2{background:color-mix(in srgb,var(--accent) 26%,var(--surface));color:var(--text)}
 .td-cal.lv-3{background:color-mix(in srgb,var(--accent) 55%,var(--surface));color:var(--text)}
 .td-cal.lv-4{background:var(--green-soft);color:var(--green)}
+.td-cal-wrap{overflow-x:auto;overscroll-behavior-x:contain}
+.td-cal-wrap .td-calendar-head,.td-cal-wrap .td-calendar{min-width:332px}
+.td-cal-wrap::after{content:"← 可左右滑动查看完整日历 →";display:none;font-size:10.5px;color:var(--subtle);padding-top:6px}
+@media(max-width:700px){.td-cal-wrap::after{display:block}}
 
 @media(max-width:980px){
   .td-view-grid{grid-template-columns:minmax(0,1fr)}
@@ -77,6 +81,7 @@
 
 @media(max-width:700px){
   .td-date-nav{width:100%}
+  .td-tab{min-width:44px}
   .td-date-form{flex:1 1 100%;flex-wrap:wrap}
   .td-date-form .ns-input{flex:1}
   .td-toolbar-meta{width:100%}

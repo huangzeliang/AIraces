@@ -164,7 +164,9 @@ body.ns-body .theme-label{display:inline}
 @media(max-width:700px){
   .ns-grid.cols-2,.ns-grid.cols-3,.ns-grid.cols-4{grid-template-columns:minmax(0,1fr)}
   .ns-body .button{min-height:44px}
-  .ns-body .button-small{min-height:40px}
+  .ns-body .button-small{min-height:44px}
+  .ns-body a.ns-pill{min-height:44px}
+  .ns-body .ns-check{min-height:44px}
   .ns-body input,.ns-body select,.ns-body textarea{font-size:16px}
   .ns-body .ns-input,.ns-body .ns-select{height:44px}
   .ns-login-wrap{grid-template-columns:minmax(0,1fr)}

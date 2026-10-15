@@ -134,6 +134,7 @@
       </div>
       <div class="td-panel">
         <h3 class="wb-sub">日历 · {{ view['calendar']['month_label'] }}</h3>
+        <div class="td-cal-wrap">
         <div class="td-calendar-head">
           {% for wd in ['一', '二', '三', '四', '五', '六', '日'] %}<span>{{ wd }}</span>{% endfor %}
         </div>
@@ -147,6 +148,7 @@
             {% if day['has_block'] %}<i class="td-cal-flag" aria-hidden="true"></i>{% endif %}
           </a>
           {% endfor %}
+        </div>
         </div>
       </div>
     </div>

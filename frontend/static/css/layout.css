@@ -31,4 +31,6 @@ body.nav-open{overflow:hidden}
   .crumb-root{display:none}
   .top-avatar{display:none}
   .logout-form{display:none}
+  .theme-toggle{height:44px}
+  .icon-button{width:44px;height:44px}
 }

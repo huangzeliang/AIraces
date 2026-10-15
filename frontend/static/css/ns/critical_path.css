@@ -56,4 +56,5 @@
   .cp-impact-form{grid-template-columns:minmax(0,1fr)}
   .cp-dep-form{grid-template-columns:minmax(0,1fr)}
   .cp-impact-sug{padding-left:16px}
+  .cp-node a,.cp-hotspot a{display:flex;align-items:center;min-height:44px}
 }
