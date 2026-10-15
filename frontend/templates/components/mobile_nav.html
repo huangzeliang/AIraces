@@ -1,0 +1,14 @@
+{# 移动端抽屉导航：≤700px 侧栏隐藏时提供同等的页面入口（复用 nav_menu.html）。 #}
+<div class="mobile-nav" id="mobile-nav" hidden>
+  <div class="mobile-nav-mask" data-nav-close></div>
+  <aside class="mobile-nav-panel" id="mobile-nav-panel" role="dialog" aria-modal="true" aria-label="导航菜单">
+    <div class="mobile-nav-head">
+      <a class="brand" href="{{ url_for('dashboard') if is_admin else url_for('tasks') }}"><span class="brand-mark">N</span><span><strong>Northstar</strong><small>PLAN AGENT</small></span></a>
+      <button class="mobile-nav-close" id="mobile-nav-close" type="button" aria-label="关闭导航菜单">×</button>
+    </div>
+    {% include 'components/nav_menu.html' %}
+    <div class="sidebar-spacer"></div>
+    <div class="profile"><span class="profile-avatar">{{ current_user.name[0] if current_user else '—' }}</span><span><strong>{{ current_user.name if current_user else '未登录' }}</strong><small>{{ current_user.role if current_user else '' }}</small></span></div>
+    <form method="post" action="{{ url_for('logout') }}"><button class="button button-secondary nav-logout" type="submit"><span aria-hidden="true">⏻</span>退出登录</button></form>
+  </aside>
+</div>

@@ -1,0 +1,26 @@
+{# 公共导航菜单：侧栏与移动端抽屉共用同一份条目，按角色过滤。
+   驾驶舱 / 数据管理 / 用户管理 / 系统设置仅管理员可见；普通用户仅见核心工作流。 #}
+<p class="nav-caption">工作台</p>
+<nav class="nav-menu" aria-label="工作台">
+  {% if is_admin %}
+  <a class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}" {% if active_page == 'dashboard' %}aria-current="page"{% endif %}><span aria-hidden="true">▦</span>驾驶舱</a>
+  {% endif %}
+  <a class="nav-item {% if active_page == 'tasks' %}active{% endif %}" href="{{ url_for('tasks') }}" {% if active_page == 'tasks' %}aria-current="page"{% endif %}><span aria-hidden="true">☰</span>任务列表</a>
+  <a class="nav-item {% if active_page == 'reminders' %}active{% endif %}" href="{{ url_for('reminders') }}" {% if active_page == 'reminders' %}aria-current="page"{% endif %}><span aria-hidden="true">♢</span>提醒中心</a>
+</nav>
+
+<p class="nav-caption">计划流程</p>
+<nav class="nav-menu" aria-label="计划流程">
+  <a class="nav-item {% if active_page == 'plan_input' %}active{% endif %}" href="{{ url_for('plan_input') }}" {% if active_page == 'plan_input' %}aria-current="page"{% endif %}><span aria-hidden="true">✎</span>计划录入</a>
+  <a class="nav-item {% if active_page == 'plan_confirm' %}active{% endif %}" href="{{ url_for('plan_confirm') }}" {% if active_page == 'plan_confirm' %}aria-current="page"{% endif %}><span aria-hidden="true">✓</span>提炼确认</a>
+  <a class="nav-item {% if active_page == 'schedule' %}active{% endif %}" href="{{ url_for('schedule') }}" {% if active_page == 'schedule' %}aria-current="page"{% endif %}><span aria-hidden="true">▤</span>智能排期</a>
+</nav>
+
+{% if is_admin %}
+<p class="nav-caption">数据与设置</p>
+<nav class="nav-menu" aria-label="数据与设置">
+  <a class="nav-item {% if active_page == 'data' %}active{% endif %}" href="{{ url_for('data_manage') }}" {% if active_page == 'data' %}aria-current="page"{% endif %}><span aria-hidden="true">⛁</span>数据管理</a>
+  <a class="nav-item {% if active_page == 'users' %}active{% endif %}" href="{{ url_for('index') }}" {% if active_page == 'users' %}aria-current="page"{% endif %}><span aria-hidden="true">♧</span>用户管理</a>
+  <a class="nav-item {% if active_page == 'settings' %}active{% endif %}" href="{{ url_for('settings') }}" {% if active_page == 'settings' %}aria-current="page"{% endif %}><span aria-hidden="true">⚙</span>系统设置</a>
+</nav>
+{% endif %}

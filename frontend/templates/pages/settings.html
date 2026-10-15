@@ -7,7 +7,7 @@
   <div>
     <p class="eyebrow">DATA &amp; SETTINGS / SETTINGS</p>
     <h1>系统设置</h1>
-    <p class="subtitle">主题、视图角色、巡检间隔、免打扰与通知渠道的集中配置，是全局行为的控制台。</p>
+    <p class="subtitle">主题、巡检间隔、免打扰与通知渠道的集中配置，是全局行为的控制台。</p>
   </div>
 </section>
 
@@ -19,7 +19,7 @@
 
   <section class="panel">
     <div class="panel-heading">
-      <div><h2>外观与身份</h2><p>主题即时生效并记忆；显示名用于侧栏与顶栏展示</p></div>
+      <div><h2>外观</h2><p>主题即时生效并记忆；登录身份与角色由账号体系管理</p></div>
     </div>
     <div class="form-grid">
       <div class="field">
@@ -31,20 +31,6 @@
         </label>
         <input type="hidden" name="theme" id="theme-value" value="{{ settings.theme }}">
         <small class="field-hint">与顶栏主题按钮共用同一套逻辑，保存在 localStorage 的 northstar-theme</small>
-      </div>
-      <div class="field">
-        <span class="field-label">显示名</span>
-        <input name="display_name" value="{{ settings.display_name }}" maxlength="30" required>
-        <small class="field-hint">不能为空，最多 30 个字符</small>
-      </div>
-      <div class="field">
-        <span class="field-label">视图角色</span>
-        <select name="view_role" id="role-select">
-          {% for role in role_options %}
-          <option value="{{ role }}" {% if settings.view_role == role %}selected{% endif %}>{{ role }}</option>
-          {% endfor %}
-        </select>
-        <small class="field-hint">普通用户隐藏管理操作；仅演示，非真实鉴权</small>
       </div>
     </div>
   </section>
@@ -100,11 +86,11 @@
   </div>
 </form>
 
-<form class="admin-zone admin-only" method="post" action="{{ url_for('reset_settings') }}"
+<form class="admin-zone" method="post" action="{{ url_for('reset_settings') }}"
       onsubmit="return confirm('确定恢复默认设置吗？当前配置会被覆盖，此操作不可撤销。')">
   <div>
     <strong>恢复默认</strong>
-    <small>把主题、角色、巡检间隔、免打扰与渠道全部重置为初始值</small>
+    <small>把主题、巡检间隔、免打扰与渠道全部重置为初始值</small>
   </div>
   <button class="button button-danger" type="submit">恢复默认</button>
 </form>

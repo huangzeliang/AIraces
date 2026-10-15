@@ -1,6 +1,10 @@
 """Developer 1: list and search user routes."""
 
+from importlib import import_module
+
 from flask import render_template, request
+
+auth = import_module("backend.auth")
 
 
 def register(app, services):
@@ -24,6 +28,7 @@ def register(app, services):
             total=len(users),
             active=sum(user["status"] == "启用" for user in users),
             admins=sum(user["role"] == "管理员" for user in users),
+            role_options=list(auth.ALLOWED_ROLES),
             keyword=request.args.get("q", "").strip(),
             status_filter=status_filter,
             active_page="users",

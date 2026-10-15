@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7ff">
+  <title>登录 · Northstar</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/login.css') }}">
+</head>
+<body>
+  <div class="login-shell">
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="切换到夜晚模式">
+      <span class="theme-sun" aria-hidden="true">☀</span><span class="theme-moon" aria-hidden="true">☾</span><span class="theme-label">白天</span>
+    </button>
+
+    <main class="login-card" aria-labelledby="login-title">
+      <header class="login-brand">
+        <span class="brand-mark" aria-hidden="true">N</span>
+        <span><strong>Northstar</strong><small>PLAN AGENT</small></span>
+      </header>
+
+      <div class="login-heading">
+        <p class="eyebrow">WORKSPACE / SIGN IN</p>
+        <h1 id="login-title">登录工作台</h1>
+        <p class="subtitle">使用邮箱与密码登录；不同角色进入各自的工作界面。</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+      {% endwith %}
+
+      <form method="post" action="{{ url_for('login', next=next_target) }}" id="login-form">
+        <input type="hidden" name="next" value="{{ next_target }}">
+        <label class="field">
+          <span class="field-label">邮箱</span>
+          <input name="email" type="email" value="{{ email }}" placeholder="name@example.com"
+                 maxlength="120" autocomplete="username" required autofocus>
+        </label>
+        <label class="field">
+          <span class="field-label">密码</span>
+          <span class="password-wrap">
+            <input name="password" id="login-password" type="password" placeholder="请输入密码"
+                   maxlength="64" autocomplete="current-password" required>
+            <button class="password-toggle" id="password-toggle" type="button" aria-pressed="false"
+                    aria-label="显示密码" aria-controls="login-password">显示</button>
+          </span>
+        </label>
+        <button class="button button-primary login-submit" type="submit" id="login-submit">登 录</button>
+      </form>
+
+      {% if demo_accounts %}
+      <section class="demo-zone" aria-label="演示账号">
+        <p class="demo-title">演示账号（初始密码 {{ demo_password }}）</p>
+        <div class="demo-list">
+          {% for account in demo_accounts %}
+          <div class="demo-item">
+            <span class="demo-role {{ 'is-admin' if account.role == '管理员' }}">{{ account.role }}</span>
+            <span class="demo-email">{{ account.email }}</span>
+            <button class="demo-fill" type="button" data-email="{{ account.email }}" data-password="{{ demo_password }}">填入</button>
+          </div>
+          {% endfor %}
+        </div>
+        <p class="demo-hint">管理员可见全部页面；普通用户仅见任务 / 提醒 / 计划流程，且只能看到自己的数据。</p>
+      </section>
+      {% endif %}
+    </main>
+
+    <footer class="login-footer">智能计划管理 Agent · 本地 JSON 演示环境</footer>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/pages/login.js') }}"></script>
+</body>
+</html>

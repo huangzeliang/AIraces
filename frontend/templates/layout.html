@@ -18,8 +18,10 @@
       <main class="content">{% block content %}{% endblock %}</main>
     </div>
   </div>
+  {% include 'components/mobile_nav.html' %}
   <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
   <script src="{{ url_for('static', filename='js/components/modal.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/components/shell.js') }}"></script>
   {% block page_js %}{% endblock %}
 </body>
 </html>

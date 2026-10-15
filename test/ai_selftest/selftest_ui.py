@@ -63,6 +63,23 @@ class UIRunner:
     def s(self, key: str) -> str:
         return self.sel.get(key, "")
 
+    def login(self) -> bool:
+        """先以管理员身份登录（routes.json 的 auth.admin），后续用例在登录态下执行。"""
+        auth = self.cfg.get("auth", {})
+        account = auth.get("admin") or {}
+        if not account:
+            return False
+        try:
+            self.page.goto(self.base + auth.get("login_path", "/login"),
+                           timeout=15000, wait_until="domcontentloaded")
+            self.page.fill("input[name='email']", account.get("email", ""))
+            self.page.fill("input[name='password']", account.get("password", ""))
+            self.page.click("#login-submit")
+            self.page.wait_for_load_state("domcontentloaded")
+            return "/login" not in self.page.url
+        except Exception:
+            return False
+
     def find(self, key: str):
         """返回 locator，找不到返回 None"""
         sel = self.s(key)
@@ -412,6 +429,8 @@ def main():
         page = ctx.new_page()
         runner = UIRunner(cfg, page, base)
         print(f"\n开始执行前端交互用例，目标：{base}\n")
+        if not runner.login():
+            print("警告：管理员登录失败（routes.json 的 auth 配置），用例可能在未登录态下执行。\n")
         for k in keys:
             try:
                 CASES[k](runner)

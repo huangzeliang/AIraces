@@ -17,9 +17,10 @@ import io
 from datetime import datetime, timedelta
 from importlib import import_module
 
-from flask import Response, flash, jsonify, redirect, render_template, request, url_for
+from flask import Response, flash, g, jsonify, redirect, render_template, request, url_for
 
 llm = import_module("backend.llm")
+scope = import_module("backend.scope")
 
 VISIBLE_STATUSES = ("待安排", "待执行", "进行中", "已延期")
 GAP_MINUTES = 15
@@ -474,12 +475,13 @@ def _dep_title_map(store):
     return {t.get("task_id"): (t.get("title") or "") for t in store.get("tasks", [])}
 
 
-def _basis_lines(settings, rows):
+def _basis_lines(settings, rows, is_admin=True):
     interval = settings.get("reminder_interval_minutes") or 240
     lines = [
         "统一视图：所有计划的未完成任务在同一张日程表展示；待安排任务按截止时间倒推，安排在可用时间（工作日 09:00–18:00）内，避让全部既有安排，项间留 %d 分钟缓冲；倒推空间不足时顺排到最近可用时段。" % GAP_MINUTES,
         "冲突判定：任意任务时间段重叠（跨计划统一判定，冲突原因会标注来源计划）、依赖未满足或依赖成环 → 标记冲突并阻断保存；计划完成晚于截止时间 → 标记「超期」（不阻断保存，交由重排建议处理）。",
-        "提醒依据：后台巡检每 %s 分钟扫描一次（系统设置可修改），命中临期 / 逾期 / 依赖冲突即生成提醒。" % interval,
+        "提醒依据：后台巡检每 %s 分钟扫描一次（%s），命中临期 / 逾期 / 依赖冲突即生成提醒。" % (
+            interval, "系统设置可修改" if is_admin else "由管理员在系统设置中调整"),
     ]
     shown = 0
     for row in rows:
@@ -501,7 +503,7 @@ def register(app, services):
 
     @app.get("/schedule")
     def schedule():
-        store = read_store()
+        store = scope.scope_store(read_store(), g.current_user)
         settings = read_settings()
         view = _schedule_view(store)
         dep_titles = _dep_title_map(store)
@@ -512,7 +514,7 @@ def register(app, services):
             settings=settings,
             view=view,
             dep_titles=dep_titles,
-            basis_lines=_basis_lines(settings, view["rows"]),
+            basis_lines=_basis_lines(settings, view["rows"], scope.is_admin(g.current_user)),
         )
 
     @app.post("/schedule/save")
@@ -537,7 +539,10 @@ def register(app, services):
         with store_lock:
             store = read_store()
             plan_titles = {p.get("plan_id"): (p.get("goal") or "") for p in store.get("plans", [])}
-            visible_tasks = [t for t in store.get("tasks", []) if t.get("status") in VISIBLE_STATUSES]
+            visible_tasks = [
+                t for t in store.get("tasks", [])
+                if t.get("status") in VISIBLE_STATUSES and scope.owns_task(t, g.current_user)
+            ]
             if not visible_tasks and not raw_items:
                 return fail(["当前没有可排期的任务。"])
 
@@ -625,7 +630,11 @@ def register(app, services):
                 # 无明细（表单直提 / 自测脚本）：按计划整体自动排期落库（跨计划避让）
                 if not plan_id:
                     return fail(["缺少计划参数，无法自动排期。"])
-                plan = next((p for p in store.get("plans", []) if p.get("plan_id") == plan_id), None)
+                plan = next(
+                    (p for p in store.get("plans", [])
+                     if p.get("plan_id") == plan_id and scope.owns_plan(p, g.current_user)),
+                    None,
+                )
                 if plan is None:
                     return fail(["计划不存在或已被删除，无法保存排期。"])
                 plan_tasks = [t for t in visible_tasks if t.get("plan_id") == plan_id]
@@ -662,7 +671,7 @@ def register(app, services):
         applied = 0
         with store_lock:
             store = read_store()
-            view = _schedule_view(store, now)
+            view = _schedule_view(scope.scope_store(store, g.current_user), now)
             suggestions = view["suggestions"]
             targets = suggestions if apply_all else [s for s in suggestions if s["task_id"] == task_id]
             index = {t.get("task_id"): t for t in store.get("tasks", [])}
@@ -701,6 +710,11 @@ def register(app, services):
         signature = "%s|%s" % (task_id, llm.iso(start))
         with store_lock:
             store = read_store()
+            if not scope.owns_task_id(store, task_id, g.current_user):
+                if is_json:
+                    return jsonify({"ok": False, "message": "任务不存在或已被删除。"}), 404
+                flash("忽略失败：任务不存在或已被删除。", "error")
+                return redirect(url_for("schedule"))
             ignored = [s for s in (store.get("ignored_suggestions") or []) if s != signature]
             ignored.append(signature)
             store["ignored_suggestions"] = ignored[-200:]
@@ -713,7 +727,7 @@ def register(app, services):
 
     @app.get("/schedule/export")
     def schedule_export():
-        store = read_store()
+        store = scope.scope_store(read_store(), g.current_user)
         view = _schedule_view(store)
         buffer = io.StringIO()
         writer = csv.writer(buffer)
