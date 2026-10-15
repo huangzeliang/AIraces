@@ -1,0 +1,219 @@
+{% extends 'ns/layout.html' %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ns/changes.css') }}">{% endblock %}
+{% block content %}
+
+{% set current_obj = namespace(value=None) %}
+{% for o in objectives %}{% if o['objective_id'] == objective_id %}{% set current_obj.value = o %}{% endif %}{% endfor %}
+
+<section class="ns-grid cols-4" aria-label="变更统计">
+  <div class="ns-card wb-tile"><em>{{ stats['total'] }}</em><small>变更总数</small></div>
+  <div class="ns-card wb-tile"><em>{{ pending_rows|length }}</em><small>待审批</small></div>
+  <div class="ns-card wb-tile"><em>{{ stats['frequent']|length }}</em><small>频繁变更目标</small></div>
+  <div class="ns-card wb-tile"><em>{{ stats['threshold'] }}</em><small>频繁阈值（次）</small></div>
+</section>
+
+{% for row in stats['frequent'] %}
+<div class="ns-banner is-yellow"><span class="ns-banner-icon" aria-hidden="true">!</span><div><strong>{{ row['objective_title'] }}</strong>：{{ row['advice'] }}（最近一次 {{ row['last_at'][:10] }}）</div></div>
+{% endfor %}
+
+<section class="ns-card" aria-label="发起变更">
+  <div class="ns-card-head"><div><h2>发起变更</h2><p>原因结构化（必填）→ 上级审批 → 通过后写入新版本并保留基线</p></div></div>
+  <form id="ch-apply" class="ch-apply" novalidate>
+    <div class="ns-grid cols-2">
+      <div class="ns-field">
+        <label for="ch-a-objective">目标<span class="req">*</span></label>
+        <select class="ns-select" id="ch-a-objective">
+          <option value="">选择目标…</option>
+          {% for o in objectives %}
+          {% if o['changeable'] %}
+          <option value="{{ o['objective_id'] }}" {{ 'selected' if o['objective_id'] == objective_id }}>{{ o['title'] }}（v{{ o['version'] }}{% if o['freeze']['frozen'] %} · 冻结窗口{% endif %}）</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+        <span class="hint" id="ch-a-freeze"></span>
+      </div>
+      <div class="ns-field">
+        <label for="ch-a-type">变更类型（一次只允许一个）<span class="req">*</span></label>
+        <select class="ns-select" id="ch-a-type">
+          {% for t in change_types %}
+          <option value="{{ t['code'] }}">{{ t['label'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div id="ch-a-fields" class="ch-a-fields"></div>
+    <div class="ns-grid cols-2">
+      <div class="ns-field">
+        <label for="ch-a-reason">原因分类<span class="req">*</span></label>
+        <select class="ns-select" id="ch-a-reason">
+          <option value="">选择原因…</option>
+          {% for r in reason_items %}
+          <option value="{{ r['dict_code'] }}">{{ r['dict_name'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="ns-field">
+        <label for="ch-a-impact">影响说明<span class="req">*</span>（是否影响关键路径 / 上下游）</label>
+        <input class="ns-input" id="ch-a-impact" maxlength="200" placeholder="如：影响下游 2 个任务的开始时间">
+      </div>
+    </div>
+    <div class="ns-field">
+      <label for="ch-a-text">原因说明<span class="req">*</span>（≤300 字）</label>
+      <textarea class="ns-textarea" id="ch-a-text" maxlength="300" rows="2" placeholder="说明变更背景、必要性与预期效果"></textarea>
+    </div>
+    {% if is_admin %}
+    <label class="ch-force"><input type="checkbox" id="ch-a-force"> 特批（仅超管：可突破周期冻结窗口提交）</label>
+    {% endif %}
+    <div class="ch-apply-actions">
+      <button class="button button-primary" type="submit" id="ch-a-submit">提交申请</button>
+      <span class="ns-mini" id="ch-a-hint">提交后由直接上级审批；员工不可自审。</span>
+    </div>
+  </form>
+</section>
+
+<section class="ns-card" aria-label="筛选">
+  <form class="ch-filter" method="get" action="{{ url_for('ns_changes') }}">
+    {% if tab %}<input type="hidden" name="tab" value="{{ tab }}">{% endif %}
+    <div class="ns-field">
+      <label for="ch-objective">按目标筛选</label>
+      <select class="ns-select" id="ch-objective" name="objective_id">
+        <option value="">全部目标</option>
+        {% for o in objectives %}
+        <option value="{{ o['objective_id'] }}" {{ 'selected' if o['objective_id'] == objective_id }}>{{ o['title'] }}（v{{ o['version'] }}{% if o['freeze']['frozen'] %} · 冻结{% endif %}）</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="button" type="submit">筛选</button>
+    {% if objective_id %}<a class="button button-ghost" href="?{% if tab %}tab={{ tab }}{% endif %}">清除</a>{% endif %}
+  </form>
+  {% if current_obj.value %}
+  <p class="ns-mini ch-obj-meta">
+    {{ current_obj.value['owner_name'] }} · {{ current_obj.value['status_label'] }} · 当前版本 v{{ current_obj.value['version'] }}
+    {% if current_obj.value['freeze']['frozen'] %}<span class="ns-pill is-red no-dot">{{ current_obj.value['freeze']['reason'] }}</span>{% else %}<span class="ns-pill is-green no-dot">可申请变更{% if current_obj.value['freeze']['days_left'] is not none %}（距冻结还剩 {{ current_obj.value['freeze']['days_left'] }} 天）{% endif %}</span>{% endif %}
+  </p>
+  {% endif %}
+</section>
+
+<section class="ns-card" aria-label="变更列表">
+  <div class="ns-card-head">
+    <div><h2>变更管理</h2><p>原因结构化 → 审批 → 新版本留档</p></div>
+    <div class="ch-tabs">
+      <a class="button button-small {{ 'button-primary' if not tab }}" href="?{% if objective_id %}objective_id={{ objective_id }}{% endif %}">待审批（{{ pending_rows|length }}）</a>
+      <a class="button button-small {{ 'button-primary' if tab == 'mine' }}" href="?tab=mine{% if objective_id %}&objective_id={{ objective_id }}{% endif %}">我提交的（{{ mine_rows|length }}）</a>
+      <a class="button button-small {{ 'button-primary' if tab == 'all' }}" href="?tab=all{% if objective_id %}&objective_id={{ objective_id }}{% endif %}">全部（{{ all_rows|length }}）</a>
+    </div>
+  </div>
+
+  {% if not tab %}
+  {% if pending_rows %}
+  <ul class="ch-list">
+    {% for row in pending_rows %}
+    <li class="ch-card">
+      <header>
+        <div>
+          <strong>{{ row['change_type_label'] }} · {{ row['objective_title'] }}</strong>
+          <p class="ns-mini">{{ row['applicant_name'] }} 提交于 {{ row['applied_at'][:16]|replace('T', ' ') }} · 原因 {{ row['reason_code'] }}{% if row['on_critical_path'] %} · <span class="ns-pill is-purple no-dot">关键路径变更</span>{% if row['predicted_delay_days'] %} 预计延期 {{ row['predicted_delay_days'] }} 天{% endif %}{% endif %}</p>
+        </div>
+        <span class="ns-pill no-dot is-yellow">待审批</span>
+      </header>
+      <div class="ch-reason">
+        <p><strong>原因说明：</strong>{{ row['reason_text'] }}</p>
+        {% if row['impact_note'] %}<p><strong>影响说明：</strong>{{ row['impact_note'] }}</p>{% endif %}
+      </div>
+      {% if row['diff'] %}
+      <div class="ns-table-wrap">
+        <table class="ns-table ch-diff">
+          <thead><tr><th>字段</th><th>变更前</th><th>变更后</th></tr></thead>
+          <tbody>
+            {% for d in row['diff'] %}
+            <tr><td>{{ d['label'] }}</td><td>{{ d['before'] }}</td><td><strong>{{ d['after'] }}</strong></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+      {% if can_approve %}
+      <div class="ch-approve" data-change-id="{{ row['change_id'] }}">
+        <div class="ns-field">
+          <label for="ch-note-{{ row['change_id'] }}">审批意见（驳回时必填，≤300 字）</label>
+          <textarea class="ns-textarea" id="ch-note-{{ row['change_id'] }}" maxlength="300" rows="2" placeholder="通过可留空，默认「同意变更，按新版本执行」"></textarea>
+        </div>
+        <div class="ch-approve-actions">
+          <button class="button button-primary" type="button" data-action="approve">通过并写入新版本</button>
+          <button class="button button-danger" type="button" data-action="reject">驳回</button>
+        </div>
+      </div>
+      {% else %}
+      <p class="ns-mini">等待有审批权限的上级处理；员工不可自审。</p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="ns-empty">没有待审批的变更。</p>
+  {% endif %}
+
+  {% else %}
+  {% set rows = mine_rows if tab == 'mine' else all_rows %}
+  {% if rows %}
+  <div class="ns-table-wrap">
+    <table class="ns-table">
+      <thead><tr><th>编号</th><th>目标</th><th>类型</th><th>原因</th><th>状态</th><th>申请人</th><th>审批人</th><th>提交时间</th><th>版本</th></tr></thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td class="num">{{ row['change_id'] }}</td>
+          <td>{{ row['objective_title'] }}</td>
+          <td>{{ row['change_type_label'] }}</td>
+          <td>{{ row['reason_code'] }}</td>
+          <td><span class="ns-pill no-dot {{ 'is-green' if row['status'] == 'approved' else ('is-red' if row['status'] == 'rejected' else 'is-yellow') }}">{{ row['status_label'] }}</span></td>
+          <td>{{ row['applicant_name'] }}</td>
+          <td>{{ row['approver_name'] or '—' }}</td>
+          <td class="num">{{ row['applied_at'][:10] }}</td>
+          <td class="num">{{ row['version_after'] or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="ns-empty">没有符合条件的变更记录。</p>
+  {% endif %}
+  {% endif %}
+</section>
+
+<section class="ns-grid cols-2" aria-label="变更分析">
+  <div class="ns-card">
+    <div class="ns-card-head"><div><h2>按类型分布</h2></div></div>
+    {% if stats['by_type'] %}
+    <ul class="ch-bars">
+      {% for row in stats['by_type'] %}
+      <li><span>{{ row['label'] }}</span><span class="ns-bar" role="img" aria-label="{{ row['count'] }} 次"><i style="width:{{ (row['count'] / stats['total'] * 100)|round(1) if stats['total'] else 0 }}%"></i></span><em>{{ row['count'] }}</em></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="ns-empty">暂无数据。</p>{% endif %}
+  </div>
+  <div class="ns-card">
+    <div class="ns-card-head"><div><h2>按原因分布</h2></div></div>
+    {% if stats['by_reason'] %}
+    <ul class="ch-bars">
+      {% for row in stats['by_reason'] %}
+      <li><span>{{ row['name'] }}</span><span class="ns-bar" role="img" aria-label="{{ row['count'] }} 次"><i style="width:{{ row['share'] }}%"></i></span><em>{{ row['count'] }}（{{ row['share'] }}%）</em></li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="ns-empty">暂无数据。</p>{% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block page_js %}
+<script>
+window.CH_CONFIG = {
+  objectives: {{ objectives | tojson }},
+  change_types: {{ change_types | tojson }},
+  reasons: {{ reason_items | tojson }},
+  owners: {{ owner_candidates | tojson }},
+  is_admin: {{ is_admin | tojson }}
+};
+</script>
+<script src="{{ url_for('static', filename='js/ns/changes.js') }}"></script>
+{% endblock %}

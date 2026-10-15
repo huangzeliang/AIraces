@@ -2904,8 +2904,8 @@
     }
   ],
   "scan_state": {
-    "last_scan_at": "2026-10-15T16:37:52",
-    "last_created": 2,
-    "scans": 4
+    "last_scan_at": "2026-10-15T16:50:09",
+    "last_created": 0,
+    "scans": 5
   }
 }

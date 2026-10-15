@@ -1,0 +1,40 @@
+/* B3 变更管理页面样式（仅本页使用，全部走语义 Token）。 */
+
+/* 统计磁贴基础排版（与工作台同款，本页自带定义） */
+.wb-tile em{display:block;font-size:29px;font-weight:900;letter-spacing:-1px;font-variant-numeric:tabular-nums;font-style:normal;color:var(--text);line-height:1.15}
+.wb-tile small{font-size:11.5px;font-weight:800;color:var(--muted)}
+
+.ch-filter{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.ch-filter .ns-field{margin-bottom:0;flex:1 1 260px}
+.ch-obj-meta{margin:12px 0 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ch-tabs{display:flex;gap:6px;flex-wrap:wrap}
+
+.ch-list{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.ch-card{border:1px solid var(--border);border-radius:14px;padding:14px;display:grid;gap:10px}
+.ch-card header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ch-card header strong{font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.ch-reason{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.8}
+.ch-reason p{margin:0 0 4px;overflow-wrap:anywhere}
+.ch-reason p:last-child{margin-bottom:0}
+.ch-diff td:last-child strong{color:var(--accent)}
+.ch-approve{border-top:1px dashed var(--border);padding-top:10px}
+.ch-approve-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.ch-bars{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.ch-bars li{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,1.4fr) auto;gap:10px;align-items:center;font-size:12px}
+.ch-bars li>span:first-child{overflow-wrap:anywhere}
+.ch-bars em{font-style:normal;font-weight:800;font-variant-numeric:tabular-nums;color:var(--muted)}
+
+.ch-apply .ns-grid{margin-bottom:0}
+.ch-apply-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.ch-a-fields{margin:2px 0 14px}
+.ch-kr-rows{display:grid;gap:8px}
+.ch-kr-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(120px,1fr);gap:10px;align-items:center;font-size:12.5px}
+.ch-kr-row span{overflow-wrap:anywhere}
+.ch-force{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted);margin:0 0 12px}
+#ch-a-freeze.is-warn{color:var(--danger);font-weight:700}
+
+@media(max-width:700px){
+  .ch-approve-actions .button{flex:1 1 auto;justify-content:center}
+  .ch-apply-actions .button{flex:1 1 auto;justify-content:center}
+}

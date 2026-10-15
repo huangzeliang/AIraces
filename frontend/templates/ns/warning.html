@@ -1,0 +1,172 @@
+{% extends 'ns/layout.html' %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ns/warning.css') }}">{% endblock %}
+{% block content %}
+
+<section class="ns-grid cols-4" aria-label="预警概览">
+  <div class="ns-card wb-tile wb-tile-red"><em>{{ summary['red'] }}</em><small>红灯预警</small></div>
+  <div class="ns-card wb-tile wb-tile-yellow"><em>{{ summary['yellow'] }}</em><small>预警关注</small></div>
+  <div class="ns-card wb-tile"><em>{{ summary['checkpoints'] }}</em><small>检查点待跟进</small></div>
+  <div class="ns-card wb-tile"><em>{{ summary['streak'] }}</em><small>连续异常条目</small></div>
+</section>
+
+<section class="ns-card" aria-label="预警列表">
+  <div class="ns-card-head">
+    <div><h2>预警列表（{{ alerts_total }}）</h2><p>超期 / 临期 / 偏差 / 检查点 / 连续异常统一口径</p></div>
+    <div class="wn-filters">
+      <a class="ns-pill no-dot {{ 'is-purple' if not level_filter else 'is-muted' }}" href="?{% if type_filter %}alert_type={{ type_filter }}{% endif %}">全部</a>
+      <a class="ns-pill no-dot {{ 'is-red' if level_filter == 'red' else 'is-muted' }}" href="?level=red{% if type_filter %}&alert_type={{ type_filter }}{% endif %}">红灯</a>
+      <a class="ns-pill no-dot {{ 'is-yellow' if level_filter == 'yellow' else 'is-muted' }}" href="?level=yellow{% if type_filter %}&alert_type={{ type_filter }}{% endif %}">预警</a>
+    </div>
+  </div>
+  <div class="wn-type-filter">
+    <a class="button button-small {{ 'button-primary' if not type_filter else '' }}" href="{% if level_filter %}?level={{ level_filter }}{% endif %}">全部类型</a>
+    {% for t in alert_types %}
+    <a class="button button-small {{ 'button-primary' if type_filter == t['code'] else '' }}" href="?alert_type={{ t['code'] }}{% if level_filter %}&level={{ level_filter }}{% endif %}">{{ t['label'] }}</a>
+    {% endfor %}
+  </div>
+  {% if alert_items %}
+  <ul class="wn-alerts">
+    {% for item in alert_items %}
+    <li class="wn-alert">
+      <span class="ns-pill {{ 'is-red' if item['level'] == 'red' else 'is-yellow' }}">{{ item['level_label'] }}</span>
+      <div class="wn-alert-body">
+        <strong>{{ item['title'] }}{% if item['is_critical'] %}<span class="ns-pill is-purple no-dot wn-critical">关键路径</span>{% endif %}</strong>
+        <p class="ns-mini">{{ item['alert_type_label'] }} · {{ item['owner_name'] }} · 进度 {{ item['progress'] }}% · 截止 {{ item['plan_end'][:10] if item['plan_end'] }}</p>
+        <p>{{ item['body'] }}</p>
+      </div>
+      <div class="wn-alert-actions">
+        {% if item['target_type'] == 'task' %}
+        <button class="button button-small" type="button" data-guidance-task="{{ item['target_id'] }}">AI 指导</button>
+        {% endif %}
+        <a class="button button-small button-secondary" href="{{ item['deep_link'] }}">去处理</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="ns-empty">当前筛选下没有预警，保持节奏。</p>
+  {% endif %}
+</section>
+
+<section class="ns-card" aria-label="检查点">
+  <div class="ns-card-head"><div><h2>检查点</h2><p>长周期任务的中间检查点，逾期未完成会进入预警</p></div></div>
+  {% if checkpoints %}
+  <ul class="wn-checks">
+    {% for cp in checkpoints %}
+    <li>
+      <span class="ns-pill no-dot {{ 'is-red' if cp['state'] == 'overdue' else ('is-green' if cp['state'] == 'passed' else 'is-yellow') }}">{{ cp['state_label'] }}</span>
+      <a href="{{ cp['deep_link'] }}">{{ cp['title'] }}</a>
+      <span class="ns-mini">{{ cp['date'] }}（提前 {{ cp['offset_days'] }} 天） · {{ cp['owner_name'] }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="ns-empty">没有需要跟进的检查点。</p>
+  {% endif %}
+</section>
+
+<section class="wn-split" aria-label="连续异常与提醒">
+  <div class="wn-main">
+    <section class="ns-card" aria-label="连续异常">
+      <div class="ns-card-head">
+        <div><h2>连续异常</h2><p>连续多日当日完成率未达 100%，双角色提醒（员工 + 直接上级）</p></div>
+        <div class="ns-card-actions">
+          <button class="button button-small" type="button" id="wn-chain-check">补偿计算（只看不写）</button>
+        </div>
+      </div>
+      {% if streak_rows %}
+      <div class="ns-table-wrap">
+        <table class="ns-table">
+          <thead><tr><th>成员</th><th>连续天数</th><th>异常窗口</th><th>最低完成率</th><th>状态</th></tr></thead>
+          <tbody>
+            {% for row in streak_rows %}
+            <tr>
+              <td>{{ row['user_name'] }}{% if row['is_self'] %} <span class="ns-pill no-dot is-purple">本人</span>{% endif %}</td>
+              <td class="num">{{ row['days'] }} / {{ row['threshold'] }} 天</td>
+              <td class="num">{{ row['window_start'] }} ~ {{ row['window_end'] }}</td>
+              <td class="num">{{ row['min_progress'] }}%</td>
+              <td>{% if row['triggered'] %}<span class="ns-pill is-red">已触发</span>{% else %}<span class="ns-pill is-yellow">观察中</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="ns-empty">范围内没有连续异常记录。</p>
+      {% endif %}
+      <div id="wn-chain-result" class="wn-chain-result" aria-live="polite" hidden></div>
+    </section>
+
+    <section class="ns-card" aria-label="提醒中心">
+      <div class="ns-card-head">
+        <div><h2>提醒中心</h2><p>未读 <span id="wn-rem-unread">{{ unread }}</span> 条 · 确认后同类提醒 3 天内不再推送</p></div>
+        <div class="ns-card-actions">
+          <div class="wn-rem-tabs" role="tablist" aria-label="提醒状态筛选">
+            <button class="wn-tab is-active" type="button" role="tab" data-status="">全部</button>
+            <button class="wn-tab" type="button" role="tab" data-status="unread">未读</button>
+            <button class="wn-tab" type="button" role="tab" data-status="read">已读</button>
+            <button class="wn-tab" type="button" role="tab" data-status="acked">已确认</button>
+            <button class="wn-tab" type="button" role="tab" data-status="ignored">已忽略</button>
+          </div>
+          <button class="button button-small button-primary" type="button" id="wn-read-all" {{ 'disabled' if not unread }}>全部已读</button>
+        </div>
+      </div>
+      <ul class="wn-reminders" id="wn-rem-list">
+        {% for r in reminders %}
+        <li class="{{ 'is-unread' if r['status_code'] == 'unread' }}">
+          <span class="ns-pill {{ 'is-red' if r['level'] == 'red' else 'is-yellow' }}">{{ r['level_label'] }}</span>
+          <div class="wn-alert-body">
+            <strong>{{ r['title'] }}</strong>
+            <p>{{ r['body'] }}</p>
+            <p class="ns-mini">{{ r['alert_type_label'] or '巡检提醒' }} · {{ r['created_at'][:16]|replace('T', ' ') }} · {{ r['status'] }}{% if r['ack_at'] %}（已确认，3 天内不再打扰）{% endif %}</p>
+          </div>
+          <div class="wn-reminder-actions">
+            <a class="button button-small button-secondary" href="{{ r['deep_link'] }}">去处理</a>
+            {% if r['status_code'] == 'unread' %}
+            <button class="button button-small" type="button" data-reminder-id="{{ r['reminder_id'] }}" data-action="read">已读</button>
+            <button class="button button-small" type="button" data-reminder-id="{{ r['reminder_id'] }}" data-action="ack">确认不再提醒</button>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="ns-empty" id="wn-rem-empty" {{ 'hidden' if reminders }}>暂无提醒。</p>
+      <nav class="wn-rem-pager" aria-label="提醒分页">
+        <button class="button button-small" type="button" id="wn-rem-prev" disabled>上一页</button>
+        <span class="ns-mini" id="wn-rem-page">1 / 1</span>
+        <button class="button button-small" type="button" id="wn-rem-next" disabled>下一页</button>
+      </nav>
+    </section>
+  </div>
+
+  <aside class="wn-side">
+    <section class="ns-card" aria-label="AI 过程指导">
+      <div class="ns-card-head"><div><h2>AI 过程指导</h2><p>大模型可用时走大模型；未配置或超时自动降级为规则建议（只给动作，不评价、不排名）</p></div></div>
+      <div class="ns-field">
+        <label for="wn-guidance-target">指导对象（我的在途任务）</label>
+        <select class="ns-select" id="wn-guidance-target">
+          <option value="">选择任务…</option>
+          {% for t in my_tasks %}
+          <option value="{{ t['task_id'] }}">{{ t['task_id'] }} · {{ t['title'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="ns-field">
+        <label for="wn-guidance-scene">场景</label>
+        <select class="ns-select" id="wn-guidance-scene">
+          <option value="auto">自动判断</option>
+          <option value="lagging">进度滞后</option>
+          <option value="deviation">进度偏差</option>
+          <option value="blocked">任务阻塞</option>
+          <option value="streak">连续异常</option>
+        </select>
+      </div>
+      <button class="button button-primary" type="button" id="wn-guidance-go">生成建议</button>
+      <div id="wn-guidance-result" class="wn-guidance-result" aria-live="polite">
+        <p class="ns-empty">从左侧预警点「AI 指导」，或选择任务后生成建议。</p>
+      </div>
+    </section>
+  </aside>
+</section>
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/ns/warning.js') }}"></script>{% endblock %}

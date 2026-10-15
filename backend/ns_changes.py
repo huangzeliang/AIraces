@@ -438,6 +438,7 @@ def register(app, services):
              ],
              "freeze": freeze_state(store, o),
              "changeable": o.get("status") in CHANGEABLE_STATUS,
+             "owner_id": o.get("owner_id", ""),
              "owner_name": user_name(store, o.get("owner_id"))}
             for o in store["objective"]
             if not o.get("is_archived")

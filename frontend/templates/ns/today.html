@@ -1,0 +1,207 @@
+{% extends 'ns/layout.html' %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ns/today.css') }}">{% endblock %}
+{% block content %}
+
+{% set plan = config['plan'] %}
+
+<section class="ns-card td-toolbar" aria-label="日期与计划状态">
+  <div class="td-toolbar-row">
+    <div class="td-date-nav">
+      <a class="button button-small button-secondary" id="td-prev" href="?date={{ date_str }}&user_id={{ config['target']['user_id'] }}" aria-label="前一天">‹ 前一天</a>
+      <form class="td-date-form" method="get" action="{{ url_for('ns_today') }}">
+        {% if config['target']['user_id'] != ns_user['user_id'] %}<input type="hidden" name="user_id" value="{{ config['target']['user_id'] }}">{% endif %}
+        <label class="ns-label" for="td-date">日期</label>
+        <input class="ns-input" type="date" id="td-date" name="date" value="{{ date_str }}">
+        <button class="button button-small" type="submit">查看</button>
+      </form>
+      <a class="button button-small button-secondary" id="td-next" href="?date={{ date_str }}&user_id={{ config['target']['user_id'] }}" aria-label="后一天">后一天 ›</a>
+      <a class="button button-small button-ghost" href="?date={{ config['today'] }}{% if config['target']['user_id'] != ns_user['user_id'] %}&user_id={{ config['target']['user_id'] }}{% endif %}">回到今天</a>
+    </div>
+    <div class="td-toolbar-meta">
+      <strong>{{ '我的日计划' if is_owner else config['target']['name'] ~ ' 的日计划' }}</strong>
+      <span class="ns-pill no-dot {{ 'is-green' if plan['day_status'] == 'approved' else ('is-red' if plan['day_status'] == 'rejected' else ('is-purple' if plan['day_status'] == 'submitted' else 'is-muted')) }}">{{ plan['day_status_label'] }}</span>
+      {% if plan['day_progress'] is not none %}<span class="ns-mini">当日完成 {{ plan['day_progress'] }}%</span>{% endif %}
+    </div>
+  </div>
+  {% if streak['days'] > 0 %}
+  <p class="ns-mini td-streak">连续异常 {{ streak['days'] }} 天（阈值 {{ streak['threshold'] }} 天）{% if streak['triggered'] %} · 已触发预警{% endif %}</p>
+  {% endif %}
+</section>
+
+{% if plan['reject_reason'] %}
+<div class="ns-banner is-red"><span class="ns-banner-icon" aria-hidden="true">!</span><div><strong>日计划被驳回</strong>：{{ plan['reject_reason'] }}（审核人 {{ plan['reviewer_name'] or '—' }}）</div></div>
+{% endif %}
+{% if can_review %}
+<div class="ns-banner is-accent td-review-banner">
+  <span class="ns-banner-icon" aria-hidden="true">◎</span>
+  <div><strong>该日计划待你审核</strong>：提交于 {{ plan['submitted_at'][:16]|replace('T', ' ') }}，共 {{ plan['items']|length }} 项、{{ plan['total_hours'] }} 小时。</div>
+  <div class="td-review-actions">
+    <button class="button button-small button-primary" type="button" id="td-approve" data-plan-id="{{ plan['plan_id'] }}">通过</button>
+    <details class="td-reject">
+      <summary class="button button-small button-danger">驳回</summary>
+      <div class="td-reject-box">
+        <label class="ns-label" for="td-reject-reason">驳回理由（必填）</label>
+        <textarea class="ns-textarea" id="td-reject-reason" rows="3" maxlength="200" placeholder="说明需要调整的内容"></textarea>
+        <button class="button button-small button-danger" type="button" id="td-reject-submit" data-plan-id="{{ plan['plan_id'] }}">确认驳回</button>
+      </div>
+    </details>
+  </div>
+</div>
+{% endif %}
+
+<section class="ns-card" aria-label="日计划明细">
+  <div class="ns-card-head">
+    <div><h2>日计划明细</h2><p>计划项 → 任务上卷；完成情况按项记录，异常项需上报阻塞</p></div>
+    {% if plan['exists'] %}<span class="ns-mini">总工时 {{ plan['total_hours'] }} 小时{% if plan['total_hours'] > max_hours_warn %} · 超过建议上限 {{ max_hours_warn }} 小时{% endif %}</span>{% endif %}
+  </div>
+  {% if plan['exists'] and plan['items'] %}
+  <div class="ns-table-wrap">
+    <table class="ns-table">
+      <thead><tr><th>#</th><th>计划动作</th><th>关联任务</th><th>工时</th><th>完成</th><th>进度</th><th>异常</th></tr></thead>
+      <tbody>
+        {% for item in plan['items'] %}
+        <tr{% if item['abnormal_flag'] %} class="td-row-abnormal"{% endif %}>
+          <td class="num">{{ item['sort_no'] or loop.index }}</td>
+          <td>
+            <strong class="td-desc">{{ item['plan_desc'] }}</strong>
+            {% if item['source'] == 'self' %}<span class="ns-pill is-purple no-dot">自主</span>{% endif %}
+          </td>
+          <td>
+            {% if item['task_missing'] %}<span class="ns-mini">{{ item['task_title'] }}</span>
+            {% else %}<a href="{{ url_for('ns_progress') }}?task_id={{ item['task_id'] }}">{{ item['task_title'] }}</a><br><span class="ns-mini">{{ item['task_status_label'] }}</span>{% endif %}
+          </td>
+          <td class="num">{{ item['plan_hours'] }}</td>
+          <td>{{ '已完成' if item['done'] else '进行中' }}</td>
+          <td>
+            <span class="ns-bar is-slim {{ 'is-green' if item['progress'] >= 100 else '' }}" role="img" aria-label="进度 {{ item['progress'] }}%"><i style="width:{{ item['progress'] }}%"></i></span>
+            <span class="ns-mini">{{ item['progress'] }}%</span>
+          </td>
+          <td>{% if item['abnormal_flag'] %}<span class="ns-pill is-red no-dot">{{ item['abnormal_flag'] }}</span>{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% elif plan['exists'] %}
+  <p class="ns-empty">该日计划没有任何计划项。</p>
+  {% else %}
+  <p class="ns-empty">该日期尚未编制日计划{% if is_owner %}。可在下方「可编入的任务」中整理当天要做的事，编制完成后提交审核{% else %}，等待员工提交后即可审核{% endif %}。</p>
+  {% endif %}
+</section>
+
+<section class="ns-card" aria-label="三视图">
+  <div class="ns-card-head">
+    <div><h2>计划三视图</h2><p>日 / 周 / 月三种粒度查看完成构成、热区与日历</p></div>
+    <div class="td-tabs" role="tablist" aria-label="视图粒度">
+      <button class="button button-small td-tab" type="button" role="tab" data-view="day" aria-selected="false">日</button>
+      <button class="button button-small td-tab is-active" type="button" role="tab" data-view="week" aria-selected="true">周</button>
+      <button class="button button-small td-tab" type="button" role="tab" data-view="month" aria-selected="false">月</button>
+    </div>
+  </div>
+
+  {% macro view_panel(view, key, label) %}
+  <div class="td-view" data-view="{{ key }}" {% if key != 'week' %}hidden{% endif %} role="tabpanel" aria-label="{{ label }}视图">
+    <p class="ns-mini">区间 {{ view['summary']['range_label'] }} · 有计划的 {{ view['summary']['plan_count'] }} 天 · 平均完成 {{ view['summary']['avg_day_progress'] if view['summary']['avg_day_progress'] is not none else '—' }}% · 连续异常 {{ view['summary']['streak_abnormal'] }} 天</p>
+    <div class="td-view-grid">
+      <div class="td-panel">
+        <h3 class="wb-sub">计划项完成构成</h3>
+        {% if view['ring']['items'] %}
+        <ul class="td-ring">
+          {% for row in view['ring']['items'] %}
+          <li>
+            <a href="{{ url_for('ns_progress') }}?task_id={{ row['task_id'] }}">{{ row['title'] }}</a>
+            <span class="ns-mini">{{ row['item_count'] }} 项</span>
+            <span class="ns-bar is-slim {{ 'is-green' if row['rate'] is not none and row['rate'] >= 100 else '' }}" role="img" aria-label="完成率 {{ row['value_text'] }}"><i style="width:{{ row['rate'] if row['rate'] is not none else 0 }}%"></i></span>
+            <em>{{ row['value_text'] }}</em>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="ns-empty">区间内没有编入计划的任务。</p>
+        {% endif %}
+      </div>
+      <div class="td-panel">
+        <h3 class="wb-sub">完成度热区</h3>
+        <div class="td-heatmap">
+          {% for cell in view['hotmap']['cells'] %}
+          {% set lv = 'lv-none' if cell['day_progress'] is none else ('lv-4' if cell['day_progress'] >= 100 else 'lv-3' if cell['day_progress'] >= 70 else 'lv-2' if cell['day_progress'] >= 40 else ('lv-1' if cell['day_progress'] > 0 else 'lv-0')) %}
+          <span class="td-heat {{ lv }}" title="{{ cell['date'] }}：{{ cell['day_progress'] if cell['day_progress'] is not none else '未编制' }}%（{{ cell['item_count'] }} 项）">{{ cell['date'][8:10] }}</span>
+          {% endfor %}
+        </div>
+        <p class="td-legend">
+          {% for legend in view['hotmap']['legend'] %}<span class="td-heat lv-{{ legend['level'] }}"></span>{{ legend['label'] }}{% if not loop.last %} · {% endif %}{% endfor %}
+        </p>
+      </div>
+      <div class="td-panel">
+        <h3 class="wb-sub">日历 · {{ view['calendar']['month_label'] }}</h3>
+        <div class="td-calendar-head">
+          {% for wd in ['一', '二', '三', '四', '五', '六', '日'] %}<span>{{ wd }}</span>{% endfor %}
+        </div>
+        <div class="td-calendar">
+          {% for _ in range(view['calendar']['start_weekday']) %}<span class="td-cal-blank"></span>{% endfor %}
+          {% for day in view['calendar']['days'] %}
+          {% set lv = 'lv-none' if day['day_progress'] is none else ('lv-4' if day['day_progress'] >= 100 else 'lv-3' if day['day_progress'] >= 70 else 'lv-2' if day['day_progress'] >= 40 else ('lv-1' if day['day_progress'] > 0 else 'lv-0')) %}
+          <a class="td-cal {{ lv }} {{ 'is-today' if day['is_today'] }} {{ 'has-block' if day['has_block'] }}" href="?date={{ day['date'] }}{% if config['target']['user_id'] != ns_user['user_id'] %}&user_id={{ config['target']['user_id'] }}{% endif %}" title="{{ day['date'] }} · {{ day['day_status_label'] }}{% if day['day_progress'] is not none %} · {{ day['day_progress'] }}%{% endif %}{% if day['has_block'] %} · 有阻塞上报{% endif %}">
+            <em>{{ day['day'] }}</em>
+            {% if day['day_progress'] is not none %}<small>{{ day['day_progress'] }}%</small>{% elif day['has_block'] %}<small>阻塞</small>{% endif %}
+            {% if day['has_block'] %}<i class="td-cal-flag" aria-hidden="true"></i>{% endif %}
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endmacro %}
+
+  {{ view_panel(config['views']['day'], 'day', '日') }}
+  {{ view_panel(config['views']['week'], 'week', '周') }}
+  {{ view_panel(config['views']['month'], 'month', '月') }}
+</section>
+
+<section class="ns-card" aria-label="今日任务分组">
+  <div class="ns-card-head"><div><h2>今日任务</h2><p>到期、已编入计划与自主任务分组呈现</p></div></div>
+  <div class="ns-grid cols-3">
+    {% set groups = [('今日到期', config['today_groups']['due_today']), ('已编入计划', config['today_groups']['planned']), ('自主任务', config['today_groups']['self_made'])] %}
+    {% for group_name, rows in groups %}
+    <div class="wb-todo">
+      <div class="wb-todo-head"><strong>{{ group_name }}</strong><span class="ns-pill is-purple no-dot">{{ rows|length }}</span></div>
+      {% if rows %}
+      <ul class="wb-list">
+        {% for task in rows %}
+        <li><a href="{{ url_for('ns_progress') }}?task_id={{ task['task_id'] }}">
+          <strong>{{ task['title'] }}</strong>
+          <small>{{ task['status_label'] }} · 截止 {{ task['plan_end'][:10] if task['plan_end'] }} · 进度 {{ task['progress'] }}%{% if task['objective_title'] %} · {{ task['objective_title'] }}{% endif %}</small>
+        </a></li>
+        {% endfor %}
+      </ul>
+      {% else %}<p class="ns-empty">暂无</p>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% if is_owner and config['available_tasks'] %}
+<section class="ns-card" aria-label="可编入任务">
+  <div class="ns-card-head"><div><h2>可编入的任务</h2><p>我负责的未完成任务，按逾期优先排序</p></div><a class="button button-small" href="{{ url_for('ns_progress') }}">去进度更新</a></div>
+  <div class="ns-table-wrap">
+    <table class="ns-table">
+      <thead><tr><th>任务</th><th>状态</th><th>截止</th><th>工时</th><th>进度</th><th>来源</th></tr></thead>
+      <tbody>
+        {% for task in config['available_tasks'] %}
+        <tr>
+          <td><a href="{{ url_for('ns_progress') }}?task_id={{ task['task_id'] }}">{{ task['title'] }}</a></td>
+          <td>{{ task['status_label'] }}{% if task['overdue'] %} <span class="ns-pill is-red no-dot">逾期</span>{% endif %}</td>
+          <td class="num">{{ task['plan_end'][:10] if task['plan_end'] }}</td>
+          <td class="num">{{ task['plan_hours'] if task['plan_hours'] is not none else '—' }}</td>
+          <td class="num">{{ task['progress'] }}%</td>
+          <td>{{ '自主' if task['source'] == 'self' else '派发' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/ns/today.js') }}"></script>{% endblock %}

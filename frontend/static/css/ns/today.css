@@ -1,0 +1,84 @@
+/* B6 日计划与任务页面样式（仅本页使用，全部走语义 Token）。 */
+
+.td-toolbar-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+.td-date-nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.td-date-form{display:flex;gap:8px;align-items:center}
+.td-date-form .ns-label{font-size:11.5px;font-weight:800;color:var(--muted)}
+.td-date-form .ns-input{width:auto;min-width:150px}
+.td-toolbar-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.td-streak{margin:10px 0 0}
+
+.td-review-banner{align-items:center}
+.td-review-actions{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;margin-left:auto}
+.td-reject{position:relative}
+.td-reject summary{cursor:pointer;list-style:none}
+.td-reject summary::-webkit-details-marker{display:none}
+.td-reject-box{position:absolute;right:0;top:calc(100% + 8px);z-index:20;width:min(320px,80vw);background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 32px rgba(10,14,40,.18);padding:12px;display:grid;gap:8px}
+.td-reject-box .ns-textarea{min-height:70px}
+
+.td-desc{display:block;overflow-wrap:anywhere}
+.td-row-abnormal{box-shadow:inset 3px 0 0 var(--danger)}
+
+.td-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.td-tab{border-color:var(--border)}
+.td-tab.is-active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.td-view-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.td-panel{border:1px solid var(--border);border-radius:14px;padding:12px 14px;min-width:0}
+.td-panel .wb-sub{margin-top:0}
+
+.td-ring{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.td-ring li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
+.td-ring a{font-size:12.5px;font-weight:700;color:var(--text);text-decoration:none;overflow-wrap:anywhere;grid-column:1 / 2}
+.td-ring em{font-style:normal;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+.td-ring .ns-bar{grid-column:1 / 3}
+
+.td-heatmap{display:flex;flex-wrap:wrap;gap:6px}
+.td-heat{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;padding:0 6px;border-radius:9px;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.td-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 0;font-size:10.5px;color:var(--subtle)}
+.td-legend .td-heat{min-width:18px;width:18px;height:18px;border-radius:6px}
+.td-heat.lv-none{background:transparent;border-style:dashed;color:var(--subtle)}
+.td-heat.lv-0{background:var(--bg);color:var(--muted)}
+.td-heat.lv-1{background:var(--accent-soft);color:var(--accent)}
+.td-heat.lv-2{background:color-mix(in srgb,var(--accent) 26%,var(--surface));color:var(--text)}
+.td-heat.lv-3{background:color-mix(in srgb,var(--accent) 55%,var(--surface));color:var(--text)}
+.td-heat.lv-4{background:var(--green-soft);color:var(--green)}
+
+.td-calendar-head{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font-size:10.5px;color:var(--subtle);text-align:center;margin-bottom:4px}
+.td-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.td-cal-blank{min-height:44px}
+.td-cal{position:relative;min-height:44px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);text-decoration:none;display:grid;align-content:center;justify-items:center;gap:1px;padding:4px 2px}
+.td-cal em{font-style:normal;font-size:11.5px;font-weight:800;font-variant-numeric:tabular-nums}
+.td-cal small{font-size:9.5px;color:inherit;opacity:.85}
+.td-cal.is-today{outline:2px solid var(--focus);outline-offset:1px}
+.td-cal.has-block{box-shadow:inset 0 0 0 1.5px var(--danger)}
+.td-cal-flag{position:absolute;top:3px;right:3px;width:6px;height:6px;border-radius:50%;background:var(--danger)}
+.td-cal.lv-none{color:var(--subtle);border-style:dashed;background:transparent}
+.td-cal.lv-0{color:var(--muted)}
+.td-cal.lv-1{background:var(--accent-soft);color:var(--accent)}
+.td-cal.lv-2{background:color-mix(in srgb,var(--accent) 26%,var(--surface));color:var(--text)}
+.td-cal.lv-3{background:color-mix(in srgb,var(--accent) 55%,var(--surface));color:var(--text)}
+.td-cal.lv-4{background:var(--green-soft);color:var(--green)}
+
+@media(max-width:980px){
+  .td-view-grid{grid-template-columns:minmax(0,1fr)}
+  .td-review-actions{margin-left:0}
+}
+/* 今日任务分组清单（与工作台 wb-todo / wb-list 同款基础，本页自带定义） */
+.wb-sub{font-size:12.5px;letter-spacing:.3px;color:var(--muted);margin:16px 0 8px}
+.wb-todo{border:1px solid var(--border);border-radius:14px;padding:12px 14px;min-width:0}
+.wb-todo-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.wb-todo-head strong{font-size:12.5px}
+.wb-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.wb-list a{display:block;padding:8px 10px;border-radius:10px;text-decoration:none;color:var(--text);transition:background .15s}
+.wb-list a:hover,.wb-list a:focus-visible{background:var(--accent-soft)}
+.wb-list strong{display:block;font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
+.wb-list small{display:block;font-size:11px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+
+@media(max-width:700px){
+  .td-date-nav{width:100%}
+  .td-date-form{flex:1 1 100%;flex-wrap:wrap}
+  .td-date-form .ns-input{flex:1}
+  .td-toolbar-meta{width:100%}
+  .td-reject-box{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));top:auto;width:auto}
+}

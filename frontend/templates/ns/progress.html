@@ -1,0 +1,179 @@
+{% extends 'ns/layout.html' %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ns/progress.css') }}">{% endblock %}
+{% block content %}
+
+<section class="ns-grid cols-3" aria-label="进度总览">
+  <div class="ns-card wb-tile"><em>{{ summary['objective_count'] }}</em><small>范围内目标</small></div>
+  <div class="ns-card wb-tile"><em>{{ summary['by_health']['lagging'] }} / {{ summary['by_health']['normal'] + summary['by_health']['ahead'] }}</em><small>滞后 / 正常+超前</small></div>
+  <div class="ns-card wb-tile"><em>{{ summary['coverage_rate'] }}%</em><small>进度覆盖（有拉条或计划的目标）</small></div>
+</section>
+
+<div class="ns-split">
+  <div class="pg-list">
+    <section class="ns-card" aria-label="目标列表">
+      <div class="ns-card-head"><div><h2>目标与 KR</h2><p>点选查看详情与时间线</p></div></div>
+      <ul class="pg-items">
+        {% for obj in objectives %}
+        <li>
+          <a class="pg-item {{ 'is-active' if objective and objective['objective_id'] == obj['objective_id'] }}" href="?objective_id={{ obj['objective_id'] }}">
+            <header>
+              <strong>{{ obj['title'] }}</strong>
+              <span class="ns-pill is-green {{ 'is-red' if obj['health'] == 'lagging' }}" style="{{ 'background:var(--danger-soft);color:var(--danger)' if obj['health'] == 'lagging' }}">{{ obj['health_label'] }}</span>
+            </header>
+            <p class="ns-mini">{{ obj['owner_name'] }} · {{ obj['status_label'] }} · 权重 {{ obj['weight'] }}% · 截止 {{ obj['plan_end'][:10] if obj['plan_end'] }}</p>
+            <div class="pg-progress">
+              <span class="ns-bar {{ 'is-red' if obj['health'] == 'lagging' else 'is-green' }}" role="img" aria-label="进度 {{ obj['progress'] }}%"><i style="width:{{ obj['progress'] }}%"></i></span>
+              <em>{{ obj['progress'] }}%</em>
+            </div>
+            <p class="ns-mini">任务 {{ obj['task_done'] }}/{{ obj['task_count'] }} 完成 · 时间进度 {{ obj['time_progress'] }}% · 差值 {{ obj['delta'] }}</p>
+          </a>
+        </li>
+        {% endfor %}
+        {% if not objectives %}<li><p class="ns-empty">范围内暂无目标。</p></li>{% endif %}
+      </ul>
+    </section>
+
+    <section class="ns-card" aria-label="任务列表">
+      <div class="ns-card-head"><div><h2>任务</h2><p>点选任务可更新进度与上传证据</p></div></div>
+      <ul class="pg-items">
+        {% for tk in tasks %}
+        <li>
+          <a class="pg-item {{ 'is-active' if task and task['task_id'] == tk['task_id'] }}" href="?task_id={{ tk['task_id'] }}">
+            <header>
+              <strong>{{ tk['title'] }}</strong>
+              <span class="ns-pill {{ 'is-red' if tk['health'] == 'lagging' else 'is-green' }}">{{ tk['health_label'] }}</span>
+            </header>
+            <p class="ns-mini">{{ tk['status_label'] }} · {{ tk['owners']|join('、') }} · 截止 {{ tk['plan_end'][:10] if tk['plan_end'] }}{% if tk['priority'] %} · 优先级 {{ tk['priority'] }}{% endif %}</p>
+            <div class="pg-progress">
+              <span class="ns-bar {{ 'is-red' if tk['health'] == 'lagging' else 'is-green' }}" role="img" aria-label="进度 {{ tk['progress'] }}%"><i style="width:{{ tk['progress'] }}%"></i></span>
+              <em>{{ tk['progress'] }}%</em>
+            </div>
+            <p class="ns-mini">{{ tk['objective_title'] }}{% if tk['source'] == 'self' %} · 自主任务{% endif %}</p>
+          </a>
+        </li>
+        {% endfor %}
+        {% if not tasks %}<li><p class="ns-empty">范围内暂无任务。</p></li>{% endif %}
+      </ul>
+    </section>
+  </div>
+
+  <div class="pg-detail">
+    {% if task %}
+    <section class="ns-card" aria-label="任务详情">
+      <div class="ns-card-head">
+        <div><h2>{{ task['title'] }}</h2><p>{{ task['objective_title'] }} · v{{ task['version'] }} · 更新于 {{ task['updated_at'][:16]|replace('T', ' ') }}</p></div>
+        <span class="ns-pill {{ 'is-red' if task['health'] == 'lagging' else 'is-green' }}">{{ task['health_label'] }}</span>
+      </div>
+      <div class="pg-meta">
+        <span>状态 <strong>{{ task['status_label'] }}</strong></span>
+        <span>进度 <strong>{{ task['progress'] }}%</strong></span>
+        <span>执行率 <strong>{{ task['exec_rate'] }}%</strong></span>
+        <span>时间进度 <strong>{{ task['time_progress'] }}%</strong></span>
+        <span>差值 <strong>{{ task['delta'] }}</strong></span>
+        <span>责任人 <strong>{{ task['owners']|join('、') }}</strong></span>
+        <span>窗口 <strong>{{ task['plan_start'][:10] if task['plan_start'] }} ~ {{ task['plan_end'][:10] if task['plan_end'] }}</strong></span>
+        {% if task['manual_override'] %}<span class="ns-pill is-purple no-dot">手动覆盖上卷</span>{% endif %}
+      </div>
+      {% if task['blocked_reason'] %}<div class="ns-banner is-red"><span class="ns-banner-icon" aria-hidden="true">!</span><div>任务阻塞：{{ task['blocked_reason'] }}</div></div>{% endif %}
+
+      {% if can_edit %}
+      <h3 class="pg-sub">更新进度</h3>
+      <form class="pg-form" id="pg-form" data-task-id="{{ task['task_id'] }}" data-current="{{ task['progress'] }}" data-version="{{ task['version'] }}">
+        <div class="pg-form-grid">
+          <div class="ns-field">
+            <label for="pg-progress">新进度（0~100）<span class="req">*</span></label>
+            <input class="ns-input" type="number" id="pg-progress" min="0" max="100" step="1" value="{{ task['progress'] }}" required>
+          </div>
+          <div class="ns-field">
+            <label for="pg-back">回退原因（进度低于当前值时必填）</label>
+            <input class="ns-input" type="text" id="pg-back" maxlength="120" placeholder="例如：验收未通过，回退重做">
+          </div>
+        </div>
+        <div class="ns-field">
+          <label for="pg-note">说明</label>
+          <textarea class="ns-textarea" id="pg-note" maxlength="300" placeholder="本次更新做了什么、下一步计划"></textarea>
+        </div>
+        <div class="ns-field">
+          <label for="pg-evidence">证据附件（可选，支持多选）</label>
+          <input class="ns-input" type="file" id="pg-evidence" multiple>
+          <span class="hint">上传后随进度一并保存；上传失败则本次进度不保存。</span>
+        </div>
+        <label class="ns-check"><input type="checkbox" id="pg-milestone"> 本次为里程碑打卡</label>
+        <div class="pg-form-actions">
+          <button class="button button-primary" type="submit" id="pg-submit">保存进度</button>
+        </div>
+      </form>
+      {% else %}
+      <p class="ns-mini">当前身份对该任务只读：仅执行人（或范围内负责人）可更新进度。</p>
+      {% endif %}
+
+      {% if task['checkpoints'] %}
+      <h3 class="pg-sub">检查点</h3>
+      <p class="pg-chips">
+        {% for cp in task['checkpoints'] %}
+        <span class="ns-pill no-dot {{ 'is-red' if cp['state'] == 'overdue' else ('is-green' if cp['state'] == 'passed' else 'is-yellow') }}">{{ cp['date'] }}（{{ '已到期未完成' if cp['state'] == 'overdue' else ('已完成' if cp['state'] == 'passed' else '即将到来') }}）</span>
+        {% endfor %}
+      </p>
+      {% endif %}
+
+      <h3 class="pg-sub">时间线</h3>
+      {% include 'ns/components/timeline.html' %}
+    </section>
+    {% elif objective %}
+    <section class="ns-card" aria-label="目标详情">
+      <div class="ns-card-head">
+        <div><h2>{{ objective['title'] }}</h2><p>{{ objective['owner_name'] }} · {{ objective['period_id'] }} · {{ objective['status_label'] }}</p></div>
+        <span class="ns-pill {{ 'is-red' if objective['health'] == 'lagging' else 'is-green' }}">{{ objective['health_label'] }}</span>
+      </div>
+      <div class="pg-progress pg-progress-lg">
+        <span class="ns-bar {{ 'is-red' if objective['health'] == 'lagging' else 'is-green' }}" role="img" aria-label="进度 {{ objective['progress'] }}%"><i style="width:{{ objective['progress'] }}%"></i></span>
+        <em>{{ objective['progress'] }}%</em>
+      </div>
+      <div class="pg-meta">
+        <span>权重 <strong>{{ objective['weight'] }}%</strong></span>
+        <span>时间进度 <strong>{{ objective['time_progress'] }}%</strong></span>
+        <span>差值 <strong>{{ objective['delta'] }}</strong></span>
+        <span>任务 <strong>{{ objective['task_done'] }}/{{ objective['task_count'] }}</strong></span>
+        <span>窗口 <strong>{{ objective['plan_start'][:10] if objective['plan_start'] }} ~ {{ objective['plan_end'][:10] if objective['plan_end'] }}</strong></span>
+        {% if objective['readonly'] %}<span class="ns-pill is-muted no-dot">验收/归档阶段只读</span>{% endif %}
+      </div>
+      {% if objective['criteria'] %}
+      <h3 class="pg-sub">成功标准</h3>
+      <ul class="pg-criteria">{% for c in objective['criteria'] %}<li>{{ c }}</li>{% endfor %}</ul>
+      {% endif %}
+      <h3 class="pg-sub">该目标下任务（{{ objective_tasks|length }}）</h3>
+      <ul class="pg-criteria">
+        {% for tk in objective_tasks %}
+        <li><a href="?task_id={{ tk['task_id'] }}">{{ tk['title'] }}</a> · {{ tk['progress'] }}% · {{ tk['status_label'] }}</li>
+        {% endfor %}
+      </ul>
+      <h3 class="pg-sub">时间线</h3>
+      {% include 'ns/components/timeline.html' %}
+    </section>
+    {% else %}
+    <section class="ns-card"><p class="ns-empty">左侧选择目标或任务查看详情。</p></section>
+    {% endif %}
+
+    <section class="ns-card" aria-label="证据归档">
+      <div class="ns-card-head"><div><h2>证据归档</h2><p>{{ '当前任务' if task else ('当前目标' if objective else '当前对象') }}的附件与 AI 预审</p></div></div>
+      {% if evidence %}
+      <ul class="pg-evidence">
+        {% for ev in evidence %}
+        <li>
+          <strong>{{ ev['file_name'] }}</strong>
+          <p class="ns-mini">{{ ev['note'] or '无备注' }} · {{ ev['uploaded_at'][:16]|replace('T', ' ') }}</p>
+          {% if ev['ai_review_result'] %}
+          {% set review = ev['ai_review_result'] %}
+          <p class="ns-mini">AI 预审：{{ review['result'] }}{% if review['missing'] %} · 缺 {{ review['missing']|join('、') }}{% endif %}{% if review['pending'] %} · 待补 {{ review['pending']|join('、') }}{% endif %}</p>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="ns-empty">暂无证据文件。</p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/ns/progress.js') }}"></script>{% endblock %}

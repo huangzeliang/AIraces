@@ -1,0 +1,18 @@
+{# 公共时间线组件：合并进度、里程碑与变更记录（需要上下文变量 timeline）。 #}
+{% if timeline %}
+<ol class="tl-list">
+  {% for row in timeline %}
+  <li class="tl-item is-{{ row['type'] }}">
+    <span class="tl-dot" aria-hidden="true"></span>
+    <div class="tl-body">
+      <strong>{{ row['title'] }}</strong>
+      {% if row['value'] is not none %}<em>进度 {{ row['value'] }}%</em>{% endif %}
+      {% if row['note'] %}<p>{{ row['note'] }}</p>{% endif %}
+      <small>{{ row['operator_name'] }} · {{ row['created_at'][:16]|replace('T', ' ') }}{% if row['source'] == 'change' %} · 变更{% endif %}</small>
+    </div>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p class="ns-empty">暂无记录。</p>
+{% endif %}

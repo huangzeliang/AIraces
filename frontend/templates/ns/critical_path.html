@@ -1,0 +1,222 @@
+{% extends 'ns/layout.html' %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ns/critical_path.css') }}">{% endblock %}
+{% block content %}
+
+{% set node_map = namespace(value={}) %}
+{% for n in graph['nodes'] %}{% set _ = node_map.value.update({n['task_id']: n['title']}) %}{% endfor %}
+
+<section class="ns-card cp-toolbar" aria-label="筛选与总览">
+  <form class="cp-filter" method="get" action="{{ url_for('ns_critical_path') }}">
+    <div class="ns-field">
+      <label for="cp-objective">按目标筛选</label>
+      <select class="ns-select" id="cp-objective" name="objective_id">
+        <option value="">全部目标</option>
+        {% for o in objectives %}
+        <option value="{{ o['objective_id'] }}" {{ 'selected' if o['objective_id'] == objective_id }}>{{ o['title'] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="button" type="submit">查看</button>
+    {% if objective_id %}<a class="button button-ghost" href="{{ url_for('ns_critical_path') }}">清除</a>{% endif %}
+  </form>
+  <div class="cp-metrics">
+    <span>项目工期 <strong>{{ graph['project_duration_days'] }} 天</strong></span>
+    <span>依赖覆盖率 <strong>{{ graph['dep_coverage'] }}%</strong></span>
+    <span>项目健康 <span class="ns-pill {{ 'is-red' if graph['project_health'] == 'red' else ('is-yellow' if graph['project_health'] == 'yellow' else 'is-green') }}">{{ {'green': '正常', 'yellow': '预警', 'red': '严重'}[graph['project_health']] }}</span></span>
+  </div>
+</section>
+
+{% for warning in graph['warnings'] %}
+<div class="ns-banner {{ 'is-red' if warning['level'] == 'red' else 'is-yellow' }}"><span class="ns-banner-icon" aria-hidden="true">!</span><div>{{ warning['text'] }}</div></div>
+{% endfor %}
+
+<section class="ns-card" aria-label="依赖网络图">
+  <div class="ns-card-head">
+    <div><h2>依赖网络图（{{ graph['nodes']|length }} 节点 / {{ graph['edges']|length }} 边）</h2><p>按最早开始（ES）横向排布；点击节点进入进度更新。宽图可在卡片内左右滑动查看</p></div>
+    <div class="cp-legend" aria-hidden="true">
+      <span class="cp-lg cp-lg-critical">关键路径</span>
+      <span class="cp-lg cp-lg-hot">唯一热点</span>
+      <span class="cp-lg cp-lg-blocked">阻塞</span>
+    </div>
+  </div>
+  <div id="cp-network" class="cp-network">
+    <noscript><p class="ns-empty">开启 JavaScript 后可查看依赖网络图；下方「任务排程」表格包含同样的数据。</p></noscript>
+  </div>
+</section>
+
+<section class="ns-card" aria-label="关键路径">
+  <div class="ns-card-head"><div><h2>关键路径（{{ graph['critical_path_detail']|length }} 个节点）</h2><p>ES / LS 推演得出的最长链，任一节点延期都会推迟整体工期</p></div></div>
+  {% if graph['critical_path_detail'] %}
+  <div class="cp-chain-wrap">
+    <ol class="cp-chain">
+      {% for node in graph['critical_path_detail'] %}
+      <li class="cp-node">
+        <em>{{ loop.index }}</em>
+        <a href="{{ url_for('ns_progress') }}?task_id={{ node['task_id'] }}">{{ node['title'] }}</a>
+        <small>{{ node['plan_hours'] }}h · 时差 {{ node['total_float'] }} 天 · {{ node['assignee_names']|join('、') }}</small>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+  {% else %}
+  <p class="ns-empty">当前范围内没有可计算的关键路径节点（可能缺少依赖边或任务）。</p>
+  {% endif %}
+</section>
+
+<section class="ns-card" aria-label="唯一热点">
+  <div class="ns-card-head"><div><h2>唯一热点阻塞</h2><p>关键路径上时差最小、一旦延误影响最大的任务</p></div></div>
+  {% if graph['hotspot_task_id'] %}
+  <p class="cp-hotspot">
+    <span class="ns-pill is-red">热点</span>
+    <a href="{{ url_for('ns_progress') }}?task_id={{ graph['hotspot_task_id'] }}">{{ node_map.value.get(graph['hotspot_task_id'], graph['hotspot_task_id']) }}</a>
+  </p>
+  <p class="ns-mini">{{ graph['hotspot_reason'] }}</p>
+  {% else %}
+  <p class="ns-empty">暂无唯一热点，关键路径健康。</p>
+  {% endif %}
+</section>
+
+<section class="ns-card" aria-label="影响传导模拟">
+  <div class="ns-card-head"><div><h2>影响传导模拟</h2><p>假设某任务延期 N 天，重算项目工期差分与下游受影响任务（不写入数据）</p></div></div>
+  {% if graph['nodes'] %}
+  <div class="cp-impact-form">
+    <div class="ns-field">
+      <label for="cp-impact-task">任务</label>
+      <select class="ns-select" id="cp-impact-task">
+        {% for node in graph['nodes']|sort(attribute='es') %}
+        <option value="{{ node['task_id'] }}" {{ 'selected' if node['is_hotspot'] }}>{{ node['task_id'] }} · {{ node['title'] }}{% if node['is_critical'] %}（关键）{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="ns-field">
+      <label for="cp-impact-days">假设延期（天）</label>
+      <input class="ns-input" type="number" id="cp-impact-days" min="0" max="90" step="1" value="1">
+    </div>
+    <button class="button button-primary" type="button" id="cp-impact-go">计算影响</button>
+  </div>
+  <div id="cp-impact-result" class="cp-impact-result" aria-live="polite">
+    <p class="ns-empty">选择任务与延期天数后计算。</p>
+  </div>
+  {% else %}
+  <p class="ns-empty">当前范围内没有任务，无法模拟影响传导。</p>
+  {% endif %}
+</section>
+
+<section class="ns-card" aria-label="任务排程">
+  <div class="ns-card-head"><div><h2>任务排程（{{ graph['nodes']|length }}）</h2><p>按最早开始（ES）排序；关键节点与热点高亮</p></div></div>
+  {% if graph['nodes'] %}
+  <div class="ns-table-wrap">
+    <table class="ns-table">
+      <thead><tr><th>任务</th><th>ES</th><th>工期</th><th>时差</th><th>进度</th><th>负责人</th><th>健康</th><th>标记</th></tr></thead>
+      <tbody>
+        {% for node in graph['nodes']|sort(attribute='es') %}
+        <tr class="{{ 'cp-critical' if node['is_critical'] }}">
+          <td><a href="{{ url_for('ns_progress') }}?task_id={{ node['task_id'] }}">{{ node['title'] }}</a><br><span class="ns-mini">{{ node['status_label'] }} · 截止 {{ node['plan_end'][:10] if node['plan_end'] }}</span></td>
+          <td class="num">{{ node['es'] }} 天</td>
+          <td class="num">{{ node['duration_days'] }} 天</td>
+          <td class="num">{{ node['total_float'] }} 天</td>
+          <td class="num">{{ node['progress'] }}%</td>
+          <td>{{ node['assignee_names']|join('、') }}</td>
+          <td><span class="ns-pill {{ 'is-red' if node['health'] == 'lagging' else 'is-green' }}">{{ node['health_label'] }}</span></td>
+          <td>
+            {% if node['is_critical'] %}<span class="ns-pill is-purple no-dot">关键</span>{% endif %}
+            {% if node['is_hotspot'] %}<span class="ns-pill is-red no-dot">热点</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="ns-empty">当前范围内没有任务。</p>
+  {% endif %}
+</section>
+
+<section class="ns-card" aria-label="依赖关系">
+  <div class="ns-card-head"><div><h2>依赖关系（{{ graph['edges']|length }} 条）</h2><p>FS 完成-开始 / SS 开始-开始 / FF 完成-完成；环检测已内置</p></div></div>
+  {% if graph['edges'] %}
+  <div class="ns-table-wrap">
+    <table class="ns-table">
+      <thead><tr><th>前置任务</th><th>类型</th><th>后置任务</th><th>间隔</th>{% if can_edit %}<th>操作</th>{% endif %}</tr></thead>
+      <tbody>
+        {% for edge in graph['edges'] %}
+        <tr>
+          <td>{{ node_map.value.get(edge['from_task_id'], edge['from_task_id']) }}</td>
+          <td><span class="ns-pill no-dot is-purple" title="{{ dep_types[edge['dep_type']] }}">{{ edge['dep_type'] }}</span></td>
+          <td>{{ node_map.value.get(edge['to_task_id'], edge['to_task_id']) }}</td>
+          <td class="num">{{ edge['lag_days'] }} 天</td>
+          {% if can_edit %}
+          <td><button class="button button-small button-danger" type="button" data-dep-del data-dep-id="{{ edge['dep_id'] }}"
+              data-from-name="{{ node_map.value.get(edge['from_task_id'], edge['from_task_id']) }}"
+              data-to-name="{{ node_map.value.get(edge['to_task_id'], edge['to_task_id']) }}">删除</button></td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="ns-empty">暂无依赖关系；建议为任务批量推断依赖后再查看关键路径。</p>
+  {% endif %}
+</section>
+
+{% if can_edit %}
+<section class="ns-card" aria-label="依赖维护">
+  <div class="ns-card-head">
+    <div><h2>依赖维护</h2><p>保存时自动做环检测：成环会被拒绝（错误码 1005）并给出环路路径</p></div>
+    <div class="ns-card-actions">
+      <button class="button button-small" type="button" id="cp-infer">按目标批量推断依赖</button>
+    </div>
+  </div>
+  {% if graph['nodes'] %}
+  <form id="cp-dep-form" class="cp-dep-form" novalidate>
+    <div class="ns-field">
+      <label for="cp-dep-from">前置任务</label>
+      <select class="ns-select" id="cp-dep-from">
+        {% for node in graph['nodes']|sort(attribute='es') %}
+        <option value="{{ node['task_id'] }}">{{ node['task_id'] }} · {{ node['title'] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="ns-field">
+      <label for="cp-dep-type">依赖类型</label>
+      <select class="ns-select" id="cp-dep-type">
+        {% for code, label in dep_types.items() %}
+        <option value="{{ code }}">{{ code }} · {{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="ns-field">
+      <label for="cp-dep-to">后置任务</label>
+      <select class="ns-select" id="cp-dep-to">
+        {% for node in graph['nodes']|sort(attribute='es') %}
+        <option value="{{ node['task_id'] }}" {{ 'selected' if loop.index == 2 }}>{{ node['task_id'] }} · {{ node['title'] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="ns-field">
+      <label for="cp-dep-lag">间隔（天，可为负）</label>
+      <input class="ns-input" type="number" id="cp-dep-lag" value="0" step="1">
+    </div>
+    <button class="button button-primary" type="submit" id="cp-dep-save">保存依赖</button>
+  </form>
+  <div id="cp-dep-result" class="cp-dep-result" aria-live="polite"></div>
+  {% if not objective_id %}<p class="ns-mini">提示：「批量推断」需要先在上方按单个目标筛选。</p>{% endif %}
+  {% else %}
+  <p class="ns-empty">当前范围内没有任务，无法维护依赖。</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}
+{% block page_js %}
+<script>
+window.CP_CONFIG = {
+  graph: {{ graph | tojson }},
+  objective_id: {{ objective_id | tojson }},
+  can_edit: {{ can_edit | tojson }},
+  dep_types: {{ dep_types | tojson }}
+};
+</script>
+<script src="{{ url_for('static', filename='js/ns/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ns/critical_path.js') }}"></script>
+{% endblock %}

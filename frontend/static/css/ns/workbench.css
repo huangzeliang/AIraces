@@ -1,0 +1,48 @@
+/* B5 个人工作台页面样式（仅本页使用，全部走语义 Token）。 */
+
+.wb-stats .wb-tile{text-align:left}
+.wb-tile em{display:block;font-size:29px;font-weight:900;letter-spacing:-1px;font-variant-numeric:tabular-nums;font-style:normal;color:var(--text)}
+.wb-tile small{font-size:11.5px;font-weight:800;color:var(--muted)}
+.wb-tile.is-red em{color:var(--danger)}
+.wb-tile.is-yellow em{color:var(--prio-mid)}
+.wb-tile.is-green em{color:var(--green)}
+
+.wb-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:6px}
+.wb-tiles .wb-tile{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+.wb-tiles .wb-tile em{font-size:23px}
+
+.wb-sub{font-size:12.5px;letter-spacing:.3px;color:var(--muted);margin:16px 0 8px}
+
+.wb-obj{border:1px solid var(--border);border-radius:14px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0}
+.wb-obj header{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.wb-obj header strong{font-size:13.5px;line-height:1.5;overflow-wrap:anywhere}
+.wb-obj .wb-progress{display:flex;align-items:center;gap:10px}
+.wb-obj .wb-progress .ns-bar{flex:1}
+.wb-obj .wb-progress em{font-size:12px;font-weight:800;font-style:normal;font-variant-numeric:tabular-nums;color:var(--text);min-width:44px;text-align:right}
+.wb-obj .button{justify-self:start;white-space:normal;text-align:left}
+.wb-more{margin:12px 0 0}
+
+.wb-todo{border:1px solid var(--border);border-radius:14px;padding:12px 14px;min-width:0}
+.wb-todo-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.wb-todo-head strong{font-size:12.5px}
+.wb-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.wb-list a{display:block;padding:8px 10px;border-radius:10px;text-decoration:none;color:var(--text);transition:background .15s}
+.wb-list a:hover,.wb-list a:focus-visible{background:var(--accent-soft)}
+.wb-list strong{display:block;font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
+.wb-list small{display:block;font-size:11px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
+
+.wb-reminders{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.wb-reminders li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+.wb-reminder-body{min-width:0}
+.wb-reminder-body strong{font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
+.wb-reminder-body p{margin:3px 0;font-size:12px;color:var(--muted);line-height:1.7;overflow-wrap:anywhere}
+.wb-reminder-body small{font-size:10.5px;color:var(--subtle)}
+
+@media(max-width:980px){
+  .wb-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .wb-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .wb-reminders li{grid-template-columns:minmax(0,1fr);justify-items:start}
+  .wb-reminders li .button{justify-self:stretch;text-align:center}
+}
