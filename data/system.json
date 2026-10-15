@@ -54,11 +54,7 @@
       "org_unit_id": "ORG-000",
       "position": "super_admin",
       "status": "启用",
-<<<<<<< HEAD
       "last_login_at": "2026-10-15T17:10:49"
-=======
-      "last_login_at": "2026-10-05T09:00:00"
->>>>>>> 3b890c0 (a线提交)
     },
     {
       "user_id": "U002",
@@ -67,11 +63,7 @@
       "org_unit_id": "ORG-001",
       "position": "manager",
       "status": "启用",
-<<<<<<< HEAD
       "last_login_at": "2026-10-15T17:02:49"
-=======
-      "last_login_at": "2026-10-06T08:00:00"
->>>>>>> 3b890c0 (a线提交)
     },
     {
       "user_id": "U003",
@@ -443,308 +435,196 @@
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P034",
-=======
       "perm_id": "P039",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:guidance.generate",
       "perm_type": "action",
       "target_key": "guidance.generate",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P035",
-=======
       "perm_id": "P040",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:dep.save",
       "perm_type": "action",
       "target_key": "dep.save",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P036",
-=======
       "perm_id": "P041",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:change.apply",
       "perm_type": "action",
       "target_key": "change.apply",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P037",
-=======
       "perm_id": "P042",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:change.approve",
       "perm_type": "action",
       "target_key": "change.approve",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P038",
-=======
       "perm_id": "P043",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:review.submit",
       "perm_type": "action",
       "target_key": "review.submit",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P039",
-=======
       "perm_id": "P044",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:review.accept",
       "perm_type": "action",
       "target_key": "review.accept",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P040",
-=======
       "perm_id": "P045",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:review.appeal",
       "perm_type": "action",
       "target_key": "review.appeal",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P041",
-=======
       "perm_id": "P046",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:retro.create",
       "perm_type": "action",
       "target_key": "retro.create",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P042",
-=======
       "perm_id": "P047",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:retro.convert",
       "perm_type": "action",
       "target_key": "retro.convert",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P043",
-=======
       "perm_id": "P048",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:org.manage",
       "perm_type": "action",
       "target_key": "org.manage",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P044",
-=======
       "perm_id": "P049",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:role.manage",
       "perm_type": "action",
       "target_key": "role.manage",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P045",
-=======
       "perm_id": "P050",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:user.manage",
       "perm_type": "action",
       "target_key": "user.manage",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P046",
-=======
       "perm_id": "P051",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:period.manage",
       "perm_type": "action",
       "target_key": "period.manage",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P047",
-=======
       "perm_id": "P052",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:dict.manage",
       "perm_type": "action",
       "target_key": "dict.manage",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P048",
-=======
       "perm_id": "P053",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:settings.manage",
       "perm_type": "action",
       "target_key": "settings.manage",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P049",
-=======
       "perm_id": "P054",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:data.import",
       "perm_type": "action",
       "target_key": "data.import",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P050",
-=======
       "perm_id": "P055",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:data.export",
       "perm_type": "action",
       "target_key": "data.export",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P051",
-=======
       "perm_id": "P056",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:data.resolve",
       "perm_type": "action",
       "target_key": "data.resolve",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P052",
-=======
       "perm_id": "P057",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "action:data.backup",
       "perm_type": "action",
       "target_key": "data.backup",
       "group_name": "操作"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P053",
-=======
       "perm_id": "P058",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "field:objective.owner_id",
       "perm_type": "field",
       "target_key": "objective.owner_id",
       "group_name": "字段"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P054",
-=======
       "perm_id": "P059",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "field:objective.content",
       "perm_type": "field",
       "target_key": "objective.content",
       "group_name": "字段"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P055",
-=======
       "perm_id": "P060",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "field:objective.status_confirm",
       "perm_type": "field",
       "target_key": "objective.status_confirm",
       "group_name": "字段"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P056",
-=======
       "perm_id": "P061",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "field:work_task.assignees",
       "perm_type": "field",
       "target_key": "work_task.assignees",
       "group_name": "字段"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P057",
-=======
       "perm_id": "P062",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "field:staff_profile.capacity",
       "perm_type": "field",
       "target_key": "staff_profile.capacity",
       "group_name": "字段"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P058",
-=======
       "perm_id": "P063",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "field:assessment.self_score",
       "perm_type": "field",
       "target_key": "assessment.self_score",
       "group_name": "字段"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P059",
-=======
       "perm_id": "P064",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "field:assessment.final_score",
       "perm_type": "field",
       "target_key": "assessment.final_score",
       "group_name": "字段"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P060",
-=======
       "perm_id": "P065",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "field:setting.value",
       "perm_type": "field",
       "target_key": "setting.value",
       "group_name": "字段"
     },
     {
-<<<<<<< HEAD
-      "perm_id": "P061",
-=======
       "perm_id": "P066",
->>>>>>> 3b890c0 (a线提交)
       "perm_code": "field:role.grant",
       "perm_type": "field",
       "target_key": "role.grant",
@@ -826,8 +706,6 @@
     },
     {
       "role_id": "R001",
-<<<<<<< HEAD
-=======
       "perm_id": "P019"
     },
     {
@@ -924,7 +802,6 @@
     },
     {
       "role_id": "R001",
->>>>>>> 3b890c0 (a线提交)
       "perm_id": "P043"
     },
     {
@@ -958,8 +835,6 @@
     {
       "role_id": "R001",
       "perm_id": "P051"
-<<<<<<< HEAD
-=======
     },
     {
       "role_id": "R001",
@@ -988,7 +863,6 @@
     {
       "role_id": "R001",
       "perm_id": "P058"
->>>>>>> 3b890c0 (a线提交)
     },
     {
       "role_id": "R001",
@@ -1124,19 +998,7 @@
     },
     {
       "role_id": "R002",
-<<<<<<< HEAD
-      "perm_id": "P034"
-    },
-    {
-      "role_id": "R002",
-      "perm_id": "P035"
-    },
-    {
-      "role_id": "R002",
-      "perm_id": "P037"
-=======
       "perm_id": "P038"
->>>>>>> 3b890c0 (a线提交)
     },
     {
       "role_id": "R002",
@@ -1152,19 +1014,11 @@
     },
     {
       "role_id": "R002",
-<<<<<<< HEAD
-      "perm_id": "P050"
-    },
-    {
-      "role_id": "R002",
-      "perm_id": "P053"
-=======
       "perm_id": "P044"
     },
     {
       "role_id": "R002",
       "perm_id": "P046"
->>>>>>> 3b890c0 (a线提交)
     },
     {
       "role_id": "R002",
@@ -1280,13 +1134,6 @@
     },
     {
       "role_id": "R003",
-<<<<<<< HEAD
-      "perm_id": "P055"
-    },
-    {
-      "role_id": "R003",
-      "perm_id": "P058"
-=======
       "perm_id": "P043"
     },
     {
@@ -1304,7 +1151,6 @@
     {
       "role_id": "R003",
       "perm_id": "P063"
->>>>>>> 3b890c0 (a线提交)
     }
   ],
   "user_role": [
@@ -5633,7 +5479,6 @@
       "updated_at": "2026-10-05T17:00:00"
     },
     {
-<<<<<<< HEAD
       "task_id": "T-201",
       "title": "集团交付质量与合规专项·需求梳理与方案设计",
       "detail": "",
@@ -11752,29 +11597,6 @@
       ],
       "created_at": "2026-10-06T09:00:00",
       "updated_at": "2026-10-14T17:00:00"
-=======
-      "task_id": "T-015",
-      "title": "上线前全链路回归与演练",
-      "detail": "发布前全链路回归、回滚演练与上线检查单执行。",
-      "parent_task_id": "",
-      "objective_id": "O-001",
-      "kr_id": "KR-001",
-      "priority": "高",
-      "plan_hours": 24,
-      "plan_start": "2026-10-15",
-      "plan_end": "2026-10-20",
-      "progress": 0,
-      "exec_rate": 0.0,
-      "status": "todo",
-      "source": "dispatch",
-      "is_demo": false,
-      "manual_override": false,
-      "blocked_reason": "",
-      "assignees": [],
-      "plan_items": [],
-      "created_at": "2026-10-14T09:00:00",
-      "updated_at": "2026-10-14T09:00:00"
->>>>>>> 3b890c0 (a线提交)
     }
   ],
   "task_assignee": [
@@ -16753,7 +16575,6 @@
       "reject_reason": "",
       "submitted_at": "2026-10-04T09:00:00",
       "ack_at": ""
-<<<<<<< HEAD
     },
     {
       "plan_id": "DP-201",
@@ -18340,8 +18161,6 @@
       "reject_reason": "",
       "submitted_at": "2026-10-15T09:00:00",
       "ack_at": ""
-=======
->>>>>>> 3b890c0 (a线提交)
     }
   ],
   "daily_plan_item": [
@@ -18498,7 +18317,6 @@
       "progress": 55,
       "sort_no": 1,
       "abnormal_flag": ""
-<<<<<<< HEAD
     },
     {
       "item_id": "DIT-2001",
@@ -22481,8 +22299,6 @@
       "progress": 0.0,
       "sort_no": 3,
       "abnormal_flag": ""
-=======
->>>>>>> 3b890c0 (a线提交)
     }
   ],
   "change_request": [
