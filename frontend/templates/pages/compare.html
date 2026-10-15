@@ -1,0 +1,141 @@
+{% extends 'layout.html' %}
+{% block title %}对比分析 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/c-line.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/pages/compare.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">COMPARISON / COMPARE</p>
+    <h1>对比分析</h1>
+    <p class="subtitle">纵向看同一目标系跨周期的变化，横向看不同负责人与层级的达成落差；三率口径分开，缺失周期按「无数据」呈现。</p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('review_list') }}"><span aria-hidden="true">✓</span>去验收</a>
+    <a class="button button-secondary" href="{{ url_for('retro_list') }}"><span aria-hidden="true">✎</span>去复盘</a>
+  </div>
+</section>
+
+<section class="stats" aria-label="三率分离">
+  <article class="stat-card">
+    <div class="stat-top"><span>目标达成率</span><b aria-hidden="true">◎</b></div>
+    <strong>{% if rates.objective_achievement is not none %}{{ rates.objective_achievement }}%{% else %}—{% endif %}</strong>
+    <div><span>已验收 {{ rates.objective_verified }} / {{ rates.objective_registered }} 项</span><em>按权重加权</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>任务完成率</span><b aria-hidden="true">☰</b></div>
+    <strong>{% if rates.task_rate is not none %}{{ rates.task_rate }}%{% else %}—{% endif %}</strong>
+    <div><span>{{ rates.task_done }} / {{ rates.task_total }} 项任务</span><em>执行口径</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>更新覆盖率</span><b aria-hidden="true">◨</b></div>
+    <strong>{% if rates.coverage_rate is not none %}{{ rates.coverage_rate }}%{% else %}—{% endif %}</strong>
+    <div><span>{{ rates.coverage_updated }} / {{ rates.coverage_total }} 项目标有更新</span><em>过程口径</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>已验收目标</span><b aria-hidden="true">✓</b></div>
+    <strong>{{ rates.objective_verified }}</strong>
+    <div><span>参与横向对比</span><em>仅已定案</em></div>
+  </article>
+</section>
+
+<p class="rates-note">{{ rates_note }}</p>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>纵向对比 · 同一目标系跨周期</h2><p>目标值一律取各周期发布快照，缺失周期不补 0</p></div>
+    {% if series_list %}
+    <div class="chips" aria-label="选择目标系">
+      {% for item in series_list %}
+      <a class="chip {% if item.series_id == current_series %}is-active{% endif %}" href="{{ url_for('compare', series=item.series_id, dim=dim) }}">{{ item.title }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if vertical.rows %}
+  <div class="vertical-head">
+    <h3>{{ vertical.title }}</h3>
+    {% if vertical.delta is not none %}
+    <span class="delta-tag delta-tag--{{ 'up' if vertical.delta >= 0 else 'down' }}">{{ '+' if vertical.delta >= 0 else '' }}{{ vertical.delta }} 个百分点</span>
+    {% endif %}
+  </div>
+  <ul class="bar-list">
+    {% for row in vertical.rows %}
+    <li class="bar-row {% if not row.has_data %}bar-row--empty{% endif %}">
+      <span class="bar-label">{{ row.cycle_name }}{% if row.verified %}<i class="bar-flag">已定案</i>{% endif %}</span>
+      <div class="bar-track">
+        {% if row.has_data %}
+        <div class="bar-fill bar-fill--{{ 'good' if (row.score or 0) >= 90 else ('mid' if (row.score or 0) >= 75 else 'low') }}" style="width: {{ row.score }}%"></div>
+        {% else %}
+        <span class="bar-none">无数据</span>
+        {% endif %}
+      </div>
+      <span class="bar-value">{% if row.has_data %}{{ row.score }}<small>{{ row.grade }}</small>{% else %}—{% endif %}</span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if vertical.warnings %}
+  <div class="warning-box">
+    <h3>不可比提示</h3>
+    <ul>{% for text in vertical.warnings %}<li>{{ text }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+  {% if vertical.rows %}
+  <ul class="legend-row">
+    <li><i class="dot dot-good"></i>≥ 90 卓越</li>
+    <li><i class="dot dot-mid"></i>75 ~ 90 达标</li>
+    <li><i class="dot dot-low"></i>&lt; 75 待改进</li>
+  </ul>
+  {% endif %}
+  {% else %}
+  <p class="empty-block">还没有可对比的目标系。目标发布并产生多个周期的数据后，这里会自动出现对比。</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>横向对比 · 团队与个人</h2><p>只统计已定案目标，按目标权重加权，不做简单平均</p></div>
+    <div class="chips" aria-label="对比维度">
+      <a class="chip {% if dim == 'user' %}is-active{% endif %}" href="{{ url_for('compare', series=current_series, dim='user') }}">按个人</a>
+      <a class="chip {% if dim == 'level' %}is-active{% endif %}" href="{{ url_for('compare', series=current_series, dim='level') }}">按层级</a>
+    </div>
+  </div>
+
+  {% if dim == 'user' %}
+    {% if horizontal_users %}
+    <ul class="bar-list">
+      {% for row in horizontal_users %}
+      <li class="bar-row">
+        <span class="bar-label">{{ row.name }}<i class="bar-sub">{{ row.objective_count }} 项目标</i></span>
+        <div class="bar-track"><div class="bar-fill bar-fill--{{ 'good' if (row.achievement or 0) >= 90 else ('mid' if (row.achievement or 0) >= 75 else 'low') }}" style="width: {{ row.bar }}%"></div></div>
+        <span class="bar-value">{{ row.achievement }}<small>{{ row.grade }}</small></span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="empty-block">还没有已定案的目标可参与横向对比。</p>{% endif %}
+  {% else %}
+    {% if horizontal_levels %}
+    <ul class="bar-list">
+      {% for row in horizontal_levels %}
+      <li class="bar-row">
+        <span class="bar-label">{{ row.label }}<i class="bar-sub">{{ row.objective_count }} 项目标</i></span>
+        <div class="bar-track"><div class="bar-fill bar-fill--{{ 'good' if (row.achievement or 0) >= 90 else ('mid' if (row.achievement or 0) >= 75 else 'low') }}" style="width: {{ row.achievement }}%"></div></div>
+        <span class="bar-value">{{ row.achievement }}<small>{{ row.grade }}</small></span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="empty-block">还没有已定案的目标可参与横向对比。</p>{% endif %}
+  {% endif %}
+</section>
+
+<section class="panel compare-rules">
+  <div class="panel-heading"><div><h2>口径说明</h2><p>对比结果可自证，避免误读</p></div><span class="badge-demo">口径可自证</span></div>
+  <ul class="note-list">
+    <li><strong>三率分离</strong>：目标达成率、任务完成率、更新覆盖率定义不同，不能互相替代。</li>
+    <li><strong>加权而非平均</strong>：目标达成率按目标权重加权；个人维度只统计已定案目标。</li>
+    <li><strong>缺失即无数据</strong>：周期缺失不补 0，避免把「没有数据」误读成「表现差」。</li>
+    <li><strong>档位阈值</strong>：{{ grade_bands | join('；') }}。</li>
+  </ul>
+</section>
+
+{% endblock %}

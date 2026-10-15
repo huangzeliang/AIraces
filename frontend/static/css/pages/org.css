@@ -1,0 +1,52 @@
+/* C 线 · 组织与角色页面专属样式；公共部分见 c-line.css */
+
+.button-danger{background:var(--danger-soft);border-color:transparent;color:var(--danger)}
+.button-danger:hover{border-color:var(--danger)}
+
+/* ---------- 组织树 ---------- */
+.dept-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.dept-row{display:grid;grid-template-columns:minmax(0,1fr) 92px 152px;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:15px;background:var(--bg)}
+.dept-row.is-child{background:var(--surface)}
+.dept-main{min-width:0}
+.dept-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dept-caret{color:var(--accent);font-size:11px;font-weight:900}
+.dept-caret.is-leaf{color:var(--subtle)}
+.dept-title strong{font-size:13px}
+.dept-title small{font-size:10px;color:var(--subtle)}
+.tag{padding:2px 8px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-size:9.5px;font-weight:900;font-style:normal;white-space:nowrap}
+.tag-off{background:var(--danger-soft);color:var(--danger)}
+.dept-meta{margin:7px 0 0;display:flex;gap:14px;flex-wrap:wrap;font-size:10.5px;color:var(--subtle)}
+.dept-score{text-align:center}
+.dept-score b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.dept-score small{font-size:10px;font-weight:800;color:var(--muted)}
+.dept-actions{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.dept-actions form{margin:0;display:flex}
+.dept-actions .button{height:34px;padding:0 13px}
+
+/* ---------- 部门表单 ---------- */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:16px}
+.form-actions{grid-column:1 / -1;display:flex;gap:10px;align-items:center}
+
+/* ---------- 成员归属表 ---------- */
+.member-table{display:grid;gap:8px}
+.member-head,.member-row{display:grid;grid-template-columns:minmax(140px,1.3fr) 74px minmax(120px,1fr) 96px minmax(110px,.9fr) 74px;align-items:center;gap:12px}
+.member-head{padding:0 16px 4px;font-size:10px;font-weight:900;color:var(--subtle);letter-spacing:.04em}
+.member-row{padding:12px 16px;border:1px solid var(--border);border-radius:15px;background:var(--bg);margin:0}
+.member-name{min-width:0}
+.member-name strong{display:block;font-size:12.5px}
+.member-name small{display:block;font-size:10px;color:var(--subtle);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member-name .tag{margin-top:4px;display:inline-block}
+.member-role{font-size:11px;font-weight:800;color:var(--muted)}
+.member-row select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);color:var(--text);font:inherit;font-size:11.5px}
+.member-row .button{height:34px;padding:0 13px;justify-content:center}
+
+/* ---------- 窄屏 ---------- */
+@media(max-width:1100px){
+  .member-head{display:none}
+  .member-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);row-gap:10px}
+  .member-row .button{grid-column:1 / -1}
+}
+@media(max-width:1000px){
+  .dept-row{grid-template-columns:minmax(0,1fr) 84px;row-gap:10px}
+  .dept-actions{grid-column:1 / -1;justify-content:flex-start}
+}

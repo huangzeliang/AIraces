@@ -1,0 +1,57 @@
+/* C 线 · 周期与字典页面专属样式；公共部分见 c-line.css */
+
+.button-danger{background:var(--danger-soft);border-color:transparent;color:var(--danger)}
+.button-danger:hover{border-color:var(--danger)}
+.button:disabled{background:var(--bg);color:var(--subtle);border-color:var(--border);cursor:not-allowed}
+
+/* ---------- 周期列表 ---------- */
+.cycle-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.cycle-row{display:flex;align-items:center;gap:16px;padding:15px 16px;border:1px solid var(--border);border-radius:15px;background:var(--bg);flex-wrap:wrap}
+.cycle-row.is-locked{border-left:5px solid var(--accent)}
+.cycle-main{min-width:0;flex:1 1 320px}
+.cycle-title{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.cycle-title strong{font-size:13px}
+.tag{padding:2px 8px;border-radius:7px;font-size:9.5px;font-weight:900;font-style:normal;white-space:nowrap;background:var(--accent-soft);color:var(--accent)}
+.tag-type{background:var(--purple-soft);color:var(--purple)}
+.tag-status--run{background:var(--green-soft);color:var(--green)}
+.tag-status--done{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.tag-status--idle{background:var(--prio-mid-soft);color:var(--prio-mid)}
+.tag-lock{background:var(--accent-soft);color:var(--accent)}
+.cycle-meta{margin:7px 0 0;display:flex;gap:14px;flex-wrap:wrap;font-size:10.5px;color:var(--subtle)}
+.cycle-meta span:first-child{font-weight:800;color:var(--muted)}
+.cycle-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.cycle-actions form{margin:0;display:flex}
+.cycle-actions .button{height:34px;padding:0 14px}
+
+/* ---------- 周期表单 ---------- */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:16px}
+.form-actions{grid-column:1 / -1;display:flex;gap:10px;align-items:center}
+
+/* ---------- 数据字典 ---------- */
+.dict-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+.dict-card{padding:15px 16px;border:1px solid var(--border);border-radius:15px;background:var(--bg)}
+.dict-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:11px}
+.dict-head strong{font-size:12.5px}
+.dict-head span{font-size:10px;font-weight:800;color:var(--subtle)}
+.dict-tags{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.dict-tags li{padding:5px 10px;border-radius:9px;background:var(--surface);border:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text)}
+
+/* ---------- 口径参考 ---------- */
+.ref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.ref-grid h3{margin:0 0 11px;font-size:12.5px;color:var(--muted)}
+.ref-list{margin:0;display:grid;gap:8px}
+.ref-list>div{display:grid;gap:3px;padding:10px 13px;border-radius:12px;background:var(--bg)}
+.ref-list dt{font-size:11.5px;font-weight:800;color:var(--text)}
+.ref-list dd{margin:0;font-size:10.5px;line-height:1.65;color:var(--muted)}
+.ref-tags{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.ref-tags li{padding:6px 11px;border-radius:9px;background:var(--accent-soft);color:var(--accent);font-size:10.5px;font-weight:800}
+.ref-note{margin:12px 0 0;font-size:10.5px;line-height:1.7;color:var(--muted)}
+
+/* ---------- 窄屏 ---------- */
+@media(max-width:1000px){
+  .cycle-actions{width:100%;margin-left:0}
+}
+@media(max-width:760px){
+  .cycle-row{flex-direction:column;align-items:flex-start}
+  .cycle-actions .button,.cycle-actions form,.cycle-actions form .button{width:100%}
+}

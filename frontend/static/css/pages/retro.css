@@ -1,0 +1,80 @@
+/* C 线 · 结构化复盘页面专属样式；公共部分见 c-line.css */
+
+/* ---------- 列表 ---------- */
+.retro-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.retro-row{display:grid;grid-template-columns:minmax(0,1fr) 88px 132px;align-items:center;gap:16px;padding:15px 18px;border:1px solid var(--border);border-left:5px solid var(--accent);border-radius:15px;background:var(--bg)}
+.retro-row--done{border-left-color:var(--green)}
+.retro-main{min-width:0}
+.retro-title{display:flex;align-items:center;gap:9px;min-width:0}
+.retro-title strong{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.level-tag{flex:none;padding:2px 7px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-size:10px;font-weight:800}
+.retro-meta{margin:6px 0 0;display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:var(--subtle)}
+.retro-score{text-align:center}
+.retro-score b{display:block;font-size:23px;font-variant-numeric:tabular-nums}
+.retro-score small{font-size:10px;font-weight:800;color:var(--muted)}
+.retro-action{text-align:right}
+.retro-action .button{height:34px;padding:0 14px}
+
+/* ---------- 四段结构说明 ---------- */
+.retro-rules .section-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.section-steps li{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:12px;background:var(--bg)}
+.step-index{flex:none;width:22px;height:22px;display:grid;place-items:center;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:900}
+.section-steps strong{font-size:12px}
+.section-steps p{margin:3px 0 0;font-size:11px;color:var(--muted);line-height:1.6}
+
+/* ---------- 详情：概览 ---------- */
+.retro-hero{display:grid;grid-template-columns:184px minmax(0,1fr);gap:24px;align-items:center;padding:22px 26px;margin-bottom:18px;border:1px solid var(--border);border-radius:21px;background:linear-gradient(118deg,var(--green-soft),var(--surface));box-shadow:var(--card-shadow)}
+.retro-hero-score{display:grid;justify-items:center;gap:4px;text-align:center;padding-right:22px;border-right:1px solid var(--border)}
+.retro-hero-score .score-value{font-size:42px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.retro-hero-score .score-unit{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:1px}
+.retro-hero-score .score-grade{padding:4px 12px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;font-weight:900}
+[data-theme="night"] .retro-hero-score .score-grade{color:#062221}
+.hero-facts{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 20px}
+.hero-facts li{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-radius:11px;background:var(--surface);font-size:11px}
+.hero-facts span{color:var(--muted)}
+.hero-facts strong{font-variant-numeric:tabular-nums}
+
+/* ---------- 结果对照表 ---------- */
+.retro-table{width:100%;border-collapse:collapse;font-size:12px}
+.retro-table th{text-align:left;padding:9px 12px;font-size:10px;font-weight:800;color:var(--muted);border-bottom:1px solid var(--border)}
+.retro-table td{padding:11px 12px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+.retro-table tr:last-child td{border-bottom:0}
+.retro-table .cell-score{font-weight:900}
+.retro-table tr.is-weak .cell-score{color:var(--danger)}
+.retro-table tr.is-strong .cell-score{color:var(--green)}
+.retro-warn{margin:14px 0 0;padding:11px 14px;border-radius:12px;background:var(--danger-soft);font-size:11px;line-height:1.7;color:var(--text)}
+
+/* ---------- 未解锁 ---------- */
+.locked-panel{text-align:center;padding:46px 24px}
+.locked-panel .empty-icon{margin:0 0 10px;font-size:32px;color:var(--muted)}
+.locked-panel h2{margin:0 0 8px;font-size:17px}
+.locked-panel p{margin:0 0 18px;font-size:12px;color:var(--muted)}
+
+/* ---------- 复盘表单 ---------- */
+.section-grid{display:grid;gap:16px}
+.readonly-text{margin:0;padding:11px 14px;border-radius:12px;background:var(--bg);font-size:12px;line-height:1.8;white-space:pre-wrap}
+#retro-form .panel-heading .heading-actions{margin:0}
+
+/* ---------- 改进项 ---------- */
+#improve-list{display:grid;gap:10px}
+.improve-row{display:grid;grid-template-columns:minmax(0,1fr) 96px 132px auto auto;gap:10px;align-items:center;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--bg)}
+.improve-text{padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);color:var(--text);font:inherit;font-size:12px;min-width:0}
+.improve-row select{padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);color:var(--text);font:inherit;font-size:12px}
+.improve-remove{width:34px;height:34px;border:1px solid var(--border);border-radius:11px;background:var(--surface);color:var(--muted);font-size:18px;line-height:1}
+.improve-remove:hover{border-color:var(--danger);color:var(--danger)}
+.convert-btn{height:34px;padding:0 13px;white-space:nowrap}
+.convert-done{padding:5px 11px;border-radius:9px;background:var(--green-soft);color:var(--green);font-size:11px;font-weight:800;white-space:nowrap}
+.improve-readonly{display:grid;gap:3px}
+.improve-readonly strong{font-size:12px}
+.improve-readonly small{font-size:10px;color:var(--subtle)}
+
+@media(max-width:1000px){
+  .retro-row{grid-template-columns:minmax(0,1fr) 80px;row-gap:12px}
+  .retro-row .retro-action{grid-column:1 / -1;text-align:left}
+  .improve-row{grid-template-columns:minmax(0,1fr);}
+}
+@media(max-width:760px){
+  .retro-hero{grid-template-columns:minmax(0,1fr)}
+  .retro-hero-score{padding:0 0 18px;border-right:0;border-bottom:1px solid var(--border)}
+  .hero-facts{grid-template-columns:minmax(0,1fr)}
+}

@@ -1,0 +1,225 @@
+{% extends 'layout.html' %}
+{% block title %}{{ objective.title }} · 验收 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/c-line.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/pages/review.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">ACCEPTANCE / REVIEW / {{ objective.objective_id }}</p>
+    <h1>{{ objective.title }}</h1>
+    <p class="subtitle">
+      {{ objective.level_label or '个人级' }} ·
+      负责人 {{ owner.name or '未指派' }} ·
+      周期 {{ cycle.name or '—' }} ·
+      权重 {{ objective.weight }}
+      {% if parent %} · 上级目标「{{ parent.title }}」{% endif %}
+    </p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('review_list') }}"><span aria-hidden="true">←</span>返回台账</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="review-hero">
+  <div class="review-hero-score">
+    <span class="score-value">{% if achievement is not none %}{{ achievement }}{% else %}—{% endif %}</span>
+    <span class="score-unit">达成度</span>
+    <span class="score-grade">{{ grade }}</span>
+  </div>
+  <div class="review-hero-body">
+    <ul class="hero-facts">
+      <li><span>目标状态</span><strong>{{ objective.status }}</strong></li>
+      <li><span>发布快照</span><strong>{{ snapshot.published_at or '—' }}</strong></li>
+      <li><span>自评分</span><strong>{{ review.self_score if review and review.self_score is not none else '—' }}</strong></li>
+      <li><span>终评分</span><strong>{{ review.final_score if review and review.final_score is not none else '待定' }}</strong></li>
+    </ul>
+    <p class="hero-note">
+      验收对照 <code>published_snapshot</code> 判定：目标值取发布时冻结值，实际值取本次验收录入值。
+      {% if review and review.snapshot_at %}本次提报快照时间：{{ review.snapshot_at }}。{% endif %}
+    </p>
+  </div>
+</section>
+
+<form method="post" action="{{ url_for('review_submit', objective_id=objective.objective_id) }}" id="review-form">
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>关键结果对照</h2><p>逐条说明完成情况并附证据；达成度由系统按口径算出</p></div>
+    <span class="badge-demo">{{ rows | length }} 条 KR</span>
+  </div>
+
+  {% for row in rows %}
+  <article class="kr-block kr-block--{{ row.metric_type }}">
+    <header class="kr-head">
+      <div class="kr-title">
+        <span class="kr-code">{{ row.kr_id }}</span>
+        <strong>{{ row.title }}</strong>
+      </div>
+      <div class="kr-tags">
+        <span class="metric-tag metric-tag--{{ row.metric_type }}">{{ row.metric_label }}</span>
+        <span class="weight-tag">权重 {{ row.weight }}</span>
+      </div>
+      <div class="kr-score">
+        <b>{{ row.final_achievement if row.locked else row.draft_achievement }}</b>
+        <small>{{ '定案' if row.locked else '预估' }}</small>
+      </div>
+    </header>
+
+    <dl class="kr-figures">
+      <div><dt>目标（快照）</dt><dd>{{ row.target_text }}</dd></div>
+      <div><dt>当前执行值</dt><dd>{{ row.current_text }}</dd></div>
+      <div><dt>验收录入</dt><dd>{% if row.locked %}{{ row.reviewed_text or '—' }}{% else %}待录入{% endif %}</dd></div>
+      <div><dt>算法口径</dt><dd class="kr-formula">{{ row.formula }}</dd></div>
+    </dl>
+
+    {% if row.metric_type == 'milestone' and row.milestones %}
+    <ul class="kr-milestones">
+      {% for stone in row.milestones %}
+      <li class="{{ 'is-done' if stone.done else '' }}"><span aria-hidden="true">{{ '✓' if stone.done else '○' }}</span>{{ stone.name }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if row.locked %}
+    <div class="kr-record">
+      <p class="kr-statement">{{ row.statement or '未填写说明' }}</p>
+      {% if row.evidence %}
+      <ul class="evidence-list">
+        {% for proof in row.evidence %}
+        <li><span aria-hidden="true">⛓</span><strong>{{ proof.name }}</strong>{% if proof.url and proof.url != '#' %}<a href="{{ proof.url }}">{{ proof.url }}</a>{% endif %}{% if proof.note %}<small>{{ proof.note }}</small>{% endif %}</li>
+        {% endfor %}
+      </ul>
+      {% else %}<p class="kr-hint">未附证据</p>{% endif %}
+    </div>
+    {% elif can_submit %}
+    <div class="kr-inputs">
+      <div class="field">
+        <span class="field-label">验收实际值</span>
+        {% if row.metric_type == 'qualitative' %}
+        <select name="level_{{ row.kr_id }}">
+          {% for level in qualitative_levels %}
+          <option value="{{ level }}" {% if level == (row.reviewed_level or row.qualitative_level) %}selected{% endif %}>{{ level }}</option>
+          {% endfor %}
+        </select>
+        {% elif row.metric_type == 'milestone' %}
+        <input type="text" value="按里程碑完成情况自动计算" disabled>
+        {% else %}
+        <input type="number" step="0.1" name="reviewed_{{ row.kr_id }}"
+               value="{{ row.reviewed_value if row.reviewed_value is not none else '' }}"
+               placeholder="留空则按当前执行值 {{ row.current_text }} 计算">
+        {% endif %}
+      </div>
+      <div class="field field-wide">
+        <span class="field-label">完成说明</span>
+        <textarea name="statement_{{ row.kr_id }}" rows="2" placeholder="说明本条的完成情况与偏差原因">{{ row.statement }}</textarea>
+      </div>
+      <div class="field field-wide">
+        <span class="field-label">证据（每行一条：名称 | 链接 | 备注）</span>
+        <textarea name="evidence_{{ row.kr_id }}" rows="2" placeholder="执行记录 | https://... | 验收现场留档">{{ row.evidence_text }}</textarea>
+      </div>
+    </div>
+    {% endif %}
+  </article>
+  {% endfor %}
+
+  {% if can_submit %}
+  <div class="review-submit">
+    <div class="field">
+      <span class="field-label">自评分（0-100）</span>
+      <input type="number" name="self_score" min="0" max="100" step="1" required
+             value="{{ review.self_score if review and review.self_score is not none else '' }}">
+      <small class="field-hint">与终评相差超过 {{ diff_limit | int }} 分时，评审人必须填写差异说明</small>
+    </div>
+    <div class="submit-actions">
+      <button class="button button-secondary" type="button" id="precheck-btn" aria-expanded="false" aria-controls="precheck-panel">AI 证据预审</button>
+      <button class="button button-primary" type="submit">{{ '重新提报' if review else '提交提报' }}</button>
+    </div>
+    <p class="submit-hint">提交后进入待验收，等待管理员评审定级；定级后不可再改。</p>
+  </div>
+  {% endif %}
+</section>
+</form>
+
+<section class="panel precheck-panel" id="precheck-panel" hidden>
+  <div class="panel-heading">
+    <div><h2>AI 证据预审</h2><p>只提示证据缺口与数据风险，不参与终评分数</p></div>
+    <span class="precheck-source" id="precheck-source"></span>
+  </div>
+  <div id="precheck-idle" class="precheck-idle">点击「AI 证据预审」，系统会先按规则核对证据完备性，再交由大模型给出风险提示。</div>
+  <div id="precheck-body" hidden>
+    <ul class="precheck-lines" id="precheck-lines"></ul>
+    <div class="precheck-risks" id="precheck-risks-wrap" hidden>
+      <h3>风险提示</h3>
+      <ul id="precheck-risks"></ul>
+    </div>
+    <p class="precheck-advice" id="precheck-advice"></p>
+  </div>
+</section>
+
+{% if review and review.ai_precheck and review.ai_precheck.lines %}
+<section class="panel">
+  <div class="panel-heading"><div><h2>提报时留存的预审意见</h2><p>提报当下生成的结论，仅作参考</p></div></div>
+  <ul class="precheck-lines">{% for line in review.ai_precheck.lines %}<li>{{ line }}</li>{% endfor %}</ul>
+</section>
+{% endif %}
+
+{% if can_score %}
+<section class="panel score-panel">
+  <div class="panel-heading">
+    <div><h2>评审定级</h2><p>终评分数决定档位；AI 预审结论不作为评分依据</p></div>
+    <span class="badge-demo">管理员</span>
+  </div>
+  <form method="post" action="{{ url_for('review_score', objective_id=objective.objective_id) }}" id="score-form">
+    <div class="score-grid">
+      <div class="field">
+        <span class="field-label">系统达成度</span>
+        <input type="text" value="{{ achievement }}" disabled>
+      </div>
+      <div class="field">
+        <span class="field-label">自评分</span>
+        <input type="text" value="{{ review.self_score }}" disabled>
+      </div>
+      <div class="field">
+        <span class="field-label">终评分数（0-100）</span>
+        <input type="number" name="final_score" min="0" max="100" step="1" required id="final-score">
+        <small class="field-hint">档位：{{ grade_bands | join('；') }}</small>
+      </div>
+    </div>
+    <div class="field field-wide" id="diff-wrap" hidden>
+      <span class="field-label">差异说明（自评与终评相差超过 {{ diff_limit | int }} 分时必填）</span>
+      <textarea name="diff_note" rows="3" placeholder="说明下修或上修的依据"></textarea>
+    </div>
+    <div class="submit-actions">
+      <button class="button button-primary" type="submit">完成定级</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+{% if review and review.final_score is not none %}
+<section class="panel outcome-panel">
+  <div class="panel-heading"><div><h2>验收结论</h2><p>已定案，不可再修改提报</p></div></div>
+  <ul class="outcome-list">
+    <li><span>系统达成度</span><strong>{{ review.achievement }}</strong></li>
+    <li><span>自评分</span><strong>{{ review.self_score }}</strong></li>
+    <li><span>终评分</span><strong>{{ review.final_score }}</strong></li>
+    <li><span>档位</span><strong>{{ review.grade }}</strong></li>
+    {% if self_final_diff is not none %}<li><span>自评终评差</span><strong>{{ self_final_diff }}</strong></li>{% endif %}
+  </ul>
+  {% if review.diff_note %}<p class="outcome-note"><b>差异说明：</b>{{ review.diff_note }}</p>{% endif %}
+  <div class="submit-actions">
+    {% if retro %}
+    <a class="button button-secondary" href="{{ url_for('retro_detail', objective_id=objective.objective_id) }}">查看复盘</a>
+    {% else %}
+    <a class="button button-primary" href="{{ url_for('retro_detail', objective_id=objective.objective_id) }}">去写复盘</a>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<script type="application/json" id="review-data">{{ {"objective_id": objective.objective_id, "self_score": (review.self_score if review else None), "diff_limit": diff_limit} | tojson }}</script>
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/review.js') }}"></script>{% endblock %}

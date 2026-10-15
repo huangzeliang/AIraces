@@ -1,0 +1,70 @@
+/* C 线（验收评估）三页公共样式：完成与验收 / 结构化复盘 / 对比分析。
+   只使用 tokens.css 的语义变量，双主题自动适配；页面专属样式各自放 review|retro|compare.css。 */
+
+/* ---------- 按钮与提示 ---------- */
+.button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 16px;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);color:var(--text);font:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:background .18s,border-color .18s,color .18s}
+.button-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.button-primary:hover{filter:brightness(1.07)}
+[data-theme="night"] .button-primary{color:#062221}
+.button-secondary{background:var(--surface);border-color:var(--border);color:var(--text)}
+.button-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.button:disabled{opacity:.6;cursor:progress}
+.notice{padding:11px 16px;margin-bottom:14px;border:1px solid var(--border);border-radius:12px;font-size:12px;font-weight:700}
+.notice.ok{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.notice.error{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+
+/* ---------- 面板 ---------- */
+.panel{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--surface);box-shadow:var(--card-shadow);padding:20px;margin-bottom:18px}
+.panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.panel-heading h2{font-size:15px;margin:0}
+.panel-heading p{margin:4px 0 0;font-size:11px;color:var(--muted)}
+.badge-demo{display:inline-block;padding:3px 8px;border-radius:8px;background:var(--purple-soft);color:var(--purple);font-size:10px;font-weight:800;font-style:normal;white-space:nowrap}
+
+/* ---------- KPI 卡 ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:18px}
+.stat-card{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--surface);box-shadow:var(--card-shadow);padding:18px 20px}
+.stat-card .stat-top{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;color:var(--muted)}
+.stat-card .stat-top b{width:31px;height:31px;display:grid;place-items:center;border-radius:11px;background:var(--accent-soft);color:var(--accent);font-size:15px}
+.stat-card strong{display:block;font-size:31px;line-height:1.1;margin:12px 0 6px;font-variant-numeric:tabular-nums}
+.stat-card>div:last-child{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--subtle)}
+.stat-card>div:last-child em{font-style:normal;font-weight:800;color:var(--accent)}
+.stat-card:nth-child(2) .stat-top b{background:var(--prio-mid-soft);color:var(--prio-mid)}
+.stat-card:nth-child(3) .stat-top b{background:var(--green-soft);color:var(--green)}
+.stat-card:nth-child(4) .stat-top b{background:var(--purple-soft);color:var(--purple)}
+
+/* ---------- 筛选 chips ---------- */
+.chips{display:flex;gap:6px;padding:4px;border:1px solid var(--border);border-radius:14px;background:var(--surface);flex-wrap:wrap}
+.chip{padding:7px 13px;border-radius:10px;font-size:12px;font-weight:800;color:var(--muted);transition:background .18s,color .18s}
+.chip:hover{background:var(--accent-soft);color:var(--accent)}
+.chip.is-active{background:var(--accent);color:#fff}
+[data-theme="night"] .chip.is-active{color:#062221}
+
+/* ---------- 表单控件 ---------- */
+.field{display:grid;gap:6px;align-content:start}
+.field-label{font-size:11px;font-weight:800;color:var(--muted)}
+.field-hint{font-size:10px;color:var(--subtle)}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);color:var(--text);font:inherit;font-size:12px;resize:vertical}
+.field input:disabled,.field input[disabled]{background:var(--bg);color:var(--muted)}
+.field-wide{grid-column:1 / -1}
+
+/* ---------- 三率脚注与口径清单（多页共用） ---------- */
+.rates-note{margin:-6px 0 18px;padding:11px 16px;border-radius:12px;background:var(--accent-soft);font-size:11px;line-height:1.7;color:var(--text)}
+.note-list{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.note-list li{position:relative;padding:11px 14px 11px 32px;border-radius:12px;background:var(--bg);font-size:12px;line-height:1.7;color:var(--muted)}
+.note-list li:before{content:"◈";position:absolute;left:13px;color:var(--accent);font-size:11px}
+.note-list strong{color:var(--text)}
+
+/* ---------- 空态 ---------- */
+.empty-block{text-align:center;padding:44px 20px;color:var(--muted);font-size:12px}
+.empty-block .empty-icon{margin:0 0 8px;font-size:30px;color:var(--accent)}
+
+/* ---------- 窄屏 ---------- */
+@media(max-width:1000px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .stats{grid-template-columns:minmax(0,1fr)}
+}
+@media(prefers-reduced-motion:reduce){
+  .button,.chip{transition:none}
+}

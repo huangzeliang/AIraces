@@ -2937,5 +2937,1987 @@
     "last_scan_at": "2026-10-15T17:07:31",
     "last_created": 3,
     "scans": 6
-  }
+  },
+  "cycles": [
+    {
+      "cycle_id": "CY-2026Q3",
+      "name": "2026 Q3",
+      "type": "季度",
+      "start_at": "2026-07-01T00:00:00",
+      "end_at": "2026-09-30T23:59:59",
+      "status": "已结束",
+      "note": "上一周期，作为纵向对比基准"
+    },
+    {
+      "cycle_id": "CY-2026Q4",
+      "name": "2026 Q4",
+      "type": "季度",
+      "start_at": "2026-10-01T00:00:00",
+      "end_at": "2026-12-31T23:59:59",
+      "status": "进行中",
+      "note": "当前周期"
+    }
+  ],
+  "objectives": [
+    {
+      "objective_id": "OBJ-100",
+      "series_id": "SR-100",
+      "parent_id": "",
+      "level": 1,
+      "level_label": "公司级",
+      "title": "把季度目标达成率提升到 85%",
+      "desc": "",
+      "user_id": "U001",
+      "cycle_id": "CY-2026Q4",
+      "weight": 30,
+      "status": "执行中",
+      "key_results": [
+        {
+          "kr_id": "KR-1001",
+          "title": "季度目标达成率",
+          "metric_type": "forward",
+          "weight": 2,
+          "target_value": 85,
+          "unit": "%",
+          "current_value": 79,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-1002",
+          "title": "目标按期发布率",
+          "metric_type": "forward",
+          "weight": 1,
+          "target_value": 95,
+          "unit": "%",
+          "current_value": 92,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-1003",
+          "title": "闭环机制评审通过",
+          "metric_type": "milestone",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": [
+            {
+              "name": "方案定稿",
+              "done": true
+            },
+            {
+              "name": "试点验证",
+              "done": true
+            },
+            {
+              "name": "全量推广",
+              "done": false
+            }
+          ]
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-10-01T09:00:00",
+      "updated_at": "2026-10-15T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-10-01T09:00:00",
+        "title": "把季度目标达成率提升到 85%",
+        "weight": 30,
+        "key_results": [
+          {
+            "kr_id": "KR-1001",
+            "title": "季度目标达成率",
+            "metric_type": "forward",
+            "weight": 2,
+            "target_value": 85,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-1002",
+            "title": "目标按期发布率",
+            "metric_type": "forward",
+            "weight": 1,
+            "target_value": 95,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-1003",
+            "title": "闭环机制评审通过",
+            "metric_type": "milestone",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "",
+            "milestones": [
+              {
+                "name": "方案定稿",
+                "done": true
+              },
+              {
+                "name": "试点验证",
+                "done": true
+              },
+              {
+                "name": "全量推广",
+                "done": false
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "OBJ-101",
+      "series_id": "SR-101",
+      "parent_id": "",
+      "level": 1,
+      "level_label": "公司级",
+      "title": "沉淀一套可复用的目标闭环机制",
+      "desc": "",
+      "user_id": "U001",
+      "cycle_id": "CY-2026Q4",
+      "weight": 20,
+      "status": "待验收",
+      "key_results": [
+        {
+          "kr_id": "KR-1011",
+          "title": "机制文档沉淀",
+          "metric_type": "milestone",
+          "weight": 2,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": [
+            {
+              "name": "框架成文",
+              "done": true
+            },
+            {
+              "name": "评审定稿",
+              "done": true
+            },
+            {
+              "name": "宣贯落地",
+              "done": true
+            }
+          ]
+        },
+        {
+          "kr_id": "KR-1012",
+          "title": "部门覆盖率",
+          "metric_type": "forward",
+          "weight": 1,
+          "target_value": 100,
+          "unit": "%",
+          "current_value": 78,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-1013",
+          "title": "机制有效性评价",
+          "metric_type": "qualitative",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "良好",
+          "reviewed_level": "",
+          "milestones": []
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-10-01T09:00:00",
+      "updated_at": "2026-10-15T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-10-01T09:00:00",
+        "title": "沉淀一套可复用的目标闭环机制",
+        "weight": 20,
+        "key_results": [
+          {
+            "kr_id": "KR-1011",
+            "title": "机制文档沉淀",
+            "metric_type": "milestone",
+            "weight": 2,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "",
+            "milestones": [
+              {
+                "name": "框架成文",
+                "done": true
+              },
+              {
+                "name": "评审定稿",
+                "done": true
+              },
+              {
+                "name": "宣贯落地",
+                "done": true
+              }
+            ]
+          },
+          {
+            "kr_id": "KR-1012",
+            "title": "部门覆盖率",
+            "metric_type": "forward",
+            "weight": 1,
+            "target_value": 100,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-1013",
+            "title": "机制有效性评价",
+            "metric_type": "qualitative",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "良好",
+            "milestones": []
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "OBJ-200",
+      "series_id": "SR-200",
+      "parent_id": "OBJ-100",
+      "level": 2,
+      "level_label": "部门级",
+      "title": "提升客户响应速度",
+      "desc": "",
+      "user_id": "U002",
+      "cycle_id": "CY-2026Q4",
+      "weight": 25,
+      "status": "已验收",
+      "key_results": [
+        {
+          "kr_id": "KR-2001",
+          "title": "平均首次响应时长",
+          "metric_type": "reverse",
+          "weight": 2,
+          "target_value": 4,
+          "unit": " 小时",
+          "current_value": 4.4,
+          "reviewed_value": 4.4,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-2002",
+          "title": "客户问题一次解决率",
+          "metric_type": "forward",
+          "weight": 1,
+          "target_value": 80,
+          "unit": "%",
+          "current_value": 76,
+          "reviewed_value": 76,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-2003",
+          "title": "响应规范落地",
+          "metric_type": "milestone",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": [
+            {
+              "name": "规范发布",
+              "done": true
+            },
+            {
+              "name": "全组培训",
+              "done": true
+            },
+            {
+              "name": "抽检达标",
+              "done": true
+            }
+          ]
+        },
+        {
+          "kr_id": "KR-2004",
+          "title": "客户主观评价",
+          "metric_type": "qualitative",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "良好",
+          "reviewed_level": "达标",
+          "milestones": []
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-10-01T09:00:00",
+      "updated_at": "2026-10-15T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-10-01T09:00:00",
+        "title": "提升客户响应速度",
+        "weight": 25,
+        "key_results": [
+          {
+            "kr_id": "KR-2001",
+            "title": "平均首次响应时长",
+            "metric_type": "reverse",
+            "weight": 2,
+            "target_value": 4,
+            "unit": " 小时",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-2002",
+            "title": "客户问题一次解决率",
+            "metric_type": "forward",
+            "weight": 1,
+            "target_value": 80,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-2003",
+            "title": "响应规范落地",
+            "metric_type": "milestone",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "",
+            "milestones": [
+              {
+                "name": "规范发布",
+                "done": true
+              },
+              {
+                "name": "全组培训",
+                "done": true
+              },
+              {
+                "name": "抽检达标",
+                "done": true
+              }
+            ]
+          },
+          {
+            "kr_id": "KR-2004",
+            "title": "客户主观评价",
+            "metric_type": "qualitative",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "良好",
+            "milestones": []
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "OBJ-201",
+      "series_id": "SR-200",
+      "parent_id": "OBJ-100",
+      "level": 2,
+      "level_label": "部门级",
+      "title": "提升客户响应速度",
+      "desc": "",
+      "user_id": "U002",
+      "cycle_id": "CY-2026Q3",
+      "weight": 25,
+      "status": "已复盘",
+      "key_results": [
+        {
+          "kr_id": "KR-2011",
+          "title": "平均首次响应时长",
+          "metric_type": "reverse",
+          "weight": 2,
+          "target_value": 6,
+          "unit": " 小时",
+          "current_value": 7,
+          "reviewed_value": 7,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-2012",
+          "title": "客户问题一次解决率",
+          "metric_type": "forward",
+          "weight": 1,
+          "target_value": 75,
+          "unit": "%",
+          "current_value": 71,
+          "reviewed_value": 71,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-2013",
+          "title": "响应规范落地",
+          "metric_type": "milestone",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": [
+            {
+              "name": "规范发布",
+              "done": true
+            },
+            {
+              "name": "全组培训",
+              "done": false
+            },
+            {
+              "name": "抽检达标",
+              "done": false
+            }
+          ]
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-07-01T09:00:00",
+      "updated_at": "2026-10-15T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-07-01T09:00:00",
+        "title": "提升客户响应速度",
+        "weight": 25,
+        "key_results": [
+          {
+            "kr_id": "KR-2011",
+            "title": "平均首次响应时长",
+            "metric_type": "reverse",
+            "weight": 2,
+            "target_value": 6,
+            "unit": " 小时",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-2012",
+            "title": "客户问题一次解决率",
+            "metric_type": "forward",
+            "weight": 1,
+            "target_value": 75,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-2013",
+            "title": "响应规范落地",
+            "metric_type": "milestone",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "",
+            "milestones": [
+              {
+                "name": "规范发布",
+                "done": true
+              },
+              {
+                "name": "全组培训",
+                "done": false
+              },
+              {
+                "name": "抽检达标",
+                "done": false
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "OBJ-202",
+      "series_id": "SR-202",
+      "parent_id": "OBJ-100",
+      "level": 2,
+      "level_label": "部门级",
+      "title": "压降线上故障率",
+      "desc": "",
+      "user_id": "U004",
+      "cycle_id": "CY-2026Q4",
+      "weight": 25,
+      "status": "已验收",
+      "key_results": [
+        {
+          "kr_id": "KR-2021",
+          "title": "线上故障次数",
+          "metric_type": "reverse",
+          "weight": 2,
+          "target_value": 2,
+          "unit": " 次",
+          "current_value": 3.4,
+          "reviewed_value": 3.4,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-2022",
+          "title": "故障平均恢复时长",
+          "metric_type": "reverse",
+          "weight": 1,
+          "target_value": 30,
+          "unit": " 分钟",
+          "current_value": 42,
+          "reviewed_value": 42,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-2023",
+          "title": "监控覆盖关键链路",
+          "metric_type": "forward",
+          "weight": 1,
+          "target_value": 100,
+          "unit": "%",
+          "current_value": 92,
+          "reviewed_value": 92,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-2024",
+          "title": "应急演练完成",
+          "metric_type": "milestone",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": [
+            {
+              "name": "演练方案",
+              "done": true
+            },
+            {
+              "name": "首次演练",
+              "done": true
+            },
+            {
+              "name": "复盘改进",
+              "done": false
+            }
+          ]
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-10-01T09:00:00",
+      "updated_at": "2026-10-15T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-10-01T09:00:00",
+        "title": "压降线上故障率",
+        "weight": 25,
+        "key_results": [
+          {
+            "kr_id": "KR-2021",
+            "title": "线上故障次数",
+            "metric_type": "reverse",
+            "weight": 2,
+            "target_value": 2,
+            "unit": " 次",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-2022",
+            "title": "故障平均恢复时长",
+            "metric_type": "reverse",
+            "weight": 1,
+            "target_value": 30,
+            "unit": " 分钟",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-2023",
+            "title": "监控覆盖关键链路",
+            "metric_type": "forward",
+            "weight": 1,
+            "target_value": 100,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-2024",
+            "title": "应急演练完成",
+            "metric_type": "milestone",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "",
+            "milestones": [
+              {
+                "name": "演练方案",
+                "done": true
+              },
+              {
+                "name": "首次演练",
+                "done": true
+              },
+              {
+                "name": "复盘改进",
+                "done": false
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "OBJ-203",
+      "series_id": "SR-203",
+      "parent_id": "OBJ-100",
+      "level": 2,
+      "level_label": "部门级",
+      "title": "推进团队能力认证",
+      "desc": "",
+      "user_id": "U004",
+      "cycle_id": "CY-2026Q4",
+      "weight": 20,
+      "status": "待验收",
+      "key_results": [
+        {
+          "kr_id": "KR-2031",
+          "title": "认证通过人数",
+          "metric_type": "forward",
+          "weight": 2,
+          "target_value": 8,
+          "unit": " 人",
+          "current_value": 6,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-2032",
+          "title": "学习完成率",
+          "metric_type": "forward",
+          "weight": 1,
+          "target_value": 90,
+          "unit": "%",
+          "current_value": 85,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-2033",
+          "title": "能力评级",
+          "metric_type": "qualitative",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "达标",
+          "reviewed_level": "",
+          "milestones": []
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-10-01T09:00:00",
+      "updated_at": "2026-10-15T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-10-01T09:00:00",
+        "title": "推进团队能力认证",
+        "weight": 20,
+        "key_results": [
+          {
+            "kr_id": "KR-2031",
+            "title": "认证通过人数",
+            "metric_type": "forward",
+            "weight": 2,
+            "target_value": 8,
+            "unit": " 人",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-2032",
+            "title": "学习完成率",
+            "metric_type": "forward",
+            "weight": 1,
+            "target_value": 90,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-2033",
+            "title": "能力评级",
+            "metric_type": "qualitative",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "达标",
+            "milestones": []
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "OBJ-300",
+      "series_id": "SR-300",
+      "parent_id": "OBJ-200",
+      "level": 3,
+      "level_label": "个人级",
+      "title": "完成数据质量专项治理",
+      "desc": "",
+      "user_id": "U002",
+      "cycle_id": "CY-2026Q4",
+      "weight": 15,
+      "status": "执行中",
+      "key_results": [
+        {
+          "kr_id": "KR-3001",
+          "title": "异常数据清零率",
+          "metric_type": "forward",
+          "weight": 2,
+          "target_value": 95,
+          "unit": "%",
+          "current_value": 88,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-3002",
+          "title": "校验规则补充",
+          "metric_type": "milestone",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": [
+            {
+              "name": "规则梳理",
+              "done": true
+            },
+            {
+              "name": "规则上线",
+              "done": false
+            },
+            {
+              "name": "效果验证",
+              "done": false
+            }
+          ]
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-10-01T09:00:00",
+      "updated_at": "2026-10-06T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-10-01T09:00:00",
+        "title": "完成数据质量专项治理",
+        "weight": 15,
+        "key_results": [
+          {
+            "kr_id": "KR-3001",
+            "title": "异常数据清零率",
+            "metric_type": "forward",
+            "weight": 2,
+            "target_value": 95,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-3002",
+            "title": "校验规则补充",
+            "metric_type": "milestone",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "",
+            "milestones": [
+              {
+                "name": "规则梳理",
+                "done": true
+              },
+              {
+                "name": "规则上线",
+                "done": false
+              },
+              {
+                "name": "效果验证",
+                "done": false
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "OBJ-301",
+      "series_id": "SR-301",
+      "parent_id": "OBJ-201",
+      "level": 3,
+      "level_label": "个人级",
+      "title": "上线真实进展看板",
+      "desc": "",
+      "user_id": "U004",
+      "cycle_id": "CY-2026Q3",
+      "weight": 15,
+      "status": "已复盘",
+      "key_results": [
+        {
+          "kr_id": "KR-3011",
+          "title": "看板覆盖计划数",
+          "metric_type": "forward",
+          "weight": 2,
+          "target_value": 10,
+          "unit": " 个",
+          "current_value": 9,
+          "reviewed_value": 9,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-3012",
+          "title": "数据刷新及时率",
+          "metric_type": "forward",
+          "weight": 1,
+          "target_value": 100,
+          "unit": "%",
+          "current_value": 100,
+          "reviewed_value": 100,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-3013",
+          "title": "使用满意度",
+          "metric_type": "qualitative",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "达标",
+          "reviewed_level": "达标",
+          "milestones": []
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-07-01T09:00:00",
+      "updated_at": "2026-10-15T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-07-01T09:00:00",
+        "title": "上线真实进展看板",
+        "weight": 15,
+        "key_results": [
+          {
+            "kr_id": "KR-3011",
+            "title": "看板覆盖计划数",
+            "metric_type": "forward",
+            "weight": 2,
+            "target_value": 10,
+            "unit": " 个",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-3012",
+            "title": "数据刷新及时率",
+            "metric_type": "forward",
+            "weight": 1,
+            "target_value": 100,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-3013",
+            "title": "使用满意度",
+            "metric_type": "qualitative",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "达标",
+            "milestones": []
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "OBJ-302",
+      "series_id": "SR-302",
+      "parent_id": "OBJ-200",
+      "level": 3,
+      "level_label": "个人级",
+      "title": "完成 3 项流程自动化",
+      "desc": "",
+      "user_id": "U002",
+      "cycle_id": "CY-2026Q4",
+      "weight": 15,
+      "status": "执行中",
+      "key_results": [
+        {
+          "kr_id": "KR-3021",
+          "title": "自动化流程数",
+          "metric_type": "forward",
+          "weight": 2,
+          "target_value": 3,
+          "unit": " 项",
+          "current_value": 2,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-3022",
+          "title": "人工工时压降",
+          "metric_type": "forward",
+          "weight": 1,
+          "target_value": 20,
+          "unit": "%",
+          "current_value": 14,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-10-01T09:00:00",
+      "updated_at": "2026-10-15T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-10-01T09:00:00",
+        "title": "完成 3 项流程自动化",
+        "weight": 15,
+        "key_results": [
+          {
+            "kr_id": "KR-3021",
+            "title": "自动化流程数",
+            "metric_type": "forward",
+            "weight": 2,
+            "target_value": 3,
+            "unit": " 项",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-3022",
+            "title": "人工工时压降",
+            "metric_type": "forward",
+            "weight": 1,
+            "target_value": 20,
+            "unit": "%",
+            "qualitative_level": "",
+            "milestones": []
+          }
+        ]
+      }
+    },
+    {
+      "objective_id": "OBJ-303",
+      "series_id": "SR-303",
+      "parent_id": "OBJ-201",
+      "level": 3,
+      "level_label": "个人级",
+      "title": "客户满意度提升",
+      "desc": "",
+      "user_id": "U004",
+      "cycle_id": "CY-2026Q3",
+      "weight": 15,
+      "status": "已复盘",
+      "key_results": [
+        {
+          "kr_id": "KR-3031",
+          "title": "客户满意度得分",
+          "metric_type": "forward",
+          "weight": 2,
+          "target_value": 90,
+          "unit": " 分",
+          "current_value": 86,
+          "reviewed_value": 86,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-3032",
+          "title": "投诉件数",
+          "metric_type": "reverse",
+          "weight": 1,
+          "target_value": 2,
+          "unit": " 件",
+          "current_value": 3,
+          "reviewed_value": 3,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": []
+        },
+        {
+          "kr_id": "KR-3033",
+          "title": "客户回访覆盖",
+          "metric_type": "milestone",
+          "weight": 1,
+          "target_value": null,
+          "unit": "",
+          "current_value": null,
+          "reviewed_value": null,
+          "qualitative_level": "",
+          "reviewed_level": "",
+          "milestones": [
+            {
+              "name": "回访名单",
+              "done": true
+            },
+            {
+              "name": "首轮回访",
+              "done": true
+            },
+            {
+              "name": "问题闭环",
+              "done": true
+            }
+          ]
+        }
+      ],
+      "progress_updated": true,
+      "created_at": "2026-07-01T09:00:00",
+      "updated_at": "2026-10-15T16:26:32",
+      "published_snapshot": {
+        "published_at": "2026-07-01T09:00:00",
+        "title": "客户满意度提升",
+        "weight": 15,
+        "key_results": [
+          {
+            "kr_id": "KR-3031",
+            "title": "客户满意度得分",
+            "metric_type": "forward",
+            "weight": 2,
+            "target_value": 90,
+            "unit": " 分",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-3032",
+            "title": "投诉件数",
+            "metric_type": "reverse",
+            "weight": 1,
+            "target_value": 2,
+            "unit": " 件",
+            "qualitative_level": "",
+            "milestones": []
+          },
+          {
+            "kr_id": "KR-3033",
+            "title": "客户回访覆盖",
+            "metric_type": "milestone",
+            "weight": 1,
+            "target_value": null,
+            "unit": "",
+            "qualitative_level": "",
+            "milestones": [
+              {
+                "name": "回访名单",
+                "done": true
+              },
+              {
+                "name": "首轮回访",
+                "done": true
+              },
+              {
+                "name": "问题闭环",
+                "done": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "reviews": [
+    {
+      "review_id": "RV-200",
+      "objective_id": "OBJ-200",
+      "cycle_id": "CY-2026Q4",
+      "submitter_id": "U002",
+      "snapshot_at": "2026-10-01T09:00:00",
+      "items": [
+        {
+          "kr_id": "KR-2001",
+          "title": "平均首次响应时长",
+          "metric_type": "reverse",
+          "metric_label": "逆向指标",
+          "target_value": 4,
+          "unit": " 小时",
+          "weight": 2,
+          "target_text": "4 小时",
+          "actual_text": "4.4 小时",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 90.0
+        },
+        {
+          "kr_id": "KR-2002",
+          "title": "客户问题一次解决率",
+          "metric_type": "forward",
+          "metric_label": "正向指标",
+          "target_value": 80,
+          "unit": "%",
+          "weight": 1,
+          "target_text": "80%",
+          "actual_text": "76%",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 95.0
+        },
+        {
+          "kr_id": "KR-2003",
+          "title": "响应规范落地",
+          "metric_type": "milestone",
+          "metric_label": "里程碑",
+          "target_value": null,
+          "unit": "",
+          "weight": 1,
+          "target_text": "3 个里程碑",
+          "actual_text": "3 / 3",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 100.0
+        },
+        {
+          "kr_id": "KR-2004",
+          "title": "客户主观评价",
+          "metric_type": "qualitative",
+          "metric_label": "定性评价",
+          "target_value": null,
+          "unit": "",
+          "weight": 1,
+          "target_text": "定性档位",
+          "actual_text": "达标",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 70.0
+        }
+      ],
+      "achievement": 89.0,
+      "self_score": 90,
+      "final_score": 88,
+      "grade": "达标",
+      "diff_note": "",
+      "ai_precheck": {
+        "source": "",
+        "lines": [],
+        "generated_at": ""
+      },
+      "status": "已验收",
+      "reviewed_by": "U001",
+      "created_at": "2026-10-06T15:10:00",
+      "reviewed_at": "2026-10-09T10:30:00"
+    },
+    {
+      "review_id": "RV-201",
+      "objective_id": "OBJ-201",
+      "cycle_id": "CY-2026Q3",
+      "submitter_id": "U002",
+      "snapshot_at": "2026-07-01T09:00:00",
+      "items": [
+        {
+          "kr_id": "KR-2011",
+          "title": "平均首次响应时长",
+          "metric_type": "reverse",
+          "metric_label": "逆向指标",
+          "target_value": 6,
+          "unit": " 小时",
+          "weight": 2,
+          "target_text": "6 小时",
+          "actual_text": "7 小时",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 83.3
+        },
+        {
+          "kr_id": "KR-2012",
+          "title": "客户问题一次解决率",
+          "metric_type": "forward",
+          "metric_label": "正向指标",
+          "target_value": 75,
+          "unit": "%",
+          "weight": 1,
+          "target_text": "75%",
+          "actual_text": "71%",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 94.7
+        },
+        {
+          "kr_id": "KR-2013",
+          "title": "响应规范落地",
+          "metric_type": "milestone",
+          "metric_label": "里程碑",
+          "target_value": null,
+          "unit": "",
+          "weight": 1,
+          "target_text": "3 个里程碑",
+          "actual_text": "1 / 3",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 33.3
+        }
+      ],
+      "achievement": 73.7,
+      "self_score": 80,
+      "final_score": 72,
+      "grade": "待改进",
+      "diff_note": "",
+      "ai_precheck": {
+        "source": "",
+        "lines": [],
+        "generated_at": ""
+      },
+      "status": "已验收",
+      "reviewed_by": "U001",
+      "created_at": "2026-10-06T15:10:00",
+      "reviewed_at": "2026-10-09T10:30:00"
+    },
+    {
+      "review_id": "RV-202",
+      "objective_id": "OBJ-202",
+      "cycle_id": "CY-2026Q4",
+      "submitter_id": "U004",
+      "snapshot_at": "2026-10-01T09:00:00",
+      "items": [
+        {
+          "kr_id": "KR-2021",
+          "title": "线上故障次数",
+          "metric_type": "reverse",
+          "metric_label": "逆向指标",
+          "target_value": 2,
+          "unit": " 次",
+          "weight": 2,
+          "target_text": "2 次",
+          "actual_text": "3.4 次",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 30.0
+        },
+        {
+          "kr_id": "KR-2022",
+          "title": "故障平均恢复时长",
+          "metric_type": "reverse",
+          "metric_label": "逆向指标",
+          "target_value": 30,
+          "unit": " 分钟",
+          "weight": 1,
+          "target_text": "30 分钟",
+          "actual_text": "42 分钟",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 60.0
+        },
+        {
+          "kr_id": "KR-2023",
+          "title": "监控覆盖关键链路",
+          "metric_type": "forward",
+          "metric_label": "正向指标",
+          "target_value": 100,
+          "unit": "%",
+          "weight": 1,
+          "target_text": "100%",
+          "actual_text": "92%",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 92.0
+        },
+        {
+          "kr_id": "KR-2024",
+          "title": "应急演练完成",
+          "metric_type": "milestone",
+          "metric_label": "里程碑",
+          "target_value": null,
+          "unit": "",
+          "weight": 1,
+          "target_text": "3 个里程碑",
+          "actual_text": "2 / 3",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 66.7
+        }
+      ],
+      "achievement": 55.7,
+      "self_score": 86,
+      "final_score": 58,
+      "grade": "未达标",
+      "diff_note": "自评 86 与终评 58 相差 28 分，超过 20 分阈值，按规则强制说明：故障次数与恢复时长双双超出目标，验收按实际数据下修，故终评显著低于自评。",
+      "ai_precheck": {
+        "source": "",
+        "lines": [],
+        "generated_at": ""
+      },
+      "status": "已验收",
+      "reviewed_by": "U001",
+      "created_at": "2026-10-06T15:10:00",
+      "reviewed_at": "2026-10-09T10:30:00"
+    },
+    {
+      "review_id": "RV-301",
+      "objective_id": "OBJ-301",
+      "cycle_id": "CY-2026Q3",
+      "submitter_id": "U004",
+      "snapshot_at": "2026-07-01T09:00:00",
+      "items": [
+        {
+          "kr_id": "KR-3011",
+          "title": "看板覆盖计划数",
+          "metric_type": "forward",
+          "metric_label": "正向指标",
+          "target_value": 10,
+          "unit": " 个",
+          "weight": 2,
+          "target_text": "10 个",
+          "actual_text": "9 个",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 90.0
+        },
+        {
+          "kr_id": "KR-3012",
+          "title": "数据刷新及时率",
+          "metric_type": "forward",
+          "metric_label": "正向指标",
+          "target_value": 100,
+          "unit": "%",
+          "weight": 1,
+          "target_text": "100%",
+          "actual_text": "100%",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 100.0
+        },
+        {
+          "kr_id": "KR-3013",
+          "title": "使用满意度",
+          "metric_type": "qualitative",
+          "metric_label": "定性评价",
+          "target_value": null,
+          "unit": "",
+          "weight": 1,
+          "target_text": "定性档位",
+          "actual_text": "达标",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 70.0
+        }
+      ],
+      "achievement": 87.5,
+      "self_score": 92,
+      "final_score": 85,
+      "grade": "达标",
+      "diff_note": "看板覆盖计划数差 1 个，验收时按实际完成计，与自评存在差异。",
+      "ai_precheck": {
+        "source": "",
+        "lines": [],
+        "generated_at": ""
+      },
+      "status": "已验收",
+      "reviewed_by": "U001",
+      "created_at": "2026-10-06T15:10:00",
+      "reviewed_at": "2026-10-09T10:30:00"
+    },
+    {
+      "review_id": "RV-303",
+      "objective_id": "OBJ-303",
+      "cycle_id": "CY-2026Q3",
+      "submitter_id": "U004",
+      "snapshot_at": "2026-07-01T09:00:00",
+      "items": [
+        {
+          "kr_id": "KR-3031",
+          "title": "客户满意度得分",
+          "metric_type": "forward",
+          "metric_label": "正向指标",
+          "target_value": 90,
+          "unit": " 分",
+          "weight": 2,
+          "target_text": "90 分",
+          "actual_text": "86 分",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 95.6
+        },
+        {
+          "kr_id": "KR-3032",
+          "title": "投诉件数",
+          "metric_type": "reverse",
+          "metric_label": "逆向指标",
+          "target_value": 2,
+          "unit": " 件",
+          "weight": 1,
+          "target_text": "2 件",
+          "actual_text": "3 件",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 50.0
+        },
+        {
+          "kr_id": "KR-3033",
+          "title": "客户回访覆盖",
+          "metric_type": "milestone",
+          "metric_label": "里程碑",
+          "target_value": null,
+          "unit": "",
+          "weight": 1,
+          "target_text": "3 个里程碑",
+          "actual_text": "3 / 3",
+          "statement": "按发布快照口径完成，证据见附件。",
+          "evidence": [
+            {
+              "name": "执行记录截图",
+              "url": "#",
+              "note": "验收现场留档"
+            },
+            {
+              "name": "数据核对表",
+              "url": "#",
+              "note": "由数据管理导出"
+            }
+          ],
+          "achievement": 100.0
+        }
+      ],
+      "achievement": 85.3,
+      "self_score": 86,
+      "final_score": 85,
+      "grade": "达标",
+      "diff_note": "",
+      "ai_precheck": {
+        "source": "",
+        "lines": [],
+        "generated_at": ""
+      },
+      "status": "已验收",
+      "reviewed_by": "U001",
+      "created_at": "2026-10-06T15:10:00",
+      "reviewed_at": "2026-10-09T10:30:00"
+    },
+    {
+      "review_id": "RV-101",
+      "objective_id": "OBJ-101",
+      "cycle_id": "CY-2026Q4",
+      "submitter_id": "U001",
+      "snapshot_at": "2026-10-01T09:00:00",
+      "items": [
+        {
+          "kr_id": "KR-1011",
+          "title": "机制文档沉淀",
+          "metric_type": "milestone",
+          "metric_label": "里程碑",
+          "target_value": null,
+          "unit": "",
+          "weight": 2,
+          "target_text": "3 个里程碑",
+          "actual_text": "3 / 3",
+          "statement": "本期按计划推进。",
+          "evidence": [],
+          "achievement": 100.0
+        },
+        {
+          "kr_id": "KR-1012",
+          "title": "部门覆盖率",
+          "metric_type": "forward",
+          "metric_label": "正向指标",
+          "target_value": 100,
+          "unit": "%",
+          "weight": 1,
+          "target_text": "100%",
+          "actual_text": "—",
+          "statement": "本期按计划推进。",
+          "evidence": [],
+          "achievement": 0.0
+        },
+        {
+          "kr_id": "KR-1013",
+          "title": "机制有效性评价",
+          "metric_type": "qualitative",
+          "metric_label": "定性评价",
+          "target_value": null,
+          "unit": "",
+          "weight": 1,
+          "target_text": "定性档位",
+          "actual_text": "良好",
+          "statement": "本期按计划推进。",
+          "evidence": [],
+          "achievement": 85.0
+        }
+      ],
+      "achievement": 90.8,
+      "self_score": 88,
+      "final_score": null,
+      "grade": "未评级",
+      "diff_note": "",
+      "ai_precheck": {
+        "source": "",
+        "lines": [],
+        "generated_at": ""
+      },
+      "status": "待验收",
+      "reviewed_by": "",
+      "created_at": "2026-10-08T16:20:00",
+      "reviewed_at": ""
+    },
+    {
+      "review_id": "RV-203",
+      "objective_id": "OBJ-203",
+      "cycle_id": "CY-2026Q4",
+      "submitter_id": "U004",
+      "snapshot_at": "2026-10-01T09:00:00",
+      "items": [
+        {
+          "kr_id": "KR-2031",
+          "title": "认证通过人数",
+          "metric_type": "forward",
+          "metric_label": "正向指标",
+          "target_value": 8,
+          "unit": " 人",
+          "weight": 2,
+          "target_text": "8 人",
+          "actual_text": "—",
+          "statement": "本期按计划推进。",
+          "evidence": [],
+          "achievement": 0.0
+        },
+        {
+          "kr_id": "KR-2032",
+          "title": "学习完成率",
+          "metric_type": "forward",
+          "metric_label": "正向指标",
+          "target_value": 90,
+          "unit": "%",
+          "weight": 1,
+          "target_text": "90%",
+          "actual_text": "—",
+          "statement": "本期按计划推进。",
+          "evidence": [],
+          "achievement": 0.0
+        },
+        {
+          "kr_id": "KR-2033",
+          "title": "能力评级",
+          "metric_type": "qualitative",
+          "metric_label": "定性评价",
+          "target_value": null,
+          "unit": "",
+          "weight": 1,
+          "target_text": "定性档位",
+          "actual_text": "达标",
+          "statement": "本期按计划推进。",
+          "evidence": [],
+          "achievement": 70.0
+        }
+      ],
+      "achievement": 78.6,
+      "self_score": 95,
+      "final_score": null,
+      "grade": "未评级",
+      "diff_note": "",
+      "ai_precheck": {
+        "source": "",
+        "lines": [],
+        "generated_at": ""
+      },
+      "status": "待验收",
+      "reviewed_by": "",
+      "created_at": "2026-10-06T15:10:00",
+      "reviewed_at": ""
+    }
+  ],
+  "retros": [
+    {
+      "retro_id": "RT-201",
+      "objective_id": "OBJ-201",
+      "review_id": "RV-201",
+      "owner_id": "U002",
+      "sections": {
+        "回顾": "本周期目标是提升客户响应速度，把平均首次响应时长压到 6 小时以内，一次解决率提升到 75%。",
+        "对照": "实际首次响应 7 小时、一次解决率 71%，未达目标；里程碑只完成 1/3，培训环节滞后。",
+        "原因": "主要原因是全组培训排在月末，与季度结算冲突，两次顺延；培训没做完，抽检自然不达标。",
+        "改进": "下周期把培训前置到周期首两周；建立培训完成度周跟踪，避免再被结算挤占。"
+      },
+      "improvements": [
+        {
+          "text": "把培训与数据源对接前置到周期首两周",
+          "owner_id": "U002",
+          "kind": "任务",
+          "converted_to": ""
+        },
+        {
+          "text": "下周期沿用同一目标系继续跟踪",
+          "owner_id": "U002",
+          "kind": "目标",
+          "converted_to": ""
+        }
+      ],
+      "ai_draft": {
+        "source": "",
+        "generated_at": ""
+      },
+      "created_at": "2026-10-10T14:00:00",
+      "updated_at": "2026-10-10T15:20:00"
+    },
+    {
+      "retro_id": "RT-301",
+      "objective_id": "OBJ-301",
+      "review_id": "RV-301",
+      "owner_id": "U004",
+      "sections": {
+        "回顾": "本周期目标是把真实进展看板上线，覆盖 10 个计划并保持数据实时刷新。",
+        "对照": "看板按期上线，覆盖 9 个计划，刷新及时率 100%，满意度达标；差 1 个计划未纳入。",
+        "原因": "未纳入的那 1 个计划属跨部门协作，数据源未打通，等对方接口开放后即可补齐。",
+        "改进": "下周期补齐最后一个计划；把数据源对接列为前置项，避免临期才发现依赖。"
+      },
+      "improvements": [
+        {
+          "text": "把培训与数据源对接前置到周期首两周",
+          "owner_id": "U004",
+          "kind": "任务",
+          "converted_to": ""
+        },
+        {
+          "text": "下周期沿用同一目标系继续跟踪",
+          "owner_id": "U004",
+          "kind": "目标",
+          "converted_to": ""
+        }
+      ],
+      "ai_draft": {
+        "source": "",
+        "generated_at": ""
+      },
+      "created_at": "2026-10-10T14:00:00",
+      "updated_at": "2026-10-10T15:20:00"
+    },
+    {
+      "retro_id": "RT-303",
+      "objective_id": "OBJ-303",
+      "review_id": "RV-303",
+      "owner_id": "U004",
+      "sections": {
+        "回顾": "本周期目标是客户满意度达到 90 分，投诉不超过 2 件，并完成一轮回访闭环。",
+        "对照": "满意度 86 分、投诉 3 件，回访闭环全部完成；满意度差 4 分、投诉超 1 件，均未达标。",
+        "原因": "回访发现高频问题是响应时效，本周期末才启动专项优化，见效时间不足。",
+        "改进": "下周期把响应时效优化并入「提升客户响应速度」目标系，与响应类目标合并推进。"
+      },
+      "improvements": [
+        {
+          "text": "把培训与数据源对接前置到周期首两周",
+          "owner_id": "U004",
+          "kind": "任务",
+          "converted_to": ""
+        },
+        {
+          "text": "下周期沿用同一目标系继续跟踪",
+          "owner_id": "U004",
+          "kind": "目标",
+          "converted_to": ""
+        }
+      ],
+      "ai_draft": {
+        "source": "",
+        "generated_at": ""
+      },
+      "created_at": "2026-10-10T14:00:00",
+      "updated_at": "2026-10-10T15:20:00"
+    }
+  ],
+  "departments": [
+    {
+      "dept_id": "DP-001",
+      "name": "技术部",
+      "parent_id": "",
+      "leader_id": "U001",
+      "note": "研发与交付主体",
+      "created_at": "2026-07-01T09:00:00"
+    },
+    {
+      "dept_id": "DP-002",
+      "name": "研发一组",
+      "parent_id": "DP-001",
+      "leader_id": "U002",
+      "note": "客户响应与数据质量",
+      "created_at": "2026-07-01T09:05:00"
+    },
+    {
+      "dept_id": "DP-003",
+      "name": "研发二组",
+      "parent_id": "DP-001",
+      "leader_id": "U004",
+      "note": "稳定性与进展看板",
+      "created_at": "2026-07-01T09:06:00"
+    },
+    {
+      "dept_id": "DP-004",
+      "name": "产品运营部",
+      "parent_id": "",
+      "leader_id": "U001",
+      "note": "本期未挂目标，口径留空",
+      "created_at": "2026-07-01T09:10:00"
+    }
+  ],
+  "org_members": [
+    {
+      "user_id": "U001",
+      "dept_id": "DP-001",
+      "post": "职能",
+      "manager_id": "",
+      "created_at": "2026-07-01T09:20:00",
+      "updated_at": "2026-07-01T09:20:00"
+    },
+    {
+      "user_id": "U002",
+      "dept_id": "DP-002",
+      "post": "研发",
+      "manager_id": "U001",
+      "created_at": "2026-07-01T09:21:00",
+      "updated_at": "2026-07-01T09:21:00"
+    },
+    {
+      "user_id": "U003",
+      "dept_id": "DP-004",
+      "post": "产品",
+      "manager_id": "U001",
+      "created_at": "2026-07-01T09:22:00",
+      "updated_at": "2026-07-01T09:22:00"
+    },
+    {
+      "user_id": "U004",
+      "dept_id": "DP-003",
+      "post": "研发",
+      "manager_id": "U001",
+      "created_at": "2026-07-01T09:23:00",
+      "updated_at": "2026-07-01T09:23:00"
+    }
+  ]
 }

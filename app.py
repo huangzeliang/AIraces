@@ -52,6 +52,13 @@ EMPTY_STORE = {
     "exceptions": [],
     "logs": [],
     "scan_state": {},
+    # ---- C 线 · 目标闭环（验收评估）----
+    "cycles": [],        # 周期：季度 / 月度
+    "objectives": [],    # 目标（含关键结果 KR），支持逐级拆解
+    "reviews": [],       # 验收记录（对照发布快照）
+    "retros": [],        # 复盘记录（四段结构）
+    "departments": [],   # 组织：部门树（单上级）
+    "org_members": [],   # 组织：成员归属（部门 / 岗位 / 直属上级）
 }
 
 environment = os.environ.get("APP_ENV", "production").strip().lower()
@@ -254,6 +261,12 @@ for module_name in (
     "backend.data_io",                                     # C2 数据管理
     "backend.settings_io",                                 # C3 系统设置
     "backend.hub",                                         # D 线 AI 任务中枢（跨线聚合 + 卡点研判）
+    "backend.review",                                      # C 线 · 完成与验收（验收评估）
+    "backend.retro",                                       # C 线 · 结构化复盘
+    "backend.compare",                                     # C 线 · 对比分析
+    "backend.objectives",                                  # C 线 · 目标全景（部门驾驶舱）
+    "backend.cycle_dict",                                  # C 线 · 周期与字典
+    "backend.org",                                         # C 线 · 组织与角色
     "backend.goal",                                        # 工作线A：部门目标 / SMART 校验 / 拆解树与发布
     "backend.assign",                                      # 工作线A：智能派工与饱和度校验
 ):

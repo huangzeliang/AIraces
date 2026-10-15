@@ -24,7 +24,9 @@ PASSWORD_MAX_LENGTH = 64
 
 # 仅管理员可访问的路径前缀；"/" 是驾驶舱别名，单列在 is_admin_path 中
 # /hub（AI 任务中枢）跨线聚合全量计划与任务，同样划归管理员专属
-ADMIN_PATH_PREFIXES = ("/dashboard", "/data", "/settings", "/users", "/analytics", "/hub")
+# /objectives（目标全景驾驶舱）按层级铺开全部目标，含「需关注人员」，员工不渲染
+ADMIN_PATH_PREFIXES = ("/dashboard", "/data", "/settings", "/users", "/analytics", "/hub",
+                       "/compare", "/objectives")
 
 PUBLIC_ENDPOINTS = {"static", "login", "logout"}
 

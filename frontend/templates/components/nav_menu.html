@@ -34,10 +34,22 @@
   <a class="nav-item {% if active_page == 'schedule' %}active{% endif %}" href="{{ url_for('schedule') }}" {% if active_page == 'schedule' %}aria-current="page"{% endif %}><span aria-hidden="true">▤</span>智能排期</a>
 </nav>
 
+<p class="nav-caption">验收评估</p>
+<nav class="nav-menu" aria-label="验收评估">
+  <a class="nav-item {% if active_page == 'review' %}active{% endif %}" href="{{ url_for('review_list') }}" {% if active_page == 'review' %}aria-current="page"{% endif %}><span aria-hidden="true">✓</span>完成与验收</a>
+  <a class="nav-item {% if active_page == 'retro' %}active{% endif %}" href="{{ url_for('retro_list') }}" {% if active_page == 'retro' %}aria-current="page"{% endif %}><span aria-hidden="true">✎</span>结构化复盘</a>
+  {% if is_admin %}
+  <a class="nav-item {% if active_page == 'objectives' %}active{% endif %}" href="{{ url_for('objectives') }}" {% if active_page == 'objectives' %}aria-current="page"{% endif %}><span aria-hidden="true">◎</span>目标全景</a>
+  <a class="nav-item {% if active_page == 'compare' %}active{% endif %}" href="{{ url_for('compare') }}" {% if active_page == 'compare' %}aria-current="page"{% endif %}><span aria-hidden="true">⇅</span>对比分析</a>
+  {% endif %}
+</nav>
+
 {% if is_admin %}
 <p class="nav-caption">数据与设置</p>
 <nav class="nav-menu" aria-label="数据与设置">
   <a class="nav-item {% if active_page == 'data' %}active{% endif %}" href="{{ url_for('data_manage') }}" {% if active_page == 'data' %}aria-current="page"{% endif %}><span aria-hidden="true">⛁</span>数据管理</a>
+  <a class="nav-item {% if active_page == 'dict' %}active{% endif %}" href="{{ url_for('cycle_dict') }}" {% if active_page == 'dict' %}aria-current="page"{% endif %}><span aria-hidden="true">◷</span>周期与字典</a>
+  <a class="nav-item {% if active_page == 'org' %}active{% endif %}" href="{{ url_for('org') }}" {% if active_page == 'org' %}aria-current="page"{% endif %}><span aria-hidden="true">☰</span>组织与角色</a>
   <a class="nav-item {% if active_page == 'users' %}active{% endif %}" href="{{ url_for('index') }}" {% if active_page == 'users' %}aria-current="page"{% endif %}><span aria-hidden="true">♧</span>用户管理</a>
   <a class="nav-item {% if active_page == 'settings' %}active{% endif %}" href="{{ url_for('settings') }}" {% if active_page == 'settings' %}aria-current="page"{% endif %}><span aria-hidden="true">⚙</span>系统设置</a>
 </nav>

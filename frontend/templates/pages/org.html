@@ -1,0 +1,184 @@
+{% extends 'layout.html' %}
+{% block title %}组织与角色 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/c-line.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/pages/org.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">DATA &amp; SETTINGS / ORG</p>
+    <h1>组织与角色</h1>
+    <p class="subtitle">部门是公司级 / 部门级 / 个人级目标的归属基础；角色决定可见范围。成员只归属一个部门，部门口径含全部下级部门。</p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('objectives') }}"><span aria-hidden="true">◎</span>目标全景</a>
+    <a class="button button-secondary" href="{{ url_for('cycle_dict') }}"><span aria-hidden="true">◷</span>周期与字典</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="stats" aria-label="组织概览">
+  <article class="stat-card">
+    <div class="stat-top"><span>部门数</span><b aria-hidden="true">☰</b></div>
+    <strong>{{ summary.dept_total }}</strong>
+    <div><span>层级深度 {{ summary.max_depth }} 层</span><em>{{ summary.leader_missing }} 个未指定负责人</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>成员归属</span><b aria-hidden="true">♧</b></div>
+    <strong>{{ summary.assigned_total }}/{{ summary.member_total }}</strong>
+    <div><span>已归属部门</span><em>{{ summary.unassigned_total }} 人待分配</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>部门达成度</span><b aria-hidden="true">◈</b></div>
+    <strong>{% if summary.achievement is not none %}{{ summary.achievement }}%{% else %}—{% endif %}</strong>
+    <div><span>{{ summary.covered_dept }} 个部门有已定案目标</span><em>按目标权重加权</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>角色分布</span><b aria-hidden="true">◔</b></div>
+    <strong>{% for item in role_counts %}{{ item.count }}{% if not loop.last %} / {% endif %}{% endfor %}</strong>
+    <div><span>{% for item in role_counts %}{{ item.role }}{% if not loop.last %} · {% endif %}{% endfor %}</span><em>账号体系</em></div>
+  </article>
+</section>
+
+{% if unassigned %}
+<p class="notice error" role="status">还有 {{ unassigned | length }} 名成员未归属部门（{% for item in unassigned %}{{ item.name }}{% if not loop.last %}、{% endif %}{% endfor %}），其目标不计入任何部门口径。</p>
+{% endif %}
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>组织树</h2><p>达成度按该部门及全部下级部门的已定案目标加权计算，与验收、对比分析同一口径</p></div>
+    <span class="badge-demo">口径可自证</span>
+  </div>
+  <ul class="dept-list">
+    {% for row in rows %}
+    <li class="dept-row{% if row.depth > 0 %} is-child{% endif %}">
+      <div class="dept-main" style="padding-left: {{ row.indent }}px">
+        <div class="dept-title">
+          {% if row.has_child %}<span class="dept-caret" aria-hidden="true">▾</span>{% else %}<span class="dept-caret is-leaf" aria-hidden="true">·</span>{% endif %}
+          <strong>{{ row.name }}</strong>
+          <span class="tag">{{ row.dept_id }}</span>
+          {% if row.parent_name %}<small>隶属 {{ row.parent_name }}</small>{% endif %}
+        </div>
+        <p class="dept-meta">
+          <span>负责人 {{ row.leader }}</span>
+          <span>{{ row.direct_members }} 名直属 / 含下级 {{ row.members }} 名</span>
+          <span>{{ row.objective_total }} 个目标 · {{ row.verified_total }} 个已定案</span>
+          {% if row.note %}<span>{{ row.note }}</span>{% endif %}
+        </p>
+      </div>
+      <div class="dept-score">
+        {% if row.achievement is not none %}<b>{{ row.achievement }}</b><small>{{ row.grade }}</small>
+        {% else %}<b>—</b><small>暂无已定案</small>{% endif %}
+      </div>
+      <div class="dept-actions">
+        <button class="button button-secondary dept-edit" type="button"
+                data-dept-id="{{ row.dept_id }}" data-name="{{ row.name }}"
+                data-parent="{{ row.parent_id }}" data-leader="{{ row.leader_id }}"
+                data-note="{{ row.note }}">编辑</button>
+        <form method="post" action="{{ url_for('org_dept_delete') }}" onsubmit="return confirm('确定删除部门「{{ row.name }}」吗？')">
+          <input type="hidden" name="dept_id" value="{{ row.dept_id }}">
+          <button class="button button-danger" type="submit">删除</button>
+        </form>
+      </div>
+    </li>
+    {% else %}
+    <li class="empty-block"><p class="empty-icon" aria-hidden="true">☰</p>还没有部门，先在下方新建一个。</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2 id="dept-form-title">新建部门</h2><p>上级部门留空即为顶层；负责人取自账号列表，一个部门只能有一个上级</p></div>
+  </div>
+  <form method="post" action="{{ url_for('org_dept_save') }}" class="form-grid" id="dept-form">
+    <input type="hidden" name="dept_id" id="dept-id" value="">
+    <div class="field">
+      <label class="field-label" for="dept-name">部门名称</label>
+      <input type="text" id="dept-name" name="name" placeholder="如：技术部 / 研发一组" maxlength="40" required>
+    </div>
+    <div class="field">
+      <label class="field-label" for="dept-parent">上级部门</label>
+      <select id="dept-parent" name="parent_id">
+        <option value="">（顶层，无上级）</option>
+        {% for item in options %}<option value="{{ item.dept_id }}">{{ item.name }}</option>{% endfor %}
+      </select>
+      <small class="field-hint">不能挂到自己的下级，否则会形成循环</small>
+    </div>
+    <div class="field">
+      <label class="field-label" for="dept-leader">部门负责人</label>
+      <select id="dept-leader" name="leader_id">
+        <option value="">（暂不指定）</option>
+        {% for item in user_options %}<option value="{{ item.user_id }}">{{ item.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field field-wide">
+      <label class="field-label" for="dept-note">职责备注</label>
+      <input type="text" id="dept-note" name="note" placeholder="选填，如主要承担的目标范围" maxlength="80">
+    </div>
+    <div class="form-actions">
+      <button class="button button-primary" type="submit">保存部门</button>
+      <button class="button button-secondary" type="button" id="dept-reset">清空表单</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>成员归属</h2><p>每位成员只归属一个部门；直属上级用于形成汇报链，不改变目标的归属口径</p></div>
+    <span class="badge-demo">{{ member_rows | length }} 名成员</span>
+  </div>
+  <div class="member-table">
+    <div class="member-head">
+      <span>成员</span><span>角色</span><span>部门</span><span>岗位</span><span>直属上级</span><span></span>
+    </div>
+    {% for item in member_rows %}
+    <form class="member-row" method="post" action="{{ url_for('org_member_save') }}">
+      <input type="hidden" name="user_id" value="{{ item.user_id }}">
+      <div class="member-name">
+        <strong>{{ item.name }}</strong>
+        <small>{{ item.email }}</small>
+        {% if item.status != '启用' %}<i class="tag tag-off">已停用</i>{% endif %}
+      </div>
+      <span class="member-role">{{ item.role }}</span>
+      <select name="dept_id" aria-label="{{ item.name }}的部门">
+        <option value="">未归属</option>
+        {% for option in options %}
+        <option value="{{ option.dept_id }}" {% if option.dept_id == item.dept_id %}selected{% endif %}>{{ option.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="post" aria-label="{{ item.name }}的岗位">
+        <option value="">未设置</option>
+        {% for post in post_options %}
+        <option value="{{ post }}" {% if post == item.post %}selected{% endif %}>{{ post }}</option>
+        {% endfor %}
+      </select>
+      <select name="manager_id" aria-label="{{ item.name }}的直属上级">
+        <option value="">未设置</option>
+        {% for option in user_options %}
+        {% if option.user_id != item.user_id %}
+        <option value="{{ option.user_id }}" {% if option.user_id == item.manager_id %}selected{% endif %}>{{ option.name }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+      <button class="button button-secondary" type="submit">保存</button>
+    </form>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-heading"><div><h2>角色与可见范围</h2><p>沿用账号体系的两个角色，本页只做归属与展示，不复制权限模型</p></div></div>
+  <ul class="note-list">
+    {% for role, hint in role_hints.items() %}
+    <li><strong>{{ role }}</strong>：{{ hint }}</li>
+    {% endfor %}
+    <li><strong>部门口径</strong>：部门达成度 = 该部门及全部下级部门成员的已定案目标，按目标权重加权；未归属成员的目标不计入任何部门。</li>
+    <li><strong>档位阈值</strong>：{{ grade_bands | join('；') }}。</li>
+  </ul>
+</section>
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/org.js') }}"></script>{% endblock %}

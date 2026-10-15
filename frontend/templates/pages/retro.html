@@ -1,0 +1,100 @@
+{% extends 'layout.html' %}
+{% block title %}结构化复盘 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/c-line.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/pages/retro.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">RETROSPECTIVE / RETRO</p>
+    <h1>结构化复盘</h1>
+    <p class="subtitle">只对已完成验收的目标开放；四段固定结构，AI 初稿只填空白、不覆盖人工文本，改进项可一键转下周期目标或自建任务。</p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('review_list') }}"><span aria-hidden="true">✓</span>去验收</a>
+    <a class="button button-secondary" href="{{ url_for('compare') }}"><span aria-hidden="true">⇅</span>对比分析</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="stats" aria-label="复盘概览">
+  <article class="stat-card">
+    <div class="stat-top"><span>待复盘</span><b aria-hidden="true">✎</b></div>
+    <strong>{{ summary.todo_count }}</strong>
+    <div><span>已验收未复盘</span><em>可开始</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>已复盘</span><b aria-hidden="true">✓</b></div>
+    <strong>{{ summary.done_count }}</strong>
+    <div><span>已完成四段沉淀</span><em>可复用</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>未解锁</span><b aria-hidden="true">⚿</b></div>
+    <strong>{{ summary.blocked_count }}</strong>
+    <div><span>尚未通过验收</span><em>需先验收</em></div>
+  </article>
+  <article class="stat-card">
+    <div class="stat-top"><span>已转化改进项</span><b aria-hidden="true">⇄</b></div>
+    <strong>{{ summary.converted_count }}</strong>
+    <div><span>转目标 / 转任务</span><em>闭环</em></div>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>待复盘目标</h2><p>验收定级完成后即可开始复盘</p></div>
+    <span class="badge-demo">{{ groups.todo | length }} 项</span>
+  </div>
+  <ul class="retro-list">
+    {% for item in groups.todo %}
+    <li class="retro-row">
+      <div class="retro-main">
+        <div class="retro-title"><span class="level-tag">{{ item.level_label or '个人级' }}</span><strong>{{ item.title }}</strong></div>
+        <p class="retro-meta"><span>{{ item.owner }}</span><span>{{ item.cycle }}</span><span>档位 {{ item.grade }}</span></p>
+      </div>
+      <div class="retro-score"><b>{{ item.final_score if item.final_score is not none else '—' }}</b><small>终评</small></div>
+      <div class="retro-action">
+        <a class="button button-primary" href="{{ url_for('retro_detail', objective_id=item.objective_id) }}">开始复盘</a>
+      </div>
+    </li>
+    {% else %}
+    <li class="empty-block"><p class="empty-icon" aria-hidden="true">✓</p><p>暂无待复盘目标，先去验收定级。</p></li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="panel">
+  <div class="panel-heading">
+    <div><h2>已复盘目标</h2><p>四段沉淀与改进项转化记录</p></div>
+    <span class="badge-demo">{{ groups.done | length }} 项</span>
+  </div>
+  <ul class="retro-list">
+    {% for item in groups.done %}
+    <li class="retro-row retro-row--done">
+      <div class="retro-main">
+        <div class="retro-title"><span class="level-tag">{{ item.level_label or '个人级' }}</span><strong>{{ item.title }}</strong></div>
+        <p class="retro-meta"><span>{{ item.owner }}</span><span>{{ item.cycle }}</span><span>改进项 {{ item.improve_count }}</span><span>已转化 {{ item.converted }}</span></p>
+      </div>
+      <div class="retro-score"><b>{{ item.final_score if item.final_score is not none else '—' }}</b><small>终评</small></div>
+      <div class="retro-action">
+        <a class="button button-secondary" href="{{ url_for('retro_detail', objective_id=item.objective_id) }}">查看复盘</a>
+      </div>
+    </li>
+    {% else %}
+    <li class="empty-block"><p class="empty-icon" aria-hidden="true">✎</p><p>还没有已完成的复盘。</p></li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="panel retro-rules">
+  <div class="panel-heading"><div><h2>四段结构</h2><p>固定顺序，避免复盘写成流水账</p></div><span class="badge-demo">结构可自证</span></div>
+  <ol class="section-steps">
+    {% for item in section_defs %}
+    <li><span class="step-index">{{ loop.index }}</span><div><strong>{{ item.label }}</strong><p>{{ item.hint }}</p></div></li>
+    {% endfor %}
+  </ol>
+</section>
+
+{% endblock %}
