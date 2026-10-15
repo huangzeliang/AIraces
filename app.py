@@ -192,6 +192,7 @@ for module_name in (
     "backend.stats",                                       # C1 驾驶舱
     "backend.data_io",                                     # C2 数据管理
     "backend.settings_io",                                 # C3 系统设置
+    "backend.hub",                                         # D 线 AI 任务中枢（跨线聚合 + 卡点研判）
 ):
     import_module(module_name).register(app, services)
 

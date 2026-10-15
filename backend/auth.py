@@ -17,7 +17,8 @@ PASSWORD_MIN_LENGTH = 6
 PASSWORD_MAX_LENGTH = 64
 
 # 仅管理员可访问的路径前缀；"/" 是驾驶舱别名，单列在 is_admin_path 中
-ADMIN_PATH_PREFIXES = ("/dashboard", "/data", "/settings", "/users", "/analytics")
+# /hub（AI 任务中枢）跨线聚合全量计划与任务，同样划归管理员专属
+ADMIN_PATH_PREFIXES = ("/dashboard", "/data", "/settings", "/users", "/analytics", "/hub")
 
 PUBLIC_ENDPOINTS = {"static", "login"}
 

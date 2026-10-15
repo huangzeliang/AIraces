@@ -4,6 +4,7 @@
 <nav class="nav-menu" aria-label="工作台">
   {% if is_admin %}
   <a class="nav-item {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}" {% if active_page == 'dashboard' %}aria-current="page"{% endif %}><span aria-hidden="true">▦</span>驾驶舱</a>
+  <a class="nav-item {% if active_page == 'hub' %}active{% endif %}" href="{{ url_for('hub') }}" {% if active_page == 'hub' %}aria-current="page"{% endif %}><span aria-hidden="true">◎</span>任务中枢</a>
   {% endif %}
   <a class="nav-item {% if active_page == 'tasks' %}active{% endif %}" href="{{ url_for('tasks') }}" {% if active_page == 'tasks' %}aria-current="page"{% endif %}><span aria-hidden="true">☰</span>任务列表</a>
   <a class="nav-item {% if active_page == 'reminders' %}active{% endif %}" href="{{ url_for('reminders') }}" {% if active_page == 'reminders' %}aria-current="page"{% endif %}><span aria-hidden="true">♢</span>提醒中心</a>
