@@ -64,7 +64,13 @@
 .cell-task{min-width:280px;max-width:420px}
 .task-title{display:flex;align-items:center;gap:8px}
 .task-title strong{font-size:12.5px;line-height:1.5}
+.task-link{color:var(--text)}
+.task-link:hover{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
 .tag-demo{padding:2px 7px;border-radius:7px;background:var(--purple-soft);color:var(--purple);font-size:9.5px;font-weight:900;font-style:normal;white-space:nowrap}
+.flag-sub{padding:2px 7px;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-size:9.5px;font-weight:900;white-space:nowrap}
+.owner-chip{padding:2px 8px;border-radius:7px;background:var(--purple-soft);color:var(--purple);font-size:9.5px;font-weight:900;white-space:nowrap}
+.parent-chip{padding:2px 8px;border-radius:7px;background:var(--bg);border:1px dashed var(--border);color:var(--muted);font-size:9.5px;font-weight:800;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.parent-chip:hover{border-color:var(--accent);color:var(--accent)}
 .task-meta{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap;font-size:10.5px;color:var(--muted)}
 .row-id{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;color:var(--subtle)}
 .plan-tag{max-width:170px;padding:2px 8px;border-radius:7px;background:var(--bg);border:1px dashed var(--border);color:var(--muted);font-size:9.5px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -103,6 +109,7 @@
 
 .cell-actions{white-space:nowrap;min-width:238px}
 .mini-btn{height:30px;padding:0 10px;margin:2px 2px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:11px;font-weight:800;transition:border-color .15s,color .15s}
+a.mini-btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 .mini-btn:hover{border-color:var(--accent);color:var(--accent)}
 .mini-btn.is-danger:hover{border-color:var(--danger);color:var(--danger)}
 .mini-btn[disabled]{opacity:.5;cursor:not-allowed}

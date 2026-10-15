@@ -5,12 +5,23 @@
   'use strict';
 
   var configNode = document.querySelector('#tasks-config');
-  var CFG = { urls: {}, next: '', plans: [] };
+  var CFG = { urls: {}, next: '', plans: [], owners: [] };
   if (configNode) {
     try { CFG = JSON.parse(configNode.textContent); } catch (error) { /* 保持默认值 */ }
   }
   var URLS = CFG.urls || {};
   var NEXT = CFG.next || '';
+
+  function ownerOptions(current, emptyLabel) {
+    var names = [];
+    if (current) names.push(current);
+    (CFG.owners || []).forEach(function (name) {
+      if (names.indexOf(name) === -1) names.push(name);
+    });
+    return [{ value: '', label: emptyLabel }].concat(names.map(function (name) {
+      return { value: name, label: name };
+    }));
+  }
 
   function url(key, id) {
     return (URLS[key] || '').replace('__ID__', id);
@@ -380,12 +391,21 @@
 
     var title = makeField({ label: '任务标题（必填，≤80 字）', name: 'title', value: button.dataset.title || '', maxlength: 80 });
     var detail = makeField({ label: '任务描述（选填，≤500 字）', tag: 'textarea', name: 'detail', value: button.dataset.detail || '', maxlength: 500 });
+    var owner = makeField({
+      label: '负责人（调整归属）', tag: 'select', name: 'owner',
+      value: button.dataset.owner || '', options: ownerOptions(button.dataset.owner || '', '不指派')
+    });
     var due = makeField({ label: '截止时间（选填）', name: 'due_at', type: 'datetime-local', value: button.dataset.due || '' });
+
+    var grid2 = document.createElement('div');
+    grid2.className = 'modal-grid';
+    grid2.appendChild(owner.node);
+    grid2.appendChild(due.node);
 
     form.appendChild(title.node);
     form.appendChild(detail.node);
     form.appendChild(grid);
-    form.appendChild(due.node);
+    form.appendChild(grid2);
     var error = makeError();
     form.appendChild(error);
 
@@ -433,6 +453,7 @@
       return { value: plan.plan_id, label: plan.plan_id + ' · ' + plan.goal };
     }));
     var plan = makeField({ label: '所属计划（选填）', tag: 'select', name: 'plan_id', options: planOptions });
+    var owner = makeField({ label: '负责人（选填，拆解到人）', tag: 'select', name: 'owner', options: ownerOptions('', '暂不指派') });
     var due = makeField({ label: '截止时间（选填）', name: 'due_at', type: 'datetime-local' });
 
     var grid = document.createElement('div');
@@ -444,6 +465,7 @@
     form.appendChild(detail.node);
     form.appendChild(grid);
     form.appendChild(plan.node);
+    form.appendChild(owner.node);
     form.appendChild(due.node);
     var error = makeError();
     form.appendChild(error);

@@ -85,12 +85,15 @@
         <tr id="task-{{ task.task_id }}" class="task-row {% if task.overdue %}is-overdue{% endif %} {% if task.is_focus %}is-focus{% endif %}" data-task="{{ task.task_id }}">
           <td class="cell-task">
             <div class="task-title">
-              <strong>{{ task.title }}</strong>
+              <strong><a class="task-link" href="{{ urls.detail | replace('__ID__', task.task_id) }}" title="打开任务详情与拆解甘特图">{{ task.title }}</a></strong>
               {% if task.is_demo %}<em class="tag-demo">演示</em>{% endif %}
+              {% if task.subtask_count %}<a class="flag-sub" href="{{ urls.detail | replace('__ID__', task.task_id) }}" title="已拆解 {{ task.subtask_count }} 个子任务，点击查看甘特图">拆解 {{ task.subtask_count }} 项</a>{% endif %}
             </div>
             <div class="task-meta">
               <span class="row-id">{{ task.task_id }}</span>
               {% if task.plan_title %}<span class="plan-tag" title="{{ task.plan_title }}">{{ task.plan_title }}</span>{% endif %}
+              {% if task.owner %}<span class="owner-chip">负责人 {{ task.owner }}</span>{% endif %}
+              {% if task.parent_task_id %}<a class="parent-chip" href="{{ urls.detail | replace('__ID__', task.parent_task_id) }}" title="父任务：{{ task.parent_title }}">父任务 {{ task.parent_task_id }}</a>{% endif %}
               {% if task.delay_count %}<span class="flag flag-delay">延期 {{ task.delay_count }} 次</span>{% endif %}
               {% if task.depends_on %}<span class="dep-chip">依赖 {{ task.depends_on|join('、') }}</span>{% endif %}
             </div>
@@ -113,6 +116,7 @@
           </td>
           <td class="cell-finish">{{ task.finish_disp }}</td>
           <td class="cell-actions">
+            <a class="mini-btn" href="{{ urls.detail | replace('__ID__', task.task_id) }}">详情</a>
             {% if task.status in ('待安排', '待执行', '进行中', '已延期') %}
             <button class="mini-btn" type="button" data-action="complete" data-task="{{ task.task_id }}">完成</button>
             <button class="mini-btn" type="button" data-action="delay" data-task="{{ task.task_id }}" data-title="{{ task.title }}">延期</button>
@@ -120,7 +124,7 @@
             {% endif %}
             <button class="mini-btn" type="button" data-action="edit"
                     data-task="{{ task.task_id }}" data-title="{{ task.title }}" data-detail="{{ task.detail }}"
-                    data-priority="{{ task.priority }}" data-estimate="{{ task.estimate_minutes }}" data-due="{{ task.due_input }}">编辑</button>
+                    data-priority="{{ task.priority }}" data-estimate="{{ task.estimate_minutes }}" data-due="{{ task.due_input }}" data-owner="{{ task.owner }}">编辑</button>
             <button class="mini-btn is-danger" type="button" data-action="delete" data-task="{{ task.task_id }}" data-title="{{ task.title }}">删除</button>
           </td>
         </tr>
@@ -147,6 +151,6 @@
   {% endif %}
 </section>
 
-<script type="application/json" id="tasks-config">{{ {'urls': urls, 'next': next_query, 'plans': plans}|tojson }}</script>
+<script type="application/json" id="tasks-config">{{ {'urls': urls, 'next': next_query, 'plans': plans, 'owners': owners}|tojson }}</script>
 {% endblock %}
 {% block page_js %}<script src="{{ url_for('static', filename='js/pages/tasks.js') }}"></script>{% endblock %}

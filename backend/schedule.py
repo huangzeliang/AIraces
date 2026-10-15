@@ -177,13 +177,36 @@ def _other_label(other_task, self_task, plan_titles):
     return "「%s」" % title
 
 
+def _ancestor_ids(task, by_id):
+    """任务的全部祖先 ID（自下而上）；用于排除拆解树内父子时间窗嵌套造成的伪冲突。"""
+    ids, seen = [], set()
+    current = task
+    while current is not None:
+        parent_id = current.get("parent_task_id") or ""
+        if not parent_id or parent_id in seen:
+            break
+        ids.append(parent_id)
+        seen.add(parent_id)
+        current = by_id.get(parent_id)
+    return ids
+
+
 def compute_conflicts(rows, plan_titles=None):
-    """返回 {task_id: [冲突原因]}；rows 为 [{task, start, finish}]；跨计划重叠会标注来源计划。"""
+    """返回 {task_id: [冲突原因]}；rows 为 [{task, start, finish}]；跨计划重叠会标注来源计划。
+
+    拆解树内（F-117）：父任务与后代的窗口天然包含，两者重叠不算冲突；
+    同级子任务的时间窗在拆解提交时已校验互不重叠，因此重叠冲突只可能来自树外任务。
+    """
     plan_titles = plan_titles or {}
     reasons = {row["task"].get("task_id"): [] for row in rows}
+    by_id = {row["task"].get("task_id"): row["task"] for row in rows}
+    ancestors = {tid: _ancestor_ids(task, by_id) for tid, task in by_id.items()}
     for i in range(len(rows)):
         for j in range(i + 1, len(rows)):
             a, b = rows[i], rows[j]
+            id_a, id_b = a["task"].get("task_id"), b["task"].get("task_id")
+            if id_a in ancestors.get(id_b, ()) or id_b in ancestors.get(id_a, ()):
+                continue
             if _overlap(a["start"], a["finish"], b["start"], b["finish"]):
                 ta, tb = a["task"], b["task"]
                 reasons[ta.get("task_id")].append("与%s时间重叠" % _other_label(tb, ta, plan_titles))

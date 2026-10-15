@@ -1,0 +1,225 @@
+{% extends 'layout.html' %}
+{% block title %}{{ task.task_id }} · 任务详情 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/task_detail.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">WORKBENCH / TASKS / DETAIL</p>
+    <nav class="crumb" aria-label="拆解链路">
+      <a href="{{ urls.list }}">任务列表</a>
+      {% for node in breadcrumb %}
+      <span class="crumb-sep" aria-hidden="true">/</span>
+      <a href="{{ urls.detail | replace('__ID__', node.task_id) }}" title="{{ node.title }}">{{ node.title | truncate(14, true, '…') }}</a>
+      {% endfor %}
+      <span class="crumb-sep" aria-hidden="true">/</span>
+      <span class="crumb-current">{{ task.task_id }}</span>
+    </nav>
+    <h1>{{ task.title }}</h1>
+    <p class="subtitle">F-116 / F-117 · 单任务详情：把大任务拆解到人（负责人 / 工时 / 起止），下方甘特图查看拆解后的全部子任务时间线。</p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ urls.schedule }}">在智能排期中查看</a>
+    <a class="button button-primary" href="{{ urls.list }}">返回任务列表</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="stats" aria-label="拆解概览">
+  <article class="stat-card"><span>预计工时</span><strong>{{ stats.estimate }}</strong><small>分钟 · 本任务预算</small></article>
+  <article class="stat-card"><span>直系子任务</span><strong>{{ stats.direct }}</strong><small>拆解层级：第 {{ stats.depth }} / {{ stats.max_depth }} 层</small></article>
+  <article class="stat-card"><span>已分配工时</span><strong>{{ stats.allocated }}</strong><small>剩余可分配 {{ stats.remaining }} 分钟</small></article>
+  <article class="stat-card"><span>拆解树总计</span><strong>{{ stats.subtree }}</strong><small>含本任务与全部后代</small></article>
+  <article class="stat-card"><span>时间窗</span><strong class="is-text">{{ stats.window_disp }}</strong><small>{% if stats.unscheduled_count %}{{ stats.unscheduled_count }} 项未排期{% else %}拆解树内全部已排期{% endif %}</small></article>
+</section>
+
+<section class="panel info-panel">
+  <div class="panel-heading">
+    <div><h2>任务信息</h2><p>任务 {{ task.task_id }} 的基础字段与拆解状态</p></div>
+    <div class="heading-actions">
+      <span class="prio prio-{{ task.priority_key }}">{{ task.priority }}优先级</span>
+      <span class="status-tag status-{{ task.status_key }}"><i class="dot"></i>{{ task.status }}</span>
+      {% if task.is_demo %}<span class="tag-demo">演示</span>{% endif %}
+    </div>
+  </div>
+  <dl class="info-grid">
+    <div class="info-item"><dt>负责人</dt><dd>{% if task.owner %}<span class="owner-chip">{{ task.owner }}</span>{% else %}<span class="muted-text">未指派</span>{% endif %}</dd></div>
+    <div class="info-item"><dt>预计工时</dt><dd>{{ task.estimate_minutes }} 分钟</dd></div>
+    <div class="info-item"><dt>进度</dt><dd>{{ task.progress }}%</dd></div>
+    <div class="info-item"><dt>计划起止</dt><dd>{{ task.start_disp }} → {{ task.finish_disp }}</dd></div>
+    <div class="info-item"><dt>截止时间</dt><dd>{{ task.due_disp }}</dd></div>
+    <div class="info-item"><dt>所属计划</dt><dd>{{ task.plan_title or '—' }}</dd></div>
+    <div class="info-item"><dt>依赖任务</dt><dd>{% if task.depends_on %}{{ task.depends_on | join('、') }}{% else %}—{% endif %}</dd></div>
+    <div class="info-item"><dt>延期记录</dt><dd>{% if task.delay_count %}已延期 {{ task.delay_count }} 次{% if task.delay_reason %}（{{ task.delay_reason }}）{% endif %}{% else %}无{% endif %}</dd></div>
+    <div class="info-item"><dt>更新时间</dt><dd>{{ task.updated_disp or '—' }}</dd></div>
+    <div class="info-item info-wide"><dt>任务描述</dt><dd>{{ task.detail or '（无描述）' }}</dd></div>
+  </dl>
+</section>
+
+<section class="panel gantt-panel">
+  <div class="panel-heading">
+    <div>
+      <h2>拆解甘特图</h2>
+      <p>当前任务所属拆解树的全部任务时间线：缩进表示拆解层级，色块为计划起止，橙色虚线为截止，竖向细线为今天{% if timeline %}；时间轴 {{ timeline.start_disp }} → {{ timeline.end_disp }}{% endif %}</p>
+    </div>
+    <div class="heading-actions">
+      <span class="badge-demo">F-116 · 拆解甘特</span>
+      {% if timeline %}
+      <span class="legend">
+        <i class="swatch swatch-ready"></i>待执行
+        <i class="swatch swatch-doing"></i>进行中
+        <i class="swatch swatch-delayed"></i>已延期
+        <i class="swatch swatch-todo"></i>待安排
+        <i class="swatch swatch-due"></i>截止
+        <i class="swatch swatch-today"></i>今天
+      </span>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if not timeline %}
+  <div class="empty-inline">拆解树内的任务都还没有计划起止时间：在下方「拆解到人」提交子任务，或到智能排期生成安排后，这里会渲染时间线。</div>
+  {% else %}
+  <div class="gantt-scroll">
+    <div class="gantt">
+      <div class="gantt-ruler">
+        <span class="ruler-corner">任务 / 时间</span>
+        <div class="ruler-track">
+          {% for day in timeline.days %}
+          <span class="ruler-day{% if day.weekend %} is-weekend{% endif %}" style="left:{{ day.left_pct }}%">{{ day.label }}<em>周{{ day.weekday }}</em></span>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="gantt-rows">
+        {% for row in timeline_rows %}
+        <div class="gantt-item{% if row.is_current %} is-current{% endif %}" data-task-id="{{ row.task_id }}">
+          <div class="gantt-info">
+            <div class="gantt-title" style="padding-left:{{ (row.depth - 1) * 16 }}px">
+              <a class="gantt-link" href="{{ urls.detail | replace('__ID__', row.task_id) }}" title="{{ row.title }}">{{ row.title }}</a>
+              {% if row.is_current %}<em class="tag-current">当前</em>{% endif %}
+              {% if row.subtask_count %}<span class="flag-sub">{{ row.subtask_count }} 子任务</span>{% endif %}
+            </div>
+            <div class="gantt-meta">
+              <span class="row-id">{{ row.task_id }}</span>
+              {% if row.owner %}<span class="owner-chip">{{ row.owner }}</span>{% endif %}
+              <span class="status-tag status-{{ row.status_key }}"><i class="dot"></i>{{ row.status }}</span>
+              <span class="gantt-window">{{ row.window_disp or '未排期' }}</span>
+            </div>
+          </div>
+          <div class="gantt-track">
+            {% for day in timeline.days %}
+            <span class="track-line{% if day.weekend %} is-weekend{% endif %}" style="left:{{ day.left_pct }}%;width:{{ day.width_pct }}%" aria-hidden="true"></span>
+            {% endfor %}
+            {% if timeline.today_pct is not none %}<span class="today-line" style="left:{{ timeline.today_pct }}%" aria-hidden="true"></span>{% endif %}
+            {% if row.unscheduled %}
+            <span class="unscheduled-note">未排期（子任务提交或排期后显示时间条）</span>
+            {% else %}
+            {% if row.due_left_pct is defined %}<span class="due-marker" style="left:{{ row.due_left_pct }}%" title="截止 {{ row.due_disp }}" aria-hidden="true"></span>{% endif %}
+            <div class="gantt-bar bar-{{ row.status_key }}" style="left:{{ row.left_pct }}%;width:{{ row.width_pct }}%" role="img"
+                 title="{{ row.title }} · {{ row.window_disp }}"
+                 aria-label="{{ row.title }}：{{ row.window_disp }}（{{ row.status }}）"></div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% if timeline.capped %}<p class="timeline-note">时间跨度较长，视图截取前 {{ timeline.days | length }} 天展示。</p>{% endif %}
+  {% endif %}
+</section>
+
+<section class="panel decompose-panel" id="decompose">
+  <div class="panel-heading">
+    <div><h2>拆解到人</h2><p>把「{{ task.title | truncate(18, true, '…') }}」拆成个人子任务：指定负责人、拆分预计工时、设定各自起止时间</p></div>
+    <span class="badge-demo">F-117 · 任务拆解</span>
+  </div>
+
+  {% if can_decompose %}
+  <form id="decompose-form" class="decompose-form" method="post" action="{{ urls.decompose }}" novalidate>
+    <div class="decompose-grid">
+      <label class="field field-wide"><span>子任务标题（必填，≤80 字）</span><input type="text" name="title" maxlength="80" required placeholder="例如：梳理巡检点位与标准"></label>
+      <label class="field"><span>负责人（必填）</span>
+        <select name="owner" required>
+          <option value="">请选择负责人</option>
+          {% for name in owners %}<option value="{{ name }}" {% if name == prefill.owner %}selected{% endif %}>{{ name }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="field"><span>预计工时（分钟，必填）</span><input type="number" name="estimate_minutes" min="1" max="100000" placeholder="剩余可分配 {{ stats.remaining }} 分钟"></label>
+      <label class="field"><span>优先级</span>
+        <select name="priority"><option value="高">高</option><option value="中" selected>中</option><option value="低">低</option></select>
+      </label>
+      <label class="field"><span>开始时间（必填）</span><input type="datetime-local" name="start_at" value="{{ prefill.start }}"></label>
+      <label class="field"><span>结束时间（必填）</span><input type="datetime-local" name="finish_at" value="{{ prefill.finish }}"></label>
+      <label class="field field-wide"><span>子任务描述（选填，≤500 字）</span><textarea name="detail" rows="2" maxlength="500" placeholder="交付物 / 验收口径，可留空"></textarea></label>
+    </div>
+    <p class="budget-line" id="budget-line" data-remaining="{{ stats.remaining }}">本次拟分配 <b id="budget-used">0</b> 分钟 · 剩余可分配 <b id="budget-left">{{ stats.remaining }}</b> 分钟（父任务 {{ stats.estimate }} − 已分配 {{ stats.allocated }}）</p>
+    <div class="form-actions">
+      <button class="button button-primary" type="submit">拆解子任务</button>
+      {% if prefill.start and prefill.finish %}<button class="button button-secondary" type="button" id="prefill-window" data-start="{{ prefill.start }}" data-finish="{{ prefill.finish }}">填入父任务时间窗</button>{% endif %}
+      <span class="form-hint">提交时强校验：工时合计 ≤ 父任务；时间窗 ⊆ 父任务窗口；同级不重叠；最多 3 层。</span>
+    </div>
+  </form>
+  {% else %}
+  <div class="notice info" role="status">{{ block_reason }}</div>
+  {% endif %}
+
+  <details class="rules-fold">
+    <summary>查看拆解规则与校验口径</summary>
+    <ul class="rules-list">
+      <li><b>层级</b>：顶层大任务 → 个人任务 → 再下拆一层，最多 {{ stats.max_depth }} 层；已完成 / 已取消的任务不能再拆。</li>
+      <li><b>工时</b>：子任务预计工时合计不得超过父任务的 {{ stats.estimate }} 分钟（当前剩余 {{ stats.remaining }} 分钟）。</li>
+      <li><b>时间窗</b>：子任务起止必须落在父任务时间窗内；父任务未排期时，首个拆解提交后父窗口自动扩为子任务并集。</li>
+      <li><b>同级</b>：同一父任务下的子任务时间窗互不重叠，甘特图上同层时间条不覆盖。</li>
+      <li><b>追溯</b>：每次拆解 / 迁出都写入任务日志，父子链可在面包屑与甘特缩进中查看。</li>
+    </ul>
+  </details>
+</section>
+
+<section class="panel children-panel">
+  <div class="panel-heading">
+    <div><h2>子任务（{{ children | length }} 项）</h2><p>点击标题打开子任务详情可继续下拆；迁出后子任务上提为顶层任务，需二次确认</p></div>
+  </div>
+  {% if children %}
+  <div class="child-list">
+    {% for child in children %}
+    <article class="child-card">
+      <div class="child-main">
+        <div class="child-title">
+          <a class="child-link" href="{{ urls.detail | replace('__ID__', child.task_id) }}">{{ child.title }}</a>
+          <span class="row-id">{{ child.task_id }}</span>
+          {% if child.owner %}<span class="owner-chip">{{ child.owner }}</span>{% endif %}
+          <span class="status-tag status-{{ child.status_key }}"><i class="dot"></i>{{ child.status }}</span>
+          {% if child.subtask_count %}<span class="flag-sub">已下拆 {{ child.subtask_count }} 项</span>{% endif %}
+        </div>
+        <div class="child-meta">
+          <span>{{ child.estimate_minutes }} 分钟</span>
+          <span class="child-window">计划 {{ child.start_disp }} → {{ child.finish_disp }}</span>
+          <span>截止 {{ child.due_disp }}</span>
+          {% if child.depends_on %}<span class="dep-chip">依赖 {{ child.depends_on | join('、') }}</span>{% endif %}
+        </div>
+        <div class="child-progress" role="img" aria-label="进度 {{ child.progress }}%">
+          <span class="mini-progress" aria-hidden="true"><i style="width:{{ child.progress }}%"></i></span>
+          <span class="child-progress-text">{{ child.progress }}%</span>
+        </div>
+      </div>
+      <div class="child-actions">
+        <a class="button button-secondary" href="{{ urls.detail | replace('__ID__', child.task_id) }}">打开详情</a>
+        <form method="post" action="{{ urls.detach | replace('__ID__', child.task_id) }}">
+          <button class="mini-btn" type="submit" data-action="detach" data-title="{{ child.title }}">迁出</button>
+        </form>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-inline">还没有子任务：用上方「拆解到人」把大任务拆给具体成员，甘特图会同步渲染时间线。</div>
+  {% endif %}
+</section>
+
+<script type="application/json" id="task-detail-config">{{ {'detach': urls.detach, 'remaining': stats.remaining}|tojson }}</script>
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/task_detail.js') }}"></script>{% endblock %}

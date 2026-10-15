@@ -302,6 +302,23 @@ def _next_suffix():
     return "?" + raw
 
 
+def _owner_options(users, extra=()):
+    """负责人下拉选项：启用中的用户姓名 + 需保留的当前值（历史数据可回显）。"""
+    names = [u.get("name") for u in users if u.get("status") == "启用" and u.get("name")]
+    for name in extra or ():
+        if name and name not in names:
+            names.append(name)
+    return names
+
+
+def _fail_or_flash(is_json, message, code=400):
+    """列表页操作失败：JSON 请求返回错误体；表单请求 flash 后回到当前筛选态。"""
+    if is_json:
+        return jsonify({"ok": False, "message": message}), code
+    flash(message, "error")
+    return redirect(url_for("tasks") + _next_suffix())
+
+
 def _respond(ok, message, code=200, **extra):
     """JSON 请求返回 JSON；页面表单请求 flash + 302 跳回当前筛选态。"""
     if request.get_json(silent=True) is not None:
@@ -415,11 +432,13 @@ def _paginate(rows, args):
     return rows[start:start + PAGE_SIZE], {"enabled": True, "page": page, "pages": pages, "total": total}
 
 
-def _serialize_task(task, now, plan_titles, is_focus=False):
+def _serialize_task(task, now, plan_titles, is_focus=False, child_counts=None, task_index=None):
     due = llm.parse_dt(task.get("due_at") or "")
     status = task.get("status") or ""
     overdue = bool(due and due < now and status not in ("已完成", "已取消"))
     plan_id = task.get("plan_id") or ""
+    parent_id = task.get("parent_task_id") or ""
+    parent = (task_index or {}).get(parent_id)
     return {
         "task_id": task.get("task_id") or "",
         "title": task.get("title") or "",
@@ -434,6 +453,7 @@ def _serialize_task(task, now, plan_titles, is_focus=False):
         "due_disp": due.strftime("%m-%d %H:%M") if due else "未设置",
         "due_input": _time_input_value(task.get("due_at")),
         "finish_disp": _fmt_moment(task.get("planned_finish_at")) or "未排期",
+        "start_disp": _fmt_moment(task.get("scheduled_start_at")) or "未排期",
         "delay_count": int(task.get("delay_count") or 0),
         "delay_reason": task.get("delay_reason") or "",
         "depends_on": list(task.get("depends_on") or []),
@@ -443,6 +463,12 @@ def _serialize_task(task, now, plan_titles, is_focus=False):
         "completed_at": task.get("completed_at") or "",
         "is_demo": bool(task.get("is_demo")),
         "is_focus": is_focus,
+        "owner": task.get("owner") or "",
+        "parent_task_id": parent_id,
+        "parent_title": (parent.get("title") or "") if parent else "",
+        "subtask_count": int((child_counts or {}).get(task.get("task_id"), 0)),
+        "created_disp": _fmt_moment(task.get("created_at")),
+        "updated_disp": _fmt_moment(task.get("updated_at")),
     }
 
 
@@ -494,6 +520,7 @@ def register(app, services):
     read_store = services.read_store
     write_store = services.write_store
     read_settings = services.read_settings
+    read_users = services.read_users
     store_lock = services.store_lock
 
     # ------------------------------------------------------------------
@@ -505,6 +532,8 @@ def register(app, services):
         settings = read_settings()
         now = _now()
         plan_titles = {p.get("plan_id"): (p.get("goal") or "") for p in store.get("plans", [])}
+        task_index = _task_index(store)
+        child_counts = {tid: len(children) for tid, children in _child_index(store).items()}
 
         rows = _sort_tasks(_filter_tasks(store, request.args, now), request.args)
 
@@ -514,7 +543,8 @@ def register(app, services):
             rows = [focus_task] + rows
 
         page_rows, pagination = _paginate(rows, request.args)
-        task_views = [_serialize_task(t, now, plan_titles, t is focus_task) for t in page_rows]
+        task_views = [_serialize_task(t, now, plan_titles, t is focus_task, child_counts, task_index)
+                      for t in page_rows]
 
         raw_status = request.args.getlist("status")
         checked_status = raw_status if "f" in request.args else [UNFINISHED_CHIP]
@@ -561,6 +591,7 @@ def register(app, services):
                 "next": url_for("tasks") + _build_query(request.args, drop=("page", "focus"), **{"page": pagination["page"] + 1}),
             },
             next_query=request.query_string.decode()[:600],
+            owners=_owner_options(read_users()),
             urls={
                 "complete": url_for("task_complete", task_id="__ID__"),
                 "delay": url_for("task_delay", task_id="__ID__"),
@@ -570,6 +601,7 @@ def register(app, services):
                 "delete": url_for("task_delete", task_id="__ID__"),
                 "undo": url_for("task_undo", feedback_id="__ID__"),
                 "create": url_for("task_create"),
+                "detail": url_for("task_detail", task_id="__ID__"),
             },
         )
 
@@ -586,6 +618,7 @@ def register(app, services):
         detail = str(data.get("detail") or "").strip()
         priority = str(data.get("priority") or "中").strip()
         plan_id = str(data.get("plan_id") or "").strip()
+        owner = str(data.get("owner") or "").strip()
         errors = []
         if not title:
             errors.append("任务标题不能为空。")
@@ -595,6 +628,8 @@ def register(app, services):
             errors.append("任务描述不能超过 %d 个字符。" % DETAIL_LIMIT)
         if priority not in PRIORITIES:
             errors.append("优先级无效。")
+        if len(owner) > OWNER_LIMIT:
+            errors.append("负责人不能超过 %d 个字符。" % OWNER_LIMIT)
         try:
             estimate = int(data.get("estimate_minutes") or 60)
         except (TypeError, ValueError):
@@ -628,6 +663,7 @@ def register(app, services):
                 "plan_id": plan_id,
                 "todo_id": "",
                 "parent_task_id": "",
+                "owner": owner,
                 "title": title,
                 "detail": detail,
                 "priority": priority,
@@ -664,6 +700,7 @@ def register(app, services):
         title = str(data.get("title") or "").strip()
         detail = str(data.get("detail") or "").strip()
         priority = str(data.get("priority") or "").strip()
+        owner = str(data.get("owner") or "").strip()
         errors = []
         if not title:
             errors.append("任务标题不能为空。")
@@ -673,6 +710,8 @@ def register(app, services):
             errors.append("任务描述不能超过 %d 个字符。" % DETAIL_LIMIT)
         if priority not in PRIORITIES:
             errors.append("优先级无效。")
+        if len(owner) > OWNER_LIMIT:
+            errors.append("负责人不能超过 %d 个字符。" % OWNER_LIMIT)
         try:
             estimate = int(data.get("estimate_minutes"))
         except (TypeError, ValueError):
@@ -700,9 +739,26 @@ def register(app, services):
                     return jsonify({"ok": False, "message": "任务不存在或已被删除。"}), 404
                 flash("任务不存在或已被删除。", "error")
                 return redirect(url_for("tasks") + _next_suffix())
+            # 拆解一致性：父任务工时不得低于子任务合计；子任务调整后同级合计不得超出父任务
+            by_id = _task_index(store)
+            children = _child_index(store).get(task_id, [])
+            allocated = sum(_minutes_of(c) for c in children)
+            if children and estimate < allocated:
+                return _fail_or_flash(
+                    is_json, "预计耗时不能低于已拆解子任务合计 %d 分钟，请先调整或迁出子任务。" % allocated)
+            parent_id = task.get("parent_task_id") or ""
+            parent = by_id.get(parent_id)
+            if parent is not None:
+                siblings = [c for c in _child_index(store).get(parent_id, []) if c.get("task_id") != task_id]
+                sibling_sum = sum(_minutes_of(c) for c in siblings)
+                if sibling_sum + estimate > _minutes_of(parent):
+                    return _fail_or_flash(
+                        is_json, "同级子任务工时合计将超出父任务「%s」的 %d 分钟（其他子任务已占 %d 分钟）。" % (
+                            parent.get("title") or parent_id, _minutes_of(parent), sibling_sum))
             task["title"] = title
             task["detail"] = detail
             task["priority"] = priority
+            task["owner"] = owner
             task["estimate_minutes"] = estimate
             task["due_at"] = llm.iso(due) if due else ""
             task["updated_at"] = llm.iso(now)
@@ -713,6 +769,267 @@ def register(app, services):
             return jsonify({"ok": True, "message": "任务已保存。"})
         flash("任务已保存。", "success")
         return redirect(url_for("tasks") + _next_suffix())
+
+    # ------------------------------------------------------------------
+    # F-116 / F-117 · 单任务详情：拆解树 + 子任务时间线甘特图
+    # ------------------------------------------------------------------
+    @app.get("/tasks/<task_id>")
+    def task_detail(task_id):
+        store = read_store()
+        settings = read_settings()
+        now = _now()
+        task = _find_task(store, task_id)
+        if task is None:
+            flash("任务不存在或已被删除。", "error")
+            return redirect(url_for("tasks"))
+
+        plan_titles = {p.get("plan_id"): (p.get("goal") or "") for p in store.get("plans", [])}
+        by_id = _task_index(store)
+        child_index = _child_index(store)
+        child_counts = {tid: len(children) for tid, children in child_index.items()}
+        ancestors = _ancestors(task, by_id)           # 自下而上
+        root = ancestors[-1] if ancestors else task   # 甘特从拆解树顶层展示全貌
+
+        views = []
+        for node, depth in _subtree_rows(root, child_index):
+            view = _serialize_task(node, now, plan_titles, child_counts=child_counts, task_index=by_id)
+            view["depth"] = depth
+            view["is_current"] = node.get("task_id") == task_id
+            view["_window"] = _effective_window(node, child_index)
+            views.append(view)
+        timeline = _timeline_span(views, now)
+
+        children_views = [_serialize_task(c, now, plan_titles, child_counts=child_counts, task_index=by_id)
+                          for c in child_index.get(task_id, [])]
+        current = next(v for v in views if v["is_current"])
+        current_depth = len(ancestors) + 1
+        allocated = sum(_minutes_of(c) for c in child_index.get(task_id, []))
+        can_decompose = current_depth < MAX_DEPTH and (task.get("status") or "") not in DECOMPOSE_BLOCKED
+        if can_decompose:
+            block_reason = ""
+        elif (task.get("status") or "") in DECOMPOSE_BLOCKED:
+            block_reason = "任务已「%s」，不能再拆解；如需调整请先重新打开任务。" % (task.get("status") or "")
+        else:
+            block_reason = "已达到最大拆解层级（顶层大任务 → 个人任务 → 再下拆一层，共 %d 层）。" % MAX_DEPTH
+
+        return render_template(
+            "pages/task_detail.html",
+            active_page="tasks",
+            page_name="任务详情",
+            settings=settings,
+            task=current,
+            breadcrumb=[{"task_id": a.get("task_id"), "title": a.get("title") or ""} for a in reversed(ancestors)],
+            children=children_views,
+            timeline_rows=views,
+            timeline=timeline,
+            stats={
+                "direct": len(children_views),
+                "subtree": len(views),
+                "estimate": _minutes_of(task),
+                "allocated": allocated,
+                "remaining": max(0, _minutes_of(task) - allocated),
+                "depth": current_depth,
+                "max_depth": MAX_DEPTH,
+                "window_disp": current.get("window_disp") or "未排期",
+                "unscheduled_count": sum(1 for v in views if v.get("unscheduled")),
+            },
+            can_decompose=can_decompose,
+            block_reason=block_reason,
+            owners=_owner_options(read_users(), [task.get("owner") or ""]),
+            priorities=PRIORITIES,
+            prefill={
+                "start": _time_input_value(task.get("scheduled_start_at")),
+                "finish": _time_input_value(task.get("planned_finish_at")),
+                "owner": task.get("owner") or "",
+            },
+            urls={
+                "decompose": url_for("task_decompose", task_id=task_id),
+                "detach": url_for("task_detach", child_id="__ID__"),
+                "detail": url_for("task_detail", task_id="__ID__"),
+                "list": url_for("tasks"),
+                "schedule": url_for("schedule"),
+            },
+        )
+
+    @app.post("/tasks/<task_id>/decompose")
+    def task_decompose(task_id):
+        payload = request.get_json(silent=True)
+        is_json = payload is not None
+        data = payload if is_json else request.form
+
+        title = str(data.get("title") or "").strip()
+        owner = str(data.get("owner") or "").strip()
+        detail = str(data.get("detail") or "").strip()
+        priority = str(data.get("priority") or "中").strip()
+        deps = data.get("depends_on") or []
+        if isinstance(deps, str):
+            deps = [d.strip() for d in deps.replace("，", ",").split(",") if d.strip()]
+        if not isinstance(deps, list):
+            deps = []
+
+        errors = []
+        if not title:
+            errors.append("子任务标题不能为空。")
+        elif len(title) > TITLE_LIMIT:
+            errors.append("子任务标题不能超过 %d 个字符。" % TITLE_LIMIT)
+        if not owner:
+            errors.append("请指定负责人（拆解到人）。")
+        elif len(owner) > OWNER_LIMIT:
+            errors.append("负责人不能超过 %d 个字符。" % OWNER_LIMIT)
+        if len(detail) > DETAIL_LIMIT:
+            errors.append("子任务描述不能超过 %d 个字符。" % DETAIL_LIMIT)
+        if priority not in PRIORITIES:
+            errors.append("优先级无效。")
+        try:
+            estimate = int(data.get("estimate_minutes"))
+        except (TypeError, ValueError):
+            estimate = None
+        if estimate is None or estimate <= 0 or estimate > ESTIMATE_LIMIT:
+            errors.append("子任务预计工时必须为大于 0 且不超过 %d 的整数。" % ESTIMATE_LIMIT)
+
+        start_raw = str(data.get("start_at") or "").strip()
+        finish_raw = str(data.get("finish_at") or "").strip()
+        start = llm.parse_dt(start_raw) if start_raw else None
+        finish = llm.parse_dt(finish_raw) if finish_raw else None
+        if not start:
+            errors.append("开始时间不能为空，且需为有效时间。" if not start_raw else "开始时间格式无效。")
+        if not finish:
+            errors.append("结束时间不能为空，且需为有效时间。" if not finish_raw else "结束时间格式无效。")
+        if start and finish and start >= finish:
+            errors.append("结束时间必须晚于开始时间。")
+
+        if errors:
+            if is_json:
+                return jsonify({"ok": False, "message": errors[0], "errors": errors}), 400
+            for message in errors:
+                flash(message, "error")
+            return redirect(url_for("task_detail", task_id=task_id))
+
+        now = _now()
+        with store_lock:
+            store = read_store()
+            parent = _find_task(store, task_id)
+            if parent is None:
+                return _respond_task_detail(False, "任务不存在或已被删除。", task_id, 404)
+            if (parent.get("status") or "") in DECOMPOSE_BLOCKED:
+                return _respond_task_detail(
+                    False, "任务已「%s」，不能继续拆解。" % parent.get("status"), task_id)
+            by_id = _task_index(store)
+            if _depth_of(parent, by_id) >= MAX_DEPTH:
+                return _respond_task_detail(
+                    False, "已达到最大拆解层级（共 %d 层），不能再往下拆。" % MAX_DEPTH, task_id)
+
+            # 1) 工时合计：子任务合计（含本单）不得超过父任务预计工时
+            child_index = _child_index(store)
+            siblings = child_index.get(task_id, [])
+            allocated = sum(_minutes_of(c) for c in siblings)
+            parent_estimate = _minutes_of(parent)
+            if allocated + estimate > parent_estimate:
+                return _respond_task_detail(
+                    False, "子任务工时合计不得超过父任务 %d 分钟：已分配 %d 分钟，剩余 %d 分钟，本次需 %d 分钟。" % (
+                        parent_estimate, allocated, max(0, parent_estimate - allocated), estimate), task_id)
+
+            # 2) 时间窗：必须落在父任务窗口内（父任务未排期时先跳过，入库后自动补齐父窗口）
+            parent_start = llm.parse_dt(parent.get("scheduled_start_at") or "")
+            parent_finish = llm.parse_dt(parent.get("planned_finish_at") or "")
+            if parent_start and parent_finish and parent_start < parent_finish:
+                if start < parent_start or finish > parent_finish:
+                    return _respond_task_detail(
+                        False, "子任务时间窗需落在父任务时间窗 %s → %s 内。" % (
+                            parent_start.strftime("%m-%d %H:%M"), parent_finish.strftime("%m-%d %H:%M")), task_id)
+
+            # 3) 同级不重叠：甘特上同层时间条互不覆盖
+            for sibling in siblings:
+                s_start = llm.parse_dt(sibling.get("scheduled_start_at") or "")
+                s_finish = llm.parse_dt(sibling.get("planned_finish_at") or "")
+                if s_start and s_finish and start < s_finish and s_start < finish:
+                    return _respond_task_detail(
+                        False, "与同级子任务「%s」时间重叠（%s → %s），请调整起止时间。" % (
+                            sibling.get("title") or sibling.get("task_id"),
+                            s_start.strftime("%m-%d %H:%M"), s_finish.strftime("%m-%d %H:%M")), task_id)
+
+            # 4) 依赖：引用的任务必须存在
+            depends_on = []
+            for dep in deps[:20]:
+                dep_id = str(dep).strip()
+                if not dep_id:
+                    continue
+                if dep_id not in by_id:
+                    return _respond_task_detail(False, "依赖的任务 %s 不存在。" % dep_id, task_id)
+                depends_on.append(dep_id)
+
+            child_id = _next_seq_id(store.setdefault("tasks", []), "task_id", "T")
+            child = {
+                "task_id": child_id,
+                "plan_id": parent.get("plan_id") or "",
+                "todo_id": "",
+                "parent_task_id": task_id,
+                "owner": owner,
+                "title": title,
+                "detail": detail,
+                "priority": priority,
+                "estimate_minutes": estimate,
+                "due_at": llm.iso(finish),
+                "scheduled_start_at": llm.iso(start),
+                "planned_finish_at": llm.iso(finish),
+                "status": "待执行",
+                "progress": 0,
+                "depends_on": depends_on,
+                "delay_count": 0,
+                "delay_reason": "",
+                "completed_at": "",
+                "is_demo": False,
+                "created_at": llm.iso(now),
+                "updated_at": llm.iso(now),
+            }
+            store["tasks"].append(child)
+
+            # 父任务未排期时，用子任务并集自动补出父窗口，保证甘特与排期口径一致
+            if not (parent_start and parent_finish):
+                fresh_index = _child_index(store)
+                windows = [w for w in (_effective_window(c, fresh_index)
+                                       for c in fresh_index.get(task_id, [])) if w]
+                if windows:
+                    parent["scheduled_start_at"] = llm.iso(min(w[0] for w in windows))
+                    parent["planned_finish_at"] = llm.iso(max(w[1] for w in windows))
+                    fb.write_log(store, task_id, "排期", "按子任务窗口并集自动补齐父任务时间窗", now)
+            parent["updated_at"] = llm.iso(now)
+            fb.write_log(store, child_id, "拆解", "由父任务「%s」（%s）拆解建立，负责人 %s" % (
+                parent.get("title") or task_id, task_id, owner), now)
+            fb.write_log(store, task_id, "拆解", "拆解出子任务 %s「%s」（负责人 %s，%d 分钟）" % (
+                child_id, title, owner, estimate), now)
+            write_store(store)
+
+        message = "已拆解出 %s「%s」（负责人 %s，%d 分钟），甘特图已更新。" % (child_id, title, owner, estimate)
+        if is_json:
+            return jsonify({"ok": True, "task_id": child_id, "parent_task_id": task_id, "message": message})
+        flash(message, "success")
+        return redirect(url_for("task_detail", task_id=task_id))
+
+    @app.post("/tasks/<child_id>/detach")
+    def task_detach(child_id):
+        now = _now()
+        with store_lock:
+            store = read_store()
+            child = _find_task(store, child_id)
+            if child is None:
+                return _respond_task_detail(False, "任务不存在或已被删除。", child_id, 404)
+            parent_id = child.get("parent_task_id") or ""
+            if not parent_id:
+                return _respond_task_detail(False, "该任务已是顶层任务，无需迁出。", child_id)
+            parent = _find_task(store, parent_id)
+            child["parent_task_id"] = ""
+            child["updated_at"] = llm.iso(now)
+            fb.write_log(store, child_id, "迁出", "从父任务「%s」（%s）迁出，上提为顶层任务" % (
+                (parent.get("title") if parent else "已删除"), parent_id), now)
+            if parent is not None:
+                parent["updated_at"] = llm.iso(now)
+                fb.write_log(store, parent_id, "迁出", "子任务 %s「%s」已迁出" % (
+                    child_id, child.get("title") or ""), now)
+            write_store(store)
+
+        message = "已将「%s」迁出为顶层任务，父子链已更新。" % (child.get("title") or child_id)
+        return _respond_task_detail(True, message, child_id)
 
     # ------------------------------------------------------------------
     # B1 + B4 · 完成 / 延期 / 取消 / 进度
