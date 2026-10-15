@@ -1,7 +1,7 @@
 """NS 线 · 登录 / 退出 / 守卫 / 错误包 / 非 B 线菜单占位页。
 
 - 账号体系：data/system.json 的 user 表（U001~U010），演示统一口令 123456；
-- 会话键 ns_user_id，与旧系统 session["user_id"] 完全隔离；
+- 会话：与统一账号共用 backend.core.SESSION_KEY，任一登录入口登录后两线页面互通；
 - 旧系统 before_request 守卫通过 app.py 把 ns_* 端点注册进 PUBLIC_ENDPOINTS 整体放行，
   本模块的 before_request 只拦截 /ns 与 /api/ns 前缀，自行判登录。
 """
@@ -122,6 +122,16 @@ def register(app, services):
         return redirect(landing_url(store, user))
 
     # ------------------------------------------------------------------ 非 B 线菜单占位页
+    # 已实现的工作线页面：占位入口 302 直达真实页面（权限点与应用页守卫一致，不放宽）
+    wired_pages = {
+        "dashboard": "dashboard",     # C1 驾驶舱（管理员专属）
+        "goal_dept": "goal_dept",     # A1 部门目标
+        "goal_smart": "goal_smart",   # A2 SMART 校验
+        "goal_tree": "goal_tree",     # A3 拆解树与发布
+        "assign": "assign",           # A4 智能派工
+        "data": "data_manage",        # C2 数据管理（管理员专属）
+        "settings": "settings",       # C3 系统设置（管理员专属）
+    }
     placeholder_pages = (
         ("ns_dashboard", "/ns/dashboard", "dashboard", "部门驾驶舱", "工作线 C · 看板与数据"),
         ("ns_goal_dept", "/ns/goal/dept", "goal_dept", "部门目标", "工作线 A · 目标制定"),
@@ -138,8 +148,12 @@ def register(app, services):
     )
 
     def make_placeholder(endpoint, menu_key, title, owner_line):
+        target_endpoint = wired_pages.get(menu_key)
+
         @require_ns_menu(menu_key)
         def view():
+            if target_endpoint:
+                return redirect(url_for(target_endpoint))
             return ns_render(
                 "ns/coming_soon.html", menu_key, title, "该菜单属于「%s」，尚未接入本演示入口。" % owner_line,
                 owner_line=owner_line,

@@ -1,0 +1,217 @@
+{% extends 'layout.html' %}
+{% block title %}部门目标 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/goal_dept.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">目标拆解 / A1 · 部门目标</p>
+    <h1>{{ '编辑部门目标' if objective else '录入部门目标' }}</h1>
+    <p class="subtitle">录入部门季度重点工作，作为拆解起点；保存一律为草稿，需经 SMART 校验与发布流程。</p>
+  </div>
+  <div class="heading-actions">
+    <a class="button button-secondary" href="{{ url_for('goal_tree') }}"><span aria-hidden="true">⊞</span>拆解树与发布</a>
+    {% if objective %}
+    <a class="button button-secondary" href="{{ url_for('goal_smart', objective_id=objective.objective_id) }}"><span aria-hidden="true">◔</span>去 SMART 校验</a>
+    {% else %}
+    <span class="button button-secondary is-disabled" title="请先保存草稿" aria-disabled="true"><span aria-hidden="true">◔</span>去 SMART 校验</span>
+    {% endif %}
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+{% if not can_write %}
+<div class="notice info" role="status">当前角色为普通用户（只读）：字段不可编辑，如需调整请联系管理员。</div>
+{% endif %}
+
+<section class="goal-grid">
+
+  <section class="panel goal-form-panel">
+    <div class="panel-heading">
+      <div><h2>目标字段</h2><p>带 <b class="required-mark">*</b> 为必填；保存后可在拆解树继续下拆。</p></div>
+      <span class="badge-demo" id="objective-chip">{{ objective.objective_id if objective else '新目标' }}</span>
+    </div>
+
+    <form id="objective-form" novalidate>
+      <div class="field-grid">
+        <label class="field field-wide">
+          <span class="field-label">目标标题 <b class="required-mark">*</b></span>
+          <input id="title-input" name="title" maxlength="100" autocomplete="off"
+                 value="{{ objective.title if objective else '' }}" {{ 'disabled' if not can_write else '' }}
+                 placeholder="例：四季度完成生产运行稳定性专项并达成 SLA">
+          <span class="field-hint"><span id="title-count">0</span>/100 · 同一父目标下标题不可重复</span>
+          <span class="field-error" id="title-error" hidden></span>
+        </label>
+
+        <label class="field">
+          <span class="field-label">目标来源 <b class="required-mark">*</b></span>
+          <input id="source-input" name="source" maxlength="200" autocomplete="off"
+                 value="{{ objective.source if objective else '' }}" {{ 'disabled' if not can_write else '' }}
+                 placeholder="例：部门季度重点工作 / 承接上级目标">
+          <span class="field-error" id="source-error" hidden></span>
+        </label>
+
+        <label class="field">
+          <span class="field-label">上级目标</span>
+          <select id="parent-select" {{ 'disabled' if not can_write else '' }}>
+            <option value="">无（根目标，固定部门级）</option>
+            {% for item in parent_options %}
+            <option value="{{ item.objective_id }}" {% if objective and objective.parent_id == item.objective_id %}selected{% endif %}>
+              {{ '　' * item.depth }}{{ item.title }}（{{ item.level_label }}）</option>
+            {% endfor %}
+          </select>
+          <span class="field-hint">选择自身或后代节点会被后端拦截（防止形成环）</span>
+          <span class="field-error" id="parent-error" hidden></span>
+        </label>
+
+        <label class="field">
+          <span class="field-label">归属组织 <b class="required-mark">*</b></span>
+          <select id="org-select" {{ 'disabled' if not can_write else '' }}>
+            {% for org in org_options %}
+            <option value="{{ org.org_unit_id }}" {% if org.org_unit_id == default_org_id %}selected{% endif %}>{{ org.org_name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field-label">唯一责任人 <b class="required-mark">*</b></span>
+          <select id="owner-select" {{ 'disabled' if not can_write else '' }}>
+            <option value="">请选择本部门在册成员</option>
+            {% for person in owner_options %}
+            <option value="{{ person.user_id }}" {% if objective and objective.owner_id == person.user_id %}selected{% endif %}>
+              {{ person.name }} · {{ person.org_name }}{% if person.position %} · {{ person.position }}{% endif %}</option>
+            {% endfor %}
+          </select>
+          <span class="field-error" id="owner-error" hidden></span>
+        </label>
+
+        <label class="field">
+          <span class="field-label">周期 <b class="required-mark">*</b></span>
+          <select id="period-select" {{ 'disabled' if not can_write else '' }}>
+            {% for period in period_options %}
+            <option value="{{ period.period_id }}"
+                    data-start="{{ period.start_date }}" data-end="{{ period.end_date }}"
+                    {% if objective and objective.period_id == period.period_id %}selected{% elif not objective and period.is_current %}selected{% endif %}>
+              {{ period.period_name }}{{ '（已冻结）' if period.is_frozen else '' }}</option>
+            {% endfor %}
+          </select>
+          <span class="field-hint">仅可选未冻结周期</span>
+        </label>
+
+        <label class="field">
+          <span class="field-label">计划开始 <b class="required-mark">*</b></span>
+          <input id="start-input" type="date" value="{{ objective.plan_start if objective else '' }}" {{ 'disabled' if not can_write else '' }}>
+          <span class="field-error" id="start-error" hidden></span>
+        </label>
+
+        <label class="field">
+          <span class="field-label">计划结束 <b class="required-mark">*</b></span>
+          <input id="end-input" type="date" value="{{ objective.plan_end if objective else '' }}" {{ 'disabled' if not can_write else '' }}>
+          <span class="field-error" id="end-error" hidden></span>
+        </label>
+
+        <label class="field">
+          <span class="field-label">权重（对上级贡献占比）</span>
+          <input id="weight-input" type="number" min="0" max="100" step="0.1" value="{{ objective.weight if objective else 0 }}" {{ 'disabled' if not can_write else '' }}>
+          <span class="field-hint">0~100；同父兄弟合计 = 100 才能发布</span>
+        </label>
+
+        <div class="field field-wide">
+          <span class="field-label">成功标准 <b class="required-mark">*</b></span>
+          <div class="criteria-list" id="criteria-list"></div>
+          <div class="criteria-actions">
+            <button class="mini-btn" type="button" id="criteria-add" {{ 'disabled' if not can_write else '' }}>+ 添加一条</button>
+            <span class="field-hint">每条 ≤500 字符，最多 {{ max_criteria }} 条；发布时快照留存，验收对照它</span>
+          </div>
+          <span class="field-error" id="criteria-error" hidden></span>
+        </div>
+      </div>
+
+      <div class="weight-bar" id="weight-bar" hidden>
+        <span class="weight-bar-label">同父兄弟权重合计（<b id="weight-parent-name">—</b>）：</span>
+        <strong id="weight-sum">0%</strong>
+        <span class="weight-bar-warn" id="weight-warn" hidden>≠ 100%，发布时将被阻断（橙色警示）</span>
+      </div>
+
+      <p class="field-error form-error" id="form-error" role="alert" hidden></p>
+
+      <div class="form-actions">
+        <button class="button button-primary" type="submit" id="save-button" {{ 'disabled' if not can_write else '' }}>保存草稿</button>
+        <button class="button button-secondary" type="button" id="completeness-button">拆解完整度检查</button>
+      </div>
+    </form>
+  </section>
+
+  <aside class="side-stack">
+    <section class="panel">
+      <div class="panel-heading">
+        <div><h2>AI 拆解建议</h2><p>以当前目标为根生成子目标草案，只展示不落库，采纳后才进目标树</p></div>
+        <span class="badge-demo">F-103</span>
+      </div>
+      <div class="ai-actions">
+        <button class="button button-secondary" type="button" id="ai-decompose-button" {{ 'disabled' if not can_write else '' }}>生成拆解草案</button>
+        <button class="button button-secondary" type="button" id="adopt-button" disabled>采纳所选</button>
+      </div>
+      <p class="ai-hint" id="ai-hint">{{ '请先保存草稿，再生成拆解建议。' if not objective else '草案按上级成功标准生成；采纳时使用当前表单的责任人 / 周期 / 时间窗。' }}</p>
+      <div class="ai-engine" id="ai-engine" hidden></div>
+      <ul class="draft-list" id="draft-list"><li class="draft-empty">暂无草案。保存草稿后点击「生成拆解草案」。</li></ul>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div><h2>拆解完整度检查</h2><p>对比上级成功标准与已落库的子目标，提示漏项 / 重叠（仅提示，不落库）</p></div>
+      </div>
+      <div class="completeness-result" id="completeness-result"><p class="draft-empty">点击「拆解完整度检查」开始比对。</p></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div><h2>目标写法模板</h2><p>套用后写入标题与成功标准，可继续修改</p></div>
+        <span class="badge-demo">F-102</span>
+      </div>
+      <div class="template-row">
+        <select id="template-select">
+          {% for template in templates %}
+          <option value="{{ template.template_id }}">{{ template.label }}</option>
+          {% endfor %}
+        </select>
+        <button class="button button-secondary" type="button" id="apply-template" {{ 'disabled' if not can_write else '' }}>套用模板</button>
+      </div>
+      {% if recent_drafts %}
+      <div class="recent-drafts">
+        <p class="field-label">最近草稿</p>
+        <ul>
+          {% for draft in recent_drafts %}
+          <li><a href="{{ url_for('goal_dept', objective_id=draft.objective_id) }}">{{ draft.title }}</a>
+            <small>{{ draft.objective_id }} · {{ draft.updated_at[:10] if draft.updated_at else '' }}</small></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </section>
+  </aside>
+
+</section>
+
+<script type="application/json" id="goal-dept-data">
+{{ {
+  "objective": objective_json,
+  "weight_ctx": weight_ctx,
+  "children_ctx": children_ctx,
+  "templates": templates,
+  "max_criteria": max_criteria,
+  "can_write": can_write,
+  "urls": {
+    "save": url_for('api_objective_save'),
+    "decompose": url_for('api_objective_ai_decompose'),
+    "smart": url_for('goal_smart'),
+    "tree": url_for('goal_tree')
+  }
+} | tojson }}
+</script>
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/goal_dept.js') }}"></script>{% endblock %}

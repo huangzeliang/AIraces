@@ -804,3 +804,219 @@ def handle_command(query, store, now=None):
         suffix = "（大模型调用失败或返回非结构化，已由规则引擎兜底）"
         result["note"] = (result.get("note") + suffix) if result.get("note") else suffix
     return result
+
+
+# ===========================================================================
+# 目标闭环系统（工作线A）· AI 能力封装
+#
+# 统一契约：以下函数只做「调用 + JSON Schema 强校验」，返回 dict 或 None；
+# None = 未配置大模型 / 超时 / 输出不合规，由调用方（goal.py / assign.py）用确定性规则兜底。
+# 日期、工期、饱和度、状态判定一律由 Python 规则计算，不交给模型。
+# ===========================================================================
+
+_SMART_DIMS = ("S", "M", "A", "R", "T")
+
+
+def _dim_scores_valid(payload):
+    """校验 SMART 五维输出：每维 score 为 0~20 的整数，comment/suggestion 为短文本。"""
+    if not isinstance(payload, dict):
+        return None
+    checked = {}
+    for dim in _SMART_DIMS:
+        item = payload.get(dim)
+        if not isinstance(item, dict):
+            return None
+        score = item.get("score")
+        if isinstance(score, bool) or not isinstance(score, (int, float)):
+            return None
+        score = int(round(score))
+        if not 0 <= score <= 20:
+            return None
+        comment = str(item.get("comment") or "").strip()[:300]
+        suggestion = str(item.get("suggestion") or "").strip()[:300]
+        checked[dim] = {"score": score, "comment": comment, "suggestion": suggestion}
+    return checked
+
+
+def llm_smart_check(objective, period=None, parent_title="", timeout=8):
+    """SMART 五维质检（F-108）：返回 {dim: {score, comment, suggestion}} 或 None。"""
+    if not llm_configured():
+        return None
+    period_text = ""
+    if period:
+        period_text = "%s（%s ~ %s）" % (
+            period.get("period_name") or "", period.get("start_date") or "", period.get("end_date") or "")
+    system = (
+        "你是目标管理评审员，按 SMART 原则对目标做五维质检。只输出严格 JSON，不要任何解释。\n"
+        "格式：{\"S\":{\"score\":0-20,\"comment\":\"判定依据\",\"suggestion\":\"改写建议\"},"
+        "\"M\":{...},\"A\":{...},\"R\":{...},\"T\":{...}}\n"
+        "S=具体（动作与对象是否明确）·M=可衡量（是否有量化口径）·A=可达成（体量与工期是否匹配）"
+        "·R=相关（是否承接上级、来源是否清晰）·T=时限（是否有明确截止）。\n"
+        "要求：score 为 0~20 的整数；comment 必须给出可核对的中文依据（≤100 字）；"
+        "维度得分 < 12 时 suggestion 给出可直接改写的建议文本（≤120 字），否则 suggestion 为空字符串。"
+    )
+    lines = [
+        "目标标题：%s" % (objective.get("title") or ""),
+        "目标来源：%s" % (objective.get("source") or "（未填写）"),
+        "层级：%s" % (objective.get("level") or ""),
+        "上级目标：%s" % (parent_title or "（无，为根目标）"),
+        "周期：%s" % (period_text or "（未指定）"),
+        "计划窗口：%s ~ %s" % (objective.get("plan_start") or "", objective.get("plan_end") or ""),
+        "成功标准：",
+    ]
+    for index, criterion in enumerate(objective.get("success_criteria") or [], start=1):
+        lines.append("%d. %s" % (index, criterion))
+    parsed = _llm_chat_json(system, "\n".join(lines), timeout=timeout)
+    return _dim_scores_valid(parsed)
+
+
+def llm_goal_decompose(objective, sibling_titles=None, timeout=8):
+    """AI 拆解建议（F-103）：以父目标为根生成子目标草案。只出草案，不落库。"""
+    if not llm_configured():
+        return None
+    lines = [
+        "上级目标：%s" % (objective.get("title") or ""),
+        "上级成功标准：",
+    ]
+    for criterion in objective.get("success_criteria") or []:
+        lines.append("- %s" % criterion)
+    if sibling_titles:
+        lines.append("已存在的同级标题（不得重复）：%s" % "、".join(sibling_titles[:12]))
+    system = (
+        "你是目标拆解助手。把上级目标拆解为 2~4 个可独立承接的子目标草案。只输出严格 JSON，不要解释。\n"
+        "格式：{\"children\":[{\"title\":\"\",\"success_criteria\":[\"\"],\"rationale\":\"\"}]}\n"
+        "要求：1. title 不超过 100 字，动词开头、对象明确；2. success_criteria 每项 1~3 条，"
+        "尽量含量化口径（数字/比例/时间）；3. rationale 一句话说明该子目标对上级的支撑点；"
+        "4. 各子目标之间尽量不重叠、合起来覆盖上级成功标准。"
+    )
+    parsed = _llm_chat_json(system, "\n".join(lines), timeout=timeout)
+    return _decompose_valid(parsed)
+
+
+def _decompose_valid(parsed):
+    if not isinstance(parsed, dict):
+        return None
+    raw_children = parsed.get("children")
+    if not isinstance(raw_children, list) or not raw_children:
+        return None
+    children = []
+    for item in raw_children[:4]:
+        if not isinstance(item, dict):
+            return None
+        title = str(item.get("title") or "").strip()
+        if not title or len(title) > 100:
+            return None
+        raw_criteria = item.get("success_criteria")
+        if isinstance(raw_criteria, str):
+            raw_criteria = [raw_criteria]
+        if not isinstance(raw_criteria, list) or not raw_criteria:
+            return None
+        criteria = []
+        for criterion in raw_criteria[:3]:
+            text = str(criterion or "").strip()
+            if not text:
+                return None
+            criteria.append(text[:200])
+        children.append({
+            "title": title,
+            "success_criteria": criteria,
+            "rationale": str(item.get("rationale") or "").strip()[:200],
+        })
+    if not children:
+        return None
+    return {"children": children}
+
+
+def llm_assign_analyze(task, objective, candidates, timeout=8):
+    """派工 AI 分析（F-118/F-119）：关联度 + 分配风险。仅建议，不参与拦截判定。"""
+    if not llm_configured():
+        return None
+    lines = [
+        "待派任务：%s" % (task.get("title") or ""),
+        "任务说明：%s" % (task.get("detail") or "（无）"),
+        "所属目标：%s" % (objective.get("title") or ""),
+        "计划工时：%sh" % task.get("plan_hours"),
+        "候选执行人：",
+    ]
+    for person in candidates:
+        lines.append("- %s（%s）：在办任务「%s」，当前饱和度 %.1f%%" % (
+            person.get("name") or person.get("user_id"),
+            "、".join(person.get("ability_tags") or []) or "无标签",
+            "」「".join((person.get("open_titles") or [])[:4]) or "无",
+            float(person.get("saturation") or 0),
+        ))
+    system = (
+        "你是派工助手，评估任务与候选执行人的匹配度并识别分配风险。只输出严格 JSON：\n"
+        "{\"people\":{\"<user_id>\":{\"relation_score\":0-100,\"note\":\"一句话理由\"}},"
+        "\"risks\":[\"任务量偏大\"|\"不确定性偏高\"|\"分配不均\"]}\n"
+        "relation_score 越高表示该员工既有工作与任务越能形成合力；risks 只允许从给定三项中选择，没有则空数组。"
+    )
+    parsed = _llm_chat_json(system, "\n".join(lines), timeout=timeout)
+    return _assign_analyze_valid(parsed, candidates)
+
+
+def _assign_analyze_valid(parsed, candidates):
+    if not isinstance(parsed, dict):
+        return None
+    raw_people = parsed.get("people")
+    if not isinstance(raw_people, dict):
+        return None
+    allowed = {person.get("user_id") for person in candidates}
+    people = {}
+    for user_id, item in raw_people.items():
+        if user_id not in allowed or not isinstance(item, dict):
+            continue
+        score = item.get("relation_score")
+        if isinstance(score, bool) or not isinstance(score, (int, float)):
+            return None
+        score = int(round(score))
+        if not 0 <= score <= 100:
+            return None
+        people[user_id] = {"relation_score": score, "note": str(item.get("note") or "").strip()[:120]}
+    if len(people) != len(allowed):
+        return None
+    raw_risks = parsed.get("risks") or []
+    if not isinstance(raw_risks, list):
+        return None
+    risks = [str(risk) for risk in raw_risks if str(risk) in ("任务量偏大", "不确定性偏高", "分配不均")]
+    return {"people": people, "risks": risks}
+
+
+def llm_assign_plan(task, assignees, timeout=8):
+    """AI 计划项（F-120）：为每个执行人生成验收口径建议。
+
+    时间窗由确定性规则拆分（不交给模型算日期），模型只补验收口径文案。
+    """
+    if not llm_configured():
+        return None
+    lines = [
+        "任务：%s" % (task.get("title") or ""),
+        "任务说明：%s" % (task.get("detail") or "（无）"),
+        "计划工时：%sh，窗口 %s ~ %s" % (
+            task.get("plan_hours"), task.get("plan_start") or "", task.get("plan_end") or ""),
+        "执行人：%s" % "、".join(item.get("name") or item.get("user_id") for item in assignees),
+    ]
+    system = (
+        "你是派工计划助手。为每个执行人给出一句验收口径（做什么、交什么、怎么算完成）。只输出严格 JSON：\n"
+        "{\"items\":[{\"user_id\":\"\",\"acceptance\":\"≤80 字\"}]}\n"
+        "user_id 必须来自输入名单，每人恰好一条。"
+    )
+    parsed = _llm_chat_json(system, "\n".join(lines), timeout=timeout)
+    if not isinstance(parsed, dict):
+        return None
+    raw_items = parsed.get("items")
+    if not isinstance(raw_items, list):
+        return None
+    allowed = {item.get("user_id") for item in assignees}
+    items = []
+    for item in raw_items:
+        if not isinstance(item, dict):
+            return None
+        user_id = item.get("user_id")
+        acceptance = str(item.get("acceptance") or "").strip()
+        if user_id not in allowed or not acceptance:
+            return None
+        items.append({"user_id": user_id, "acceptance": acceptance[:120]})
+    if len(items) != len(allowed):
+        return None
+    return {"items": items}

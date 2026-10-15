@@ -1,5 +1,6 @@
 {# 公共导航菜单：侧栏与移动端抽屉共用同一份条目，按角色过滤。
-   驾驶舱 / 数据管理 / 用户管理 / 系统设置仅管理员可见；普通用户仅见核心工作流。 #}
+   统一账号体系：管理员可见全部；普通用户仅见任务 / 提醒 / 计划流程与自己的目标拆解视图。
+   「目标拆解」分组按目标闭环权限点渲染；B/C 线页面接入后在此继续追加分组。 #}
 <p class="nav-caption">工作台</p>
 <nav class="nav-menu" aria-label="工作台">
   {% if is_admin %}
@@ -8,6 +9,22 @@
   {% endif %}
   <a class="nav-item {% if active_page == 'tasks' %}active{% endif %}" href="{{ url_for('tasks') }}" {% if active_page == 'tasks' %}aria-current="page"{% endif %}><span aria-hidden="true">☰</span>任务列表</a>
   <a class="nav-item {% if active_page == 'reminders' %}active{% endif %}" href="{{ url_for('reminders') }}" {% if active_page == 'reminders' %}aria-current="page"{% endif %}><span aria-hidden="true">♢</span>提醒中心</a>
+</nav>
+
+<p class="nav-caption">目标拆解</p>
+<nav class="nav-menu" aria-label="目标拆解">
+  {% if 'menu:goal_dept' in ns_perms %}
+  <a class="nav-item {% if active_page == 'goal_dept' %}active{% endif %}" href="{{ url_for('goal_dept') }}" {% if active_page == 'goal_dept' %}aria-current="page"{% endif %}><span aria-hidden="true">⚑</span>部门目标</a>
+  {% endif %}
+  {% if 'menu:goal_smart' in ns_perms %}
+  <a class="nav-item {% if active_page == 'goal_smart' %}active{% endif %}" href="{{ url_for('goal_smart') }}" {% if active_page == 'goal_smart' %}aria-current="page"{% endif %}><span aria-hidden="true">◔</span>SMART 校验</a>
+  {% endif %}
+  {% if 'menu:goal_tree' in ns_perms %}
+  <a class="nav-item {% if active_page == 'goal_tree' %}active{% endif %}" href="{{ url_for('goal_tree') }}" {% if active_page == 'goal_tree' %}aria-current="page"{% endif %}><span aria-hidden="true">⊞</span>拆解树与发布</a>
+  {% endif %}
+  {% if 'menu:assign' in ns_perms %}
+  <a class="nav-item {% if active_page == 'assign' %}active{% endif %}" href="{{ url_for('assign') }}" {% if active_page == 'assign' %}aria-current="page"{% endif %}><span aria-hidden="true">➤</span>智能派工</a>
+  {% endif %}
 </nav>
 
 <p class="nav-caption">计划流程</p>

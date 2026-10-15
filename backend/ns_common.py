@@ -1,7 +1,7 @@
 """NS 线（目标拆解与验证闭环）公共服务层 —— 工作线 B 各模块共用。
 
 职责：
-- 会话：NS 独立账号体系（session 键 ns_user_id，与旧系统 user_id 互不影响）；
+- 会话：统一账号体系（session 键与 backend.core.SESSION_KEY 一致，两线共用同一登录身份）；
 - 数据范围：超管 ALL / 负责人 DEPT（组织子树）/ 员工 SELF（仅本人）；
 - 导航：5 组 18 个二级菜单，按 menu: 权限点过滤，整组无权限则不渲染；
 - 进度上卷：4.4.4 两级公式（日计划项 → 任务执行度 → 目标过程完成率）；
@@ -23,6 +23,7 @@ from backend.core import (
     BizError,
     DATA_LOCK,
     ERROR_HTTP,
+    SESSION_KEY,
     audit as core_audit,
     client_key,
     dict_name,
@@ -45,7 +46,9 @@ from backend.core import (
     write_store,
 )
 
-NS_SESSION_KEY = "ns_user_id"
+# 单系统合并：NS 会话与统一账号共用同一 session 键（users.json 的 id ≡ system.json 的 user_id），
+# 从目标闭环登录页或智能计划管理登录页任一入口登录，都可直达两线全部页面。
+NS_SESSION_KEY = SESSION_KEY
 NS_DEMO_PASSWORD = "123456"
 
 ROLE_SCOPE_LABEL = {"ALL": "全公司", "DEPT": "本部门及下级", "SELF": "仅本人"}
@@ -68,7 +71,7 @@ def ns_login_session(user_id):
 
 
 def ns_logout_session():
-    # 只清 NS 会话键，旧系统的 session["user_id"] 原样保留，两套登录互不影响
+    # 统一会话：退出即两线同时退出（与旧系统 logout 行为一致）
     session.pop(NS_SESSION_KEY, None)
 
 

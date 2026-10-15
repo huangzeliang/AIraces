@@ -1,0 +1,253 @@
+{% extends 'layout.html' %}
+{% block title %}SMART 校验 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/goal_smart.css') }}">{% endblock %}
+{% block content %}
+
+{% set step_map = {'draft': 0, 'pending_confirm': 1, 'confirmed': 2} %}
+{% set step_idx = step_map.get(objective.status, 3) %}
+{% set level_labels = {'dep': '部门', 'team': '团队', 'personal': '个人'} %}
+{% set status_labels = {'draft': '草稿', 'pending_confirm': '待确认', 'confirmed': '已承接', 'published': '已发布', 'executing': '执行中', 'pending_review': '待验收', 'reviewed': '已验收', 'archived': '已归档'} %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">目标拆解 / A2 · SMART 校验</p>
+    <h1>SMART 五维质检</h1>
+    <p class="subtitle">{{ objective.title }}</p>
+  </div>
+  <div class="heading-actions">
+    {% if can_apply %}
+    <a class="button button-secondary" href="{{ url_for('goal_dept', objective_id=objective.objective_id) }}"><span aria-hidden="true">✎</span>编辑目标</a>
+    {% endif %}
+    <a class="button button-secondary" href="{{ url_for('goal_tree', focus_id=objective.objective_id) }}"><span aria-hidden="true">⊞</span>拆解树</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+{% if not can_apply %}
+<div class="notice info" role="status">
+  {% if is_staff %}当前为承接方视角：你可以查看评分依据与会签状态；确认承接 / 驳回请使用本页底部操作。{% else %}当前为只读视角：目标已进入发布后流程或你的角色不可编辑，如需调整请联系管理员。{% endif %}
+</div>
+{% endif %}
+
+<section class="smart-grid">
+
+  <div class="smart-main">
+
+    <section class="panel smart-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>五维评分</h2>
+          <p>S 具体 · M 可衡量 · A 可达成 · R 相关 · T 时限，各 0~20 分；总分 ≥ 60 且任一维 ≥ {{ min_score }} 才能提交确认</p>
+        </div>
+        <div class="heading-actions">
+          <span class="engine-chip" id="engine-chip"{% if not smart_meta %} hidden{% endif %}>质检引擎：{{ smart_meta.engine }}{% if smart_meta.degraded %}（规则兜底）{% endif %} · {{ smart_meta.checked_at[:16] | replace('T', ' ') if smart_meta.checked_at else '' }}</span>
+          {% if can_apply %}
+          <button class="button button-secondary" type="button" id="recheck-button">重新质检</button>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="smart-top">
+        <div class="ring-wrap" id="ring-wrap"></div>
+        <div class="gate-verdict" id="gate-verdict">
+          <p class="gate-state" id="gate-state">—</p>
+          <p class="gate-detail" id="gate-detail">—</p>
+          <p class="gate-block" id="gate-block" hidden></p>
+        </div>
+      </div>
+
+      <div class="dim-list" id="dim-list"></div>
+
+      {% if can_apply %}
+      <div class="smart-actions">
+        <button class="button button-primary" type="button" id="adopt-button" disabled>采纳所选建议</button>
+        <span class="smart-hint">勾选后系统会按建议改写对应字段（标题 / 成功标准 / 来源 / 时限），并自动重新质检。</span>
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="panel flow-panel">
+      <div class="panel-heading">
+        <div><h2>流程与操作</h2><p>草稿 → 提交确认 → 承接会签 → 发布，四步各有门禁</p></div>
+        <span class="badge-status status-{{ objective.status }}" id="status-chip">{{ status_labels.get(objective.status, objective.status) }}</span>
+      </div>
+
+      <ol class="flow-steps">
+        <li class="{{ 'is-done' if step_idx > 0 else 'is-current' if step_idx == 0 else '' }}"><i>1</i><span>草稿录入</span></li>
+        <li class="{{ 'is-done' if step_idx > 1 else 'is-current' if step_idx == 1 else '' }}"><i>2</i><span>提交确认</span></li>
+        <li class="{{ 'is-done' if step_idx > 2 else 'is-current' if step_idx == 2 else '' }}"><i>3</i><span>承接会签</span></li>
+        <li class="{{ 'is-done' if step_idx > 3 else 'is-current' if step_idx == 3 else '' }}"><i>4</i><span>发布执行</span></li>
+      </ol>
+
+      <div class="flow-actions">
+        {% if is_manager and objective.status == 'draft' %}
+        <button class="button button-primary" type="button" id="submit-button">提交确认（发起承接会签）</button>
+        <span class="flow-hint" id="submit-hint"></span>
+        {% elif is_manager and objective.status == 'pending_confirm' %}
+        <span class="flow-hint">已发起承接会签，等待责任人「{{ owner_name }}」确认；驳回后目标将退回草稿。</span>
+        {% elif objective.status == 'confirmed' %}
+        {% if is_manager %}
+        <a class="button button-primary" href="{{ url_for('goal_tree', focus_id=objective.objective_id) }}" id="publish-link">去发布（拆解树内二次确认）</a>
+        {% else %}
+        <span class="flow-hint">已承接，等待管理员发布。</span>
+        {% endif %}
+        {% elif objective.status in ('published', 'executing', 'pending_review', 'reviewed', 'archived') %}
+        <span class="flow-hint">目标已进入发布后流程（{{ status_labels.get(objective.status, objective.status) }}），如需调整请到拆解树发起变更申请。</span>
+        {% endif %}
+        {% if is_staff and objective.status == 'pending_confirm' and ns_user and ns_user.user_id == objective.owner_id %}
+        <button class="button button-primary" type="button" id="accept-button">确认承接</button>
+        <button class="button button-danger" type="button" id="reject-button">驳回承接</button>
+        {% endif %}
+      </div>
+
+      {% if block_reason and is_manager and objective.status == 'draft' %}
+      <p class="flow-block" id="flow-block">提交门禁未通过：{{ block_reason }}。可采纳下方低维建议后重试。</p>
+      {% else %}
+      <p class="flow-block" id="flow-block" hidden></p>
+      {% endif %}
+    </section>
+
+  </div>
+
+  <aside class="side-stack">
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>目标速览</h2><p>{{ objective.objective_id }}</p></div></div>
+      <dl class="overview-grid">
+        <div class="overview-item"><span>层级</span><strong>{{ level_labels.get(objective.level, objective.level) }}级目标</strong></div>
+        <div class="overview-item"><span>归属组织</span><strong>{{ objective.org_unit_id }}</strong></div>
+        <div class="overview-item"><span>唯一责任人</span><strong>{{ owner_name }}</strong></div>
+        <div class="overview-item"><span>权重</span><strong>{{ objective.weight }}%</strong></div>
+        <div class="overview-item"><span>周期</span><strong>{{ period.period_name if period else objective.period_id }}</strong></div>
+        <div class="overview-item"><span>计划窗口</span><strong class="num">{{ objective.plan_start }} ~ {{ objective.plan_end }}</strong></div>
+        <div class="overview-item overview-wide"><span>上级目标</span>
+          {% if parent %}
+          <strong><a class="link-strong" href="{{ url_for('goal_smart', objective_id=parent.objective_id) }}">{{ parent.title }}</a></strong>
+          {% else %}
+          <strong>—（根目标）</strong>
+          {% endif %}
+        </div>
+        <div class="overview-item overview-wide"><span>目标来源</span><strong>{{ objective.source }}</strong></div>
+      </dl>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>上下追溯</h2><p>F-110 · 为什么做（上级链）与承接情况（直接下级）</p></div></div>
+      <div class="trace-block">
+        <span class="detail-label">上级链</span>
+        {% if ancestors %}
+        <ol class="trace-chain">
+          {% for item in ancestors %}
+          <li>
+            {% if item.visible %}<a href="{{ url_for('goal_smart', objective_id=item.objective_id) }}">{{ item.title }}</a>{% else %}<span>{{ item.title }}</span>{% endif %}
+            <small>{{ item.level_label }} · {{ item.status_label }}</small>
+          </li>
+          {% endfor %}
+          <li class="is-current"><span>{{ objective.title }}</span><small>当前目标</small></li>
+        </ol>
+        {% else %}
+        <p class="trace-empty">根目标，没有更上级（部门季度重点工作可直接作为来源）。</p>
+        {% endif %}
+      </div>
+      <div class="trace-block">
+        <span class="detail-label">直接下级（{{ children | length }}）</span>
+        {% if children %}
+        <ul class="trace-children">
+          {% for item in children %}
+          <li>
+            <span class="trace-title">
+              {% if item.visible %}<a href="{{ url_for('goal_smart', objective_id=item.objective_id) }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}
+            </span>
+            <span class="trace-meta">{{ item.status_label }} · {{ item.owner_name }} · 权重 {{ item.weight }}% · SMART {{ item.smart_total }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="trace-empty">暂无下级承接，可在录入页用「AI 拆解建议」继续下拆。</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>承接会签</h2><p>责任人确认后目标才可发布</p></div></div>
+      {% if countersign.status == 'confirmed' %}
+      <p class="cs-banner is-ok">已确认承接 · {{ countersign.at[:16] | replace('T', ' ') if countersign.at else '' }}</p>
+      {% if countersign.note %}<p class="cs-note">备注：{{ countersign.note }}</p>{% endif %}
+      {% elif countersign.status == 'pending' %}
+      <p class="cs-banner is-pending">待承接 · {{ countersign.at[:16] | replace('T', ' ') if countersign.at else '' }}</p>
+      {% elif countersign.status == 'rejected' %}
+      <p class="cs-banner is-bad">已驳回 · {{ countersign.at[:16] | replace('T', ' ') if countersign.at else '' }}</p>
+      {% if countersign.note %}<p class="cs-note">原因：{{ countersign.note }}</p>{% endif %}
+      {% else %}
+      <p class="cs-banner">尚未发起（提交确认后进入会签）</p>
+      {% endif %}
+      <ul class="gate-list" id="gate-list">
+        <li id="gate-owner" class="{{ 'ok' if objective.owner_id else 'miss' }}">唯一责任人已指定：{{ owner_name or '未指定' }}</li>
+        <li id="gate-smart" class="{{ 'ok' if has_smart else 'miss' }}">SMART 五维质检已完成</li>
+        <li id="gate-dims" class="{{ 'ok' if has_smart and not (dims | selectattr('low') | list) else 'miss' }}">任一维度 ≥ {{ min_score }} 分</li>
+        <li id="gate-total" class="{{ 'ok' if has_smart and smart_total >= 60 else 'miss' }}">总分 ≥ 60 分（当前 {{ smart_total }}）</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading"><div><h2>对齐度总评</h2><p>当前范围内的结构问题扫描</p></div></div>
+      <div class="align-score">
+        <strong>{{ alignment.score }}</strong><span>/ 100</span>
+        <div class="align-bar"><i style="width: {{ alignment.score }}%"></i></div>
+      </div>
+      {% if alignment.issues %}
+      <ul class="issue-list">
+        {% for issue in alignment.issues %}
+        <li class="issue-item">
+          <span class="issue-type">{{ issue.type }}</span>
+          <a href="{{ url_for('goal_tree', focus_id=issue.objective_id) }}">{{ issue.title }}</a>
+          <small>{{ issue.detail }}</small>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="issue-empty">对齐度良好：未发现孤儿目标 / 空承接 / 权重异常。</p>
+      {% endif %}
+    </section>
+
+  </aside>
+
+</section>
+
+<script type="application/json" id="goal-smart-data">
+{{ {
+  "objective": {
+    "objective_id": objective.objective_id,
+    "title": objective.title,
+    "status": objective.status,
+    "status_label": status_labels.get(objective.status, objective.status),
+    "owner_id": objective.owner_id,
+    "owner_name": owner_name,
+    "success_criteria": objective.success_criteria,
+    "plan_end": objective.plan_end
+  },
+  "dims": dims,
+  "smart_total": smart_total,
+  "min_score": min_score,
+  "has_smart": has_smart,
+  "block_reason": block_reason,
+  "can_apply": can_apply,
+  "viewer": {
+    "user_id": ns_user.user_id if ns_user else "",
+    "display_name": ns_user.display_name if ns_user else ""
+  },
+  "urls": {
+    "check": url_for('api_objective_smart_check'),
+    "adopt": url_for('api_objective_smart_adopt'),
+    "countersign": url_for('api_objective_countersign'),
+    "publish": url_for('api_objective_publish'),
+    "tree": url_for('goal_tree')
+  }
+} | tojson }}
+</script>
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/goal_smart.js') }}"></script>{% endblock %}

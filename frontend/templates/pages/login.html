@@ -23,7 +23,7 @@
       <div class="login-heading">
         <p class="eyebrow">WORKSPACE / SIGN IN</p>
         <h1 id="login-title">登录工作台</h1>
-        <p class="subtitle">使用邮箱与密码登录；不同角色进入各自的工作界面。</p>
+        <p class="subtitle">使用邮箱（或演示登录名）与密码登录；不同角色进入各自的工作界面。</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -33,8 +33,8 @@
       <form method="post" action="{{ url_for('login', next=next_target) }}" id="login-form">
         <input type="hidden" name="next" value="{{ next_target }}">
         <label class="field">
-          <span class="field-label">邮箱</span>
-          <input name="email" type="email" value="{{ email }}" placeholder="name@example.com"
+          <span class="field-label">邮箱 / 登录名</span>
+          <input name="email" type="text" value="{{ email }}" placeholder="name@example.com 或登录名"
                  maxlength="120" autocomplete="username" required autofocus>
         </label>
         <label class="field">
@@ -51,22 +51,22 @@
 
       {% if demo_accounts %}
       <section class="demo-zone" aria-label="演示账号">
-        <p class="demo-title">演示账号（初始密码 {{ demo_password }}）</p>
+        <p class="demo-title">演示账号（统一口令 {{ demo_password }}，邮箱或登录名均可登录）</p>
         <div class="demo-list">
           {% for account in demo_accounts %}
           <div class="demo-item">
             <span class="demo-role {{ 'is-admin' if account.role == '管理员' }}">{{ account.role }}</span>
-            <span class="demo-email">{{ account.email }}</span>
-            <button class="demo-fill" type="button" data-email="{{ account.email }}" data-password="{{ demo_password }}">填入</button>
+            <span class="demo-email">{{ account.login }} · {{ account.name }}</span>
+            <button class="demo-fill" type="button" data-email="{{ account.login }}" data-password="{{ demo_password }}">填入</button>
           </div>
           {% endfor %}
         </div>
-        <p class="demo-hint">管理员可见全部页面；普通用户仅见任务 / 提醒 / 计划流程，且只能看到自己的数据。</p>
+        <p class="demo-hint">统一账号体系：管理员可录入目标、SMART 质检、拆解发布与智能派工；普通用户执行任务、更新进度，并可查看自己的目标与确认承接。</p>
       </section>
       {% endif %}
     </main>
 
-    <footer class="login-footer">智能计划管理 Agent · 本地 JSON 演示环境</footer>
+    <footer class="login-footer">目标闭环 · 智能计划管理 Agent · 本地 JSON 演示环境</footer>
   </div>
 
   <script src="{{ url_for('static', filename='js/theme.js') }}"></script>

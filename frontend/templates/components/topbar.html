@@ -1,1 +1,12 @@
-<header class="topbar"><div class="topbar-left"><button class="menu-button" id="mobile-menu-button" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mobile-nav"><span aria-hidden="true">☰</span></button><div class="breadcrumbs"><span class="crumb-root">工作空间 <span aria-hidden="true">/</span> </span><strong>{{ page_name }}</strong></div></div><div class="top-actions"><button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="切换到夜晚模式"><span class="theme-sun" aria-hidden="true">☀</span><span class="theme-moon" aria-hidden="true">☾</span><span class="theme-label">白天</span></button><a class="icon-button" href="{{ url_for('reminders') }}" aria-label="提醒中心" title="提醒中心">♢{% if unread_reminders %}<em class="reminder-count" id="reminder-badge">{{ unread_reminders }}</em>{% endif %}</a><span class="top-avatar" title="{{ current_user.name if current_user else '' }}">{{ current_user.name[0] if current_user else '—' }}</span><form class="logout-form" method="post" action="{{ url_for('logout') }}"><button class="logout-button" type="submit"><span aria-hidden="true">⏻</span>退出</button></form></div></header>
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="menu-button" id="mobile-menu-button" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="mobile-nav"><span aria-hidden="true">☰</span></button>
+    <div class="breadcrumbs"><span class="crumb-root">工作空间 <span aria-hidden="true">/</span> </span><strong>{{ page_name }}</strong></div>
+  </div>
+  <div class="top-actions">
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="切换到夜晚模式"><span class="theme-sun" aria-hidden="true">☀</span><span class="theme-moon" aria-hidden="true">☾</span><span class="theme-label">白天</span></button>
+    <a class="icon-button" href="{{ url_for('reminders') }}" aria-label="提醒中心" title="提醒中心">♢{% if unread_reminders %}<em class="reminder-count" id="reminder-badge">{{ unread_reminders }}</em>{% endif %}</a>
+    <span class="top-avatar" title="{{ current_user.name if current_user else '' }}（{{ current_user.role if current_user else '' }}）">{{ current_user.name[0] if current_user else '—' }}</span>
+    <form class="logout-form" method="post" action="{{ url_for('logout') }}"><button class="logout-button" type="submit"><span aria-hidden="true">⏻</span>退出</button></form>
+  </div>
+</header>

@@ -1,0 +1,166 @@
+{% extends 'layout.html' %}
+{% block title %}拆解树与发布 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/goal_tree.css') }}">{% endblock %}
+{% block content %}
+
+{% macro tree_node(node) %}
+<li class="tree-node" data-id="{{ node.objective_id }}" data-depth="{{ node.depth }}">
+  <div class="node-card status-{{ node.status }}{% if node.flags.is_context %} is-context{% endif %}">
+    {% if node.children %}
+    <button class="node-toggle" type="button" aria-expanded="true" aria-label="展开/收起「{{ node.title }}」的子目标"><span aria-hidden="true">▾</span></button>
+    {% else %}
+    <span class="node-toggle is-leaf" aria-hidden="true">·</span>
+    {% endif %}
+
+    <div class="node-main">
+      <div class="node-title-row">
+        <span class="level-chip level-{{ node.level }}">{{ node.level_label }}</span>
+        <a class="node-title" href="{{ url_for('goal_smart', objective_id=node.objective_id) }}">{{ node.title }}</a>
+        <span class="status-tag status-{{ node.status }}"><i class="dot" aria-hidden="true"></i>{{ node.status_label }}</span>
+        {% if node.published %}<span class="node-chip chip-snapshot">快照已留存</span>{% endif %}
+        {% if node.low_dims %}<span class="node-chip chip-low">短板 {{ node.low_dims | join(' / ') }}</span>{% endif %}
+        {% if node.flags.is_context %}<span class="node-chip chip-context">上级上下文 · 只读</span>{% endif %}
+      </div>
+      <div class="node-meta">
+        <span class="row-id">{{ node.objective_id }}</span>
+        <span>☺ {{ node.owner_name }}</span>
+        <span>权重 {{ node.weight }}%</span>
+        <span>SMART {{ node.smart_total }}</span>
+        <span>进度 {{ node.progress }}%</span>
+        <span class="num">{{ node.plan_start }} ~ {{ node.plan_end }}</span>
+        {% if node.countersign.status == 'pending' %}<span class="mini-flag flag-pending">会签中</span>{% elif node.countersign.status == 'rejected' %}<span class="mini-flag flag-bad">会签被驳回</span>{% endif %}
+      </div>
+      <div class="node-progress" role="img" aria-label="进度 {{ node.progress }}%"><i style="width:{{ node.progress }}%"></i></div>
+    </div>
+
+    <div class="node-actions">
+      {% if node.flags.can_edit %}<a class="mini-btn" href="{{ url_for('goal_dept', objective_id=node.objective_id) }}">编辑</a>{% endif %}
+      {% if node.flags.can_smart %}<a class="mini-btn" href="{{ url_for('goal_smart', objective_id=node.objective_id) }}">SMART</a>{% endif %}
+      {% if node.flags.can_submit %}
+      <button class="mini-btn" type="button" data-action="submit" data-id="{{ node.objective_id }}"
+              {% if node.flags.submit_block %}disabled title="提交门禁未通过：{{ node.flags.submit_block }}"{% else %}title="提交确认，发起承接会签"{% endif %}>提交确认</button>
+      {% endif %}
+      {% if node.flags.can_publish %}
+      <button class="mini-btn is-primary" type="button" data-action="publish" data-id="{{ node.objective_id }}" title="发布（二次确认：范围与备注）">发布</button>
+      {% endif %}
+      {% if node.flags.can_confirm %}
+      <button class="mini-btn is-primary" type="button" data-action="confirm" data-id="{{ node.objective_id }}" title="确认承接该目标">确认承接</button>
+      <button class="mini-btn is-danger" type="button" data-action="reject" data-id="{{ node.objective_id }}" title="驳回承接（需填写原因）">驳回</button>
+      {% endif %}
+      {% if node.flags.can_change %}<a class="mini-btn" href="/changes?objective_id={{ node.objective_id }}" title="发布后调整请走变更申请流程">变更申请</a>{% endif %}
+      {% if not node.flags.is_context %}
+      <button class="mini-btn" type="button" data-action="detail" data-id="{{ node.objective_id }}" title="打开目标档案卡">详情</button>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if node.children %}
+  <ul class="tree-children">
+    {% for child in node.children %}{{ tree_node(child) }}{% endfor %}
+  </ul>
+  {% endif %}
+</li>
+{% endmacro %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">目标拆解 / A3 · 拆解树与发布</p>
+    <h1>拆解树与发布</h1>
+    <p class="subtitle">逐级拆解的目标结构；发布瞬间留存快照（成功标准 / KR 基线 / 责任人 / 时限），验收对照快照。</p>
+  </div>
+  <div class="heading-actions">
+    {% if is_manager %}
+    <a class="button button-primary" href="{{ url_for('goal_dept') }}"><span aria-hidden="true">✎</span>新建部门目标</a>
+    {% endif %}
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+<section class="stats">
+  <div class="stat-card"><span>节点总数</span><strong>{{ stats.total }}</strong><small>当前筛选范围</small></div>
+  <div class="stat-card"><span>草稿</span><strong>{{ stats.draft }}</strong><small>待提交确认</small></div>
+  <div class="stat-card is-pending"><span>待承接</span><strong>{{ stats.pending }}</strong><small>会签进行中</small></div>
+  <div class="stat-card is-published"><span>已发布</span><strong>{{ stats.published }}</strong><small>含执行中</small></div>
+</section>
+
+<section class="panel filter-panel">
+  <form class="filter-form" method="get" action="{{ url_for('goal_tree') }}">
+    <div class="filter-row">
+      <span class="filter-label">筛选</span>
+      <label class="filter-item">周期
+        <select name="period">
+          {% for period in period_options %}
+          <option value="{{ period.period_id }}" {% if filter_period == period.period_id %}selected{% endif %}>{{ period.period_name }}{{ '（当前）' if period.is_current else '' }}{{ '（已冻结）' if period.is_frozen else '' }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="filter-item">组织
+        <select name="org_unit_id">
+          <option value="">全部（我的范围）</option>
+          {% for org in org_options %}
+          <option value="{{ org.org_unit_id }}" {% if filter_org == org.org_unit_id %}selected{% endif %}>{{ org.org_name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="button button-secondary" type="submit">应用筛选</button>
+      {% if filter_period or filter_org %}
+      <a class="filter-reset" href="{{ url_for('goal_tree') }}">清空筛选</a>
+      {% endif %}
+      <span class="filter-tip" id="focus-tip" {% if not focus_id %}hidden{% endif %}>已定位到 {{ focus_id }} 节点</span>
+    </div>
+  </form>
+</section>
+
+<section class="panel tree-panel">
+  <div class="panel-heading">
+    <div><h2>目标结构</h2><p>默认展开两层；点击节点前箭头展开 / 收起</p></div>
+    <div class="heading-actions">
+      <button class="mini-btn" type="button" id="expand-all">全部展开</button>
+      <button class="mini-btn" type="button" id="collapse-all">全部收起</button>
+      <button class="mini-btn" type="button" id="expand-two">恢复两层</button>
+    </div>
+  </div>
+
+  <div class="tree-legend" aria-label="状态图例">
+    <span class="legend-item status-draft"><i></i>草稿</span>
+    <span class="legend-item status-pending_confirm"><i></i>待确认</span>
+    <span class="legend-item status-confirmed"><i></i>已承接</span>
+    <span class="legend-item status-published"><i></i>已发布</span>
+    <span class="legend-item status-executing"><i></i>执行中</span>
+    <span class="legend-item status-pending_review"><i></i>待验收</span>
+    <span class="legend-item status-reviewed"><i></i>已验收</span>
+    <span class="legend-item status-archived"><i></i>已归档</span>
+  </div>
+
+  {% if nodes %}
+  <ul class="tree-root" id="tree-root">
+    {% for node in nodes %}{{ tree_node(node) }}{% endfor %}
+  </ul>
+  {% else %}
+  <div class="empty-state">
+    <p class="empty-icon" aria-hidden="true">⊞</p>
+    <h2>当前筛选下没有目标</h2>
+    <p>调整周期 / 组织筛选，或从录入部门目标开始搭建拆解树。</p>
+    {% if is_manager %}<a class="button button-primary" href="{{ url_for('goal_dept') }}">录入部门目标</a>{% endif %}
+  </div>
+  {% endif %}
+</section>
+
+<script type="application/json" id="goal-tree-data">
+{{ {
+  "focus_id": focus_id,
+  "urls": {
+    "submit": url_for('api_objective_publish'),
+    "publish": url_for('api_objective_publish'),
+    "countersign": url_for('api_objective_countersign'),
+    "detail": url_for('api_objective_detail'),
+    "tree": url_for('goal_tree')
+  }
+} | tojson }}
+</script>
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/goal_tree.js') }}"></script>{% endblock %}

@@ -189,16 +189,12 @@ def client_key():
 # 会话、权限与数据范围
 # ---------------------------------------------------------------------------
 
-def login_session(user_id):
-    session["user_id"] = user_id
-
-
-def logout_session():
-    session.pop("user_id", None)
+# 统一账号体系：目标闭环与智能计划管理共用同一登录身份（users.json 的 id ≡ system.json 的 user_id）
+SESSION_KEY = "user_id"
 
 
 def current_user(store=None):
-    user_id = session.get("user_id")
+    user_id = session.get(SESSION_KEY)
     if not user_id:
         return None
     store = store or read_store()

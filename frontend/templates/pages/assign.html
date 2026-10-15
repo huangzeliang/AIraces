@@ -1,0 +1,308 @@
+{% extends 'layout.html' %}
+{% block title %}智能派工 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/assign.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">目标拆解 / A4 · 智能派工</p>
+    <h1>智能派工</h1>
+    <p class="subtitle">按饱和度校验把任务派给合适的人：≤ {{ thresholds.green | int }}% 推荐 · 黄区谨慎 · &gt; {{ thresholds.red | int }}% 拦截（可强制下发并留痕）。</p>
+  </div>
+  <div class="heading-actions">
+    {% if can_create_task and is_manager %}
+    <button class="button button-primary" type="button" id="create-task-button"><span aria-hidden="true">＋</span>新建派工任务</button>
+    {% endif %}
+    <a class="button button-secondary" href="{{ url_for('goal_tree') }}"><span aria-hidden="true">⊞</span>目标拆解树</a>
+  </div>
+</section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}<div class="notice {{ category }}" role="status">{{ message }}</div>{% endfor %}
+{% endwith %}
+
+{% if is_staff %}
+<div class="notice info" role="status">当前为普通用户视角：显示你名下任务的派工结果与计划项；派工与改派由管理员操作。</div>
+{% endif %}
+
+<section class="stats">
+  <div class="stat-card"><span>任务总数</span><strong>{{ stats.total }}</strong><small>当前筛选范围</small></div>
+  <div class="stat-card is-need"><span>待派工</span><strong>{{ stats.need_assign }}</strong><small>尚无执行人</small></div>
+  <div class="stat-card"><span>进行中</span><strong>{{ stats.doing }}</strong><small>含改派场景</small></div>
+  <div class="stat-card is-over"><span>超载成员</span><strong>{{ stats.overloaded }}</strong><small>饱和度 &gt; {{ thresholds.red | int }}%</small></div>
+</section>
+
+<section class="assign-grid">
+
+  <section class="panel task-list-panel">
+    <div class="panel-heading">
+      <div><h2>任务清单</h2><p>待派工优先展示；点击任务进入派工面板</p></div>
+    </div>
+
+    <div class="list-filters">
+      <a class="filter-chip {% if not filter_status %}active{% endif %}" href="{{ url_for('assign', objective_id=filter_objective or none) }}">全部</a>
+      <a class="filter-chip {% if filter_status == 'need_assign' %}active{% endif %}" href="{{ url_for('assign', status='need_assign', objective_id=filter_objective or none) }}">待派工</a>
+      <a class="filter-chip {% if filter_status == 'doing' %}active{% endif %}" href="{{ url_for('assign', status='doing', objective_id=filter_objective or none) }}">进行中</a>
+      <a class="filter-chip {% if filter_status == 'todo' %}active{% endif %}" href="{{ url_for('assign', status='todo', objective_id=filter_objective or none) }}">待开始</a>
+      <a class="filter-chip {% if filter_status == 'done' %}active{% endif %}" href="{{ url_for('assign', status='done', objective_id=filter_objective or none) }}">已完成</a>
+    </div>
+
+    <form class="list-objective" method="get" action="{{ url_for('assign') }}">
+      {% if filter_status %}<input type="hidden" name="status" value="{{ filter_status }}">{% endif %}
+      <select name="objective_id" aria-label="按目标筛选">
+        <option value="">全部目标</option>
+        {% for objective in objective_rows %}
+        <option value="{{ objective.objective_id }}" {% if filter_objective == objective.objective_id %}selected{% endif %}>{{ objective.objective_id }} · {{ objective.title[:24] }}</option>
+        {% endfor %}
+      </select>
+      <button class="button button-secondary" type="submit">筛选</button>
+    </form>
+
+    {% if task_list %}
+    <ul class="assignment-list">
+      {% for row in task_list %}
+      <li>
+        <a class="task-card status-{{ row.status }} {% if selected and selected.task.task_id == row.task_id %}is-selected{% endif %}"
+           href="{{ url_for('assign', task_id=row.task_id, status=filter_status or none, objective_id=filter_objective or none) }}">
+          <span class="task-card-top">
+            <strong>{{ row.title }}</strong>
+            {% if row.need_assign %}<span class="mini-flag flag-need">待派工</span>{% endif %}
+            {% if row.is_overload_override %}<span class="mini-flag flag-over">超载标记</span>{% endif %}
+          </span>
+          <span class="task-card-meta">
+            <span class="row-id">{{ row.task_id }}</span>
+            <span class="status-tag status-{{ row.status }}">{{ row.status_label }}</span>
+            <span class="prio prio-{{ {'高': 'high', '中': 'mid', '低': 'low'}.get(row.priority, 'mid') }}">{{ row.priority }}</span>
+            <span>{{ row.plan_hours }}h</span>
+          </span>
+          <span class="task-card-sub">{{ row.assignee_names or '尚未指定执行人' }}</span>
+          <span class="task-card-sub is-objective">{{ row.objective_id }} · {{ row.objective_title[:22] }}</span>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="list-empty">当前筛选下没有任务。{% if can_create_task and is_manager %}可点击右上角「新建派工任务」。{% endif %}</p>
+    {% endif %}
+  </section>
+
+  <div class="assign-main">
+    {% if selected %}
+    <section class="panel task-detail-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>{{ selected.task.title }}</h2>
+          <p>{{ selected.task.task_id }} · 计划 {{ selected.task.plan_hours }}h · {{ selected.task.plan_start }} ~ {{ selected.task.plan_end }}</p>
+        </div>
+        <div class="heading-actions">
+          <span class="status-tag status-{{ selected.task.status }}">{{ {'todo': '待开始', 'doing': '进行中', 'blocked': '阻塞', 'done': '已完成', 'cancelled': '已取消'}.get(selected.task.status, selected.task.status) }}</span>
+          {% if selected.objective %}
+          <a class="mini-btn" href="{{ url_for('goal_tree', focus_id=selected.objective.objective_id) }}">{{ selected.objective.objective_id }} 目标树</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item"><span>所属目标</span><strong>{{ selected.objective.title if selected.objective else '未挂接' }}{% if selected.objective %}（{{ selected.objective.status_label }} · {{ selected.objective.org_name }}）{% endif %}</strong></div>
+        <div class="detail-item"><span>目标责任人</span><strong>{{ selected.objective.owner_name if selected.objective else '—' }}</strong></div>
+        <div class="detail-item"><span>优先级</span><strong>{{ selected.task.priority }}</strong></div>
+        <div class="detail-item"><span>任务来源</span><strong>{{ '智能派工' if selected.task.source == 'dispatch' else '常规指派' }}</strong></div>
+        {% if selected.task.detail %}<div class="detail-item detail-wide"><span>任务说明</span><strong>{{ selected.task.detail }}</strong></div>{% endif %}
+      </div>
+
+      <div class="assignee-now">
+        <span class="detail-label">当前执行人</span>
+        {% if selected.assignees %}
+        {% for item in selected.assignees %}
+        <span class="person-chip">{{ item.name }} · {{ item.role_in_task }} · {{ item.weight }}%{% if item.is_owner %}（主责）{% endif %}</span>
+        {% endfor %}
+        {% else %}
+        <span class="person-chip is-empty">尚未派工</span>
+        {% endif %}
+      </div>
+
+      {% if selected.plan_items %}
+      <div class="plan-current">
+        <span class="detail-label">已下发计划项</span>
+        <ul>
+          {% for item in selected.plan_items %}
+          <li>
+            <span class="person-chip is-small">{{ item.name }}</span>
+            <span class="num">{{ item.start }} ~ {{ item.end }} · {{ item.plan_hours }}h</span>
+            {% if item.edited %}<span class="mini-flag flag-edited">人工调整</span>{% endif %}
+            <em>{{ item.acceptance }}</em>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if selected.parallel %}
+      <div class="parallel-block">
+        <span class="detail-label">并行进度汇总（F-123）</span>
+        <div class="parallel-sum">
+          <span>任务卡进度 <strong class="num">{{ selected.parallel.task_progress }}%</strong></span>
+          {% if selected.parallel.weighted_progress is not none %}
+          <span>按权重加权 <strong class="num is-acc">{{ selected.parallel.weighted_progress }}%</strong></span>
+          {% endif %}
+          {% if selected.parallel.missing %}
+          <span class="parallel-missing">未填报：{{ selected.parallel.missing | join('、') }}（不参与加权）</span>
+          {% endif %}
+        </div>
+        <ul class="parallel-list">
+          {% for row in selected.parallel.rows %}
+          <li>
+            <span class="person-chip is-small">{{ row.name }}{% if row.is_owner %} · 主责{% endif %}</span>
+            <span class="parallel-weight num">{{ row.weight }}%</span>
+            <div class="parallel-bar" role="img" aria-label="{{ row.name }} 贡献进度">{% if row.progress is not none %}<i style="width: {{ row.progress }}%"></i>{% endif %}</div>
+            <span class="parallel-value num">{% if row.progress is not none %}{{ row.progress }}% · {{ row.logged_at }}{% else %}未填报{% endif %}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </section>
+
+    {% if is_manager and can_dispatch %}
+    <section class="panel dispatch-panel">
+      <div class="panel-heading">
+        <div><h2>派工面板</h2><p>勾选执行人并调整权重；饱和度按「加入本次派工后」预演</p></div>
+        <div class="heading-actions">
+          <button class="mini-btn" type="button" id="recheck-button">重新试算</button>
+          {% if can_analyze %}<button class="mini-btn" type="button" id="analyze-button">AI 派工分析</button>{% endif %}
+          {% if can_plan %}<button class="mini-btn" type="button" id="plan-button">生成计划项</button>{% endif %}
+        </div>
+      </div>
+
+      <div class="recommend-strip" id="recommend-strip" hidden>
+        <span class="detail-label">推荐人选</span>
+        <div class="recommend-list" id="recommend-list"></div>
+      </div>
+
+      <ul class="member-list" id="member-list">
+        {% for member in selected.members %}
+        <li class="member-row level-{{ member.level }}" data-user-id="{{ member.user_id }}"
+            data-load="{{ member.load_hours }}" data-base="{{ member.base_hours }}">
+          <label class="member-check">
+            <input type="checkbox" data-role="pick" value="{{ member.user_id }}"
+                   {% if selected.assignees | selectattr('user_id', 'equalto', member.user_id) | list %}checked{% endif %}>
+          </label>
+          <div class="member-body">
+            <div class="member-head">
+              <strong>{{ member.name }}</strong>
+              <span class="member-sub">{{ member.org_name }}{% if member.position_name %} · {{ member.position_name }}{% endif %}</span>
+              <span class="level-chip level-{{ member.level }}" data-role="level-chip">饱和度 {{ member.saturation_before }}%</span>
+            </div>
+            <div class="member-meta">
+              {% if member.ability_tags %}<span class="tag-row">{{ member.ability_tags | join(' / ') }}</span>{% endif %}
+              <span>在办 {{ member.open_count }} 项</span>
+              <span class="num">负荷 {{ member.load_hours }}h / 容量 {{ member.base_hours }}h</span>
+            </div>
+            <div class="saturation-bar">
+              <i class="bar-base" style="width: {{ 100 if member.saturation_before > 100 else member.saturation_before }}%"></i>
+              <em class="bar-add" data-role="bar-add" style="display:none"></em>
+            </div>
+            <p class="member-advice" data-role="advice">{{ member.advice_text }}</p>
+          </div>
+          <div class="member-side">
+            <label class="owner-field" title="任务层唯一主责（单选）">
+              <input type="radio" name="owner-pick" data-role="owner"
+                     {% if selected.assignees | selectattr('user_id', 'equalto', member.user_id) | selectattr('is_owner') | list %}checked{% endif %} disabled> 主责
+            </label>
+            <label class="weight-field">权重
+              <input type="number" min="1" max="100" step="1" data-role="weight" value="100" disabled>
+            </label>
+            <button class="mini-btn" type="button" data-action="profile" data-id="{{ member.user_id }}">档案</button>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="dispatch-tip" id="weight-sum-tip">已选 0 人 · 权重合计 0%（须为 100%）</p>
+
+      {% if can_analyze %}
+      <div class="ai-result" id="analyze-result" hidden></div>
+      {% endif %}
+
+      {% if can_plan %}
+      <div class="plan-draft" id="plan-draft" hidden>
+        <div class="plan-draft-head">
+          <span class="detail-label">计划项草案（可编辑，未下发）</span>
+          <span class="engine-chip" id="plan-engine"></span>
+        </div>
+        <ul class="plan-draft-list" id="plan-draft-list"></ul>
+        <p class="plan-sum" id="plan-sum"></p>
+      </div>
+      {% endif %}
+
+      <div class="dispatch-actions">
+        <button class="button button-primary" type="button" id="commit-button" disabled>下发派工</button>
+        <span class="dispatch-hint" id="commit-hint">勾选执行人后下发；红区成员会被拦截，可使用强制下发并填写理由。</span>
+      </div>
+    </section>
+    {% endif %}
+
+    {% else %}
+    <section class="panel">
+      <div class="empty-state">
+        <p class="empty-icon" aria-hidden="true">➤</p>
+        <h2>从左侧选择任务开始派工</h2>
+        <p>派工对象为挂在「已发布 / 执行中」目标下的任务；无执行人的任务在「待派工」筛选下查看。</p>
+        {% if can_create_task and is_manager %}
+        <button class="button button-primary" type="button" id="create-task-button-empty">新建派工任务</button>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+  </div>
+
+</section>
+
+{% if overloaded_rows %}
+<section class="panel overload-panel">
+  <div class="panel-heading">
+    <div><h2>超载成员提示</h2><p>饱和度 &gt; {{ thresholds.red | int }}%，新派工默认被拦截；可通过「档案」调整基准容量或先减负</p></div>
+  </div>
+  <div class="overload-list">
+    {% for row in overloaded_rows %}
+    <button class="overload-chip" type="button" data-action="profile" data-id="{{ row.user_id }}">
+      {{ row.name }} · {{ row.saturation_before }}%
+    </button>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<script type="application/json" id="assign-data">
+{{ {
+  "is_manager": is_manager,
+  "is_staff": is_staff,
+  "thresholds": thresholds,
+  "can_check": can_check,
+  "can_analyze": can_analyze,
+  "can_plan": can_plan,
+  "can_override": can_override,
+  "can_profile_edit": can_profile_edit,
+  "priorities": priorities,
+  "selected": {
+    "task": selected.task if selected else None,
+    "objective": selected.objective if selected else None,
+    "assignees": selected.assignees if selected else [],
+    "plan_items": selected.plan_items if selected else [],
+    "members": selected.members if selected else []
+  },
+  "objective_rows": objective_rows,
+  "urls": {
+    "check": url_for('api_assign_check'),
+    "analyze": url_for('api_assign_analyze'),
+    "plan": url_for('api_assign_plan'),
+    "commit": url_for('api_assign_commit'),
+    "create": url_for('api_task_create'),
+    "profile": url_for('api_staff_profile'),
+    "save": url_for('api_staff_save'),
+    "assign": url_for('assign')
+  }
+} | tojson }}
+</script>
+
+{% endblock %}
+{% block page_js %}<script src="{{ url_for('static', filename='js/pages/assign.js') }}"></script>{% endblock %}

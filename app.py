@@ -5,10 +5,12 @@
 - 各业务线只在 backend/ 下新增自己的路由模块，由本文件统一 import；
 - 数据读写沿用「读取 → 校验 → 加锁写 → 刷新」闭环，不引入数据库。
 
-数据载体：
-- data/users.json   账号（姓名 / 邮箱 / 角色 / 状态 / 密码哈希），登录与角色体系的数据源
+数据载体（统一账号体系）：
+- data/users.json   账号权威（姓名 / 角色 管理员|普通用户 / 状态 / 口令），登录与角色守卫的数据源
+- data/system.json  目标逐级拆解与验证闭环（org/role/objective/work_task 等 23 张表，backend/core.py 管理）
 - data/plans.json   Plan / Todo / Task / Reminder / Feedback / Exception（按 user_id 归属到账号）
 - data/settings.json 系统设置
+登录后由 sync_account 把 users.json 身份同步进 system.json 用户表，两线共用同一 session["user_id"]。
 """
 
 import json
@@ -20,7 +22,7 @@ from importlib import import_module
 from pathlib import Path
 from types import SimpleNamespace
 
-from flask import Flask, g, render_template, request
+from flask import Flask, g, jsonify, render_template, request
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -35,6 +37,7 @@ DATA_LOCK = threading.Lock()
 
 auth = import_module("backend.auth")
 scope = import_module("backend.scope")
+core = import_module("backend.core")
 
 ALLOWED_ROLES = set(auth.ALLOWED_ROLES)
 ALLOWED_STATUSES = {"启用", "停用"}
@@ -138,6 +141,63 @@ def form_data(require_password=False):
 settings_io = import_module("backend.settings_io")
 
 
+def sync_account(account):
+    """统一账号：把 users.json 的账号同步进 system.json 用户表（目标闭环侧）。
+
+    账号池 users.json 是身份权威（姓名 / 角色 管理员|普通用户 / 状态）；
+    org_unit_id、岗位、能力等目标闭环扩展字段保留在 system.json，互不覆盖。
+    """
+    if not account or not account.get("id"):
+        return None
+    role_code = "admin" if account.get("role") == auth.ROLE_ADMIN else "staff"
+    with core.DATA_LOCK:
+        store = core.read_store()
+        row = next((item for item in store["user"] if item["user_id"] == account["id"]), None)
+        changed = False
+        login_name = account.get("login_name") or (account.get("email") or "").split("@")[0]
+        if row is None:
+            row = {
+                "user_id": account["id"],
+                "display_name": account.get("name") or account["id"],
+                "login_name": login_name,
+                "org_unit_id": "ORG-001",
+                "position": "",
+                "status": account.get("status") or "启用",
+                "last_login_at": "",
+            }
+            store["user"].append(row)
+            changed = True
+        else:
+            if row.get("display_name") != (account.get("name") or row.get("display_name")):
+                row["display_name"] = account.get("name") or row.get("display_name")
+                changed = True
+            if row.get("status") != (account.get("status") or row.get("status")):
+                row["status"] = account.get("status") or row.get("status")
+                changed = True
+            if login_name and row.get("login_name") != login_name:
+                row["login_name"] = login_name
+                changed = True
+        role = next((item for item in store["role"] if item.get("role_code") == role_code), None)
+        if role is not None:
+            grants = [item for item in store["user_role"] if item["user_id"] == account["id"]]
+            if len(grants) != 1 or grants[0].get("role_id") != role["role_id"]:
+                store["user_role"] = [item for item in store["user_role"] if item["user_id"] != account["id"]]
+                store["user_role"].append({
+                    "user_id": account["id"], "role_id": role["role_id"],
+                    "org_unit_id": row.get("org_unit_id") or "",
+                    "granted_by": "system", "granted_at": core.iso(),
+                })
+                changed = True
+        if changed:
+            core.write_store(store)
+        return row
+
+
+def sync_all_accounts():
+    for account in read_users():
+        sync_account(account)
+
+
 def read_store():
     """读取计划数据；缺失字段自动补齐，保证下游聚合不出现 KeyError。"""
     store = read_json(STORE_FILE, EMPTY_STORE)
@@ -171,6 +231,7 @@ services = SimpleNamespace(
     write_users=write_users,
     form_data=form_data,
     allowed_statuses=ALLOWED_STATUSES,
+    sync_account=sync_account,
     # 计划数据与设置
     read_store=read_store,
     write_store=write_store,
@@ -193,13 +254,15 @@ for module_name in (
     "backend.data_io",                                     # C2 数据管理
     "backend.settings_io",                                 # C3 系统设置
     "backend.hub",                                         # D 线 AI 任务中枢（跨线聚合 + 卡点研判）
+    "backend.goal",                                        # 工作线A：部门目标 / SMART 校验 / 拆解树与发布
+    "backend.assign",                                      # 工作线A：智能派工与饱和度校验
 ):
     import_module(module_name).register(app, services)
 
 # ---------------------------------------------------------------------------
-# NS 线（目标拆解与验证闭环 · 工作线 B）：独立账号体系（U001~U010）与页面壳，
+# NS 线（目标拆解与验证闭环 · 工作线 B）：账号池与页面壳对齐统一账号体系，
 # 数据源 data/system.json（backend/core），路由统一走 /ns 与 /api/ns 前缀。
-# 单系统合并：根路径 / 由 ns_root 接管，旧 /login 统一 302 到 /ns/login；
+# 单系统合并：根路径 / 由 ns_root 接管；/ns/login 与 /login 两个入口共用同一会话；
 # ns_* 端点对旧登录守卫整体放行，由 NS 守卫自查登录。
 # ---------------------------------------------------------------------------
 for module_name in (
@@ -262,11 +325,45 @@ def page_context(active_page, page_name):
 def inject_shell_context():
     user = g.get("current_user")
     store = read_store()
+    # 目标闭环侧上下文：统一账号已同步，同一身份可直达 A 线页面
+    ns_user = None
+    ns_role_label = ""
+    ns_perms = ()
+    ns_unread = 0
+    try:
+        ns_store = core.read_store()
+        ns_user = core.current_user(ns_store)
+        if ns_user is not None:
+            ns_perms = tuple(sorted(core.user_perms(ns_store, ns_user["user_id"])))
+            ns_role_label = auth.ROLE_ADMIN if auth.is_admin(user) else auth.ROLE_USER
+            ns_unread = sum(
+                1 for item in ns_store.get("reminder", [])
+                if item.get("user_id") == ns_user["user_id"] and item.get("status") == "未读"
+            )
+    except Exception:
+        ns_user = None
     return {
         "current_user": user,
         "is_admin": auth.is_admin(user),
         "unread_reminders": scope.unread_reminder_count(store, user),
+        "ns_user": ns_user,
+        "ns_role_label": ns_role_label,
+        "ns_perms": ns_perms,
+        "ns_unread": ns_unread,
     }
+
+
+@app.errorhandler(core.BizError)
+def handle_biz_error(error):
+    """业务异常统一转 {code, message, data} 响应包；HTTP 状态按错误码表映射。"""
+    status = core.ERROR_HTTP.get(error.code, 400)
+    return jsonify({"code": error.code, "message": error.message, "data": error.data}), status
+
+
+@app.get("/forbidden")
+def forbidden():
+    """无权限页（新版菜单守卫 core.require_menu 的重定向落点）。"""
+    return render_template("pages/forbidden.html", page_name="无权限"), 403
 
 
 @app.get("/analytics")
@@ -275,6 +372,7 @@ def analytics():
 
 
 migrate_legacy_data()
+sync_all_accounts()
 
 
 if __name__ == "__main__":

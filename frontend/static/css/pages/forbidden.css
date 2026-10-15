@@ -1,0 +1,12 @@
+/* 无权限页（/forbidden）—— 只使用 tokens.css 语义变量，双主题自动适配 */
+
+.button-secondary{background:var(--surface);border-color:var(--border);color:var(--text)}
+.button-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.panel{border:1px solid var(--border);border-radius:var(--radius-card);background:var(--surface);box-shadow:var(--card-shadow);padding:20px}
+
+.forbidden-panel{max-width:560px;text-align:center;padding:40px 28px}
+.forbidden-icon{font-size:40px;margin:0 0 10px}
+.forbidden-panel h2{margin:0 0 8px;font-size:19px}
+.forbidden-desc{margin:0 0 22px;color:var(--muted);font-size:12.5px;line-height:1.8}
+.forbidden-actions{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.forbidden-actions form{margin:0;display:flex}

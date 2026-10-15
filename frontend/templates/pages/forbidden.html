@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+{% block title %}无权限 · Northstar{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/forbidden.css') }}">{% endblock %}
+{% block content %}
+
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">ACCESS DENIED</p>
+    <h1>无权限访问</h1>
+    <p class="subtitle">当前登录角色没有该页面的权限点，入口不会在侧栏中显示。</p>
+  </div>
+</section>
+
+<section class="panel forbidden-panel">
+  <p class="forbidden-icon" aria-hidden="true">⛔</p>
+  <h2>该页面不在你的角色权限范围内</h2>
+  <p class="forbidden-desc">
+    权限由「角色 × 权限点」共同决定，统一账号下角色分为「管理员 / 普通用户」两种。如需访问，请联系管理员调整授权。
+  </p>
+  <div class="forbidden-actions">
+    {% if is_admin %}
+    <a class="button button-primary" href="{{ url_for('dashboard') }}">返回驾驶舱</a>
+    {% else %}
+    <a class="button button-primary" href="{{ url_for('tasks') }}">返回任务列表</a>
+    {% endif %}
+    <form method="post" action="{{ url_for('logout') }}"><button class="button button-secondary" type="submit">退出登录</button></form>
+  </div>
+</section>
+
+{% endblock %}

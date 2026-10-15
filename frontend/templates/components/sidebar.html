@@ -1,10 +1,15 @@
 <aside class="sidebar">
-  <a class="brand" href="{{ url_for('dashboard') if is_admin else url_for('tasks') }}"><span class="brand-mark">N</span><span><strong>Northstar</strong><small>PLAN AGENT</small></span></a>
-  <div class="workspace-card"><span class="workspace-badge">N</span><span><strong>智能计划管理</strong><small>本地 JSON 数据</small></span><span aria-hidden="true">⌄</span></div>
+  {% set home = url_for('dashboard') if is_admin else url_for('tasks') %}
+  <a class="brand" href="{{ home }}"><span class="brand-mark">N</span><span><strong>Northstar</strong><small>PLAN AGENT</small></span></a>
+  <div class="workspace-card"><span class="workspace-badge">N</span><span><strong>目标闭环 · 智能计划</strong><small>本地 JSON 数据</small></span><span aria-hidden="true">⌄</span></div>
 
   {% include 'components/nav_menu.html' %}
 
   <div class="sidebar-spacer"></div>
-  {% if is_admin %}<div class="side-tip"><span class="tip-icon">✦</span><strong>管理员视图</strong><p>可见全部页面与全量数据；普通用户仅见任务、提醒与计划流程，且只看到自己的数据。</p></div>{% endif %}
+  {% if is_admin %}
+  <div class="side-tip"><span class="tip-icon">✦</span><strong>管理员视角</strong><p>录入目标、SMART 质检、逐级拆解发布与智能派工；派工必过饱和度校验，超载需强制下发并留痕。</p></div>
+  {% else %}
+  <div class="side-tip"><span class="tip-icon">✦</span><strong>普通用户视角</strong><p>执行任务、更新进度与日计划；查看自己的目标与拆解树、在 SMART 页确认承接。</p></div>
+  {% endif %}
   <div class="profile"><span class="profile-avatar">{{ current_user.name[0] if current_user else '—' }}</span><span><strong>{{ current_user.name if current_user else '未登录' }}</strong><small>{{ current_user.role if current_user else '' }}</small></span></div>
 </aside>

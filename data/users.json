@@ -1,42 +1,102 @@
 [
   {
     "id": "U001",
-    "name": "林若溪",
-    "email": "ruoxi.lin@example.com",
-    "phone": "138 0012 3401",
+    "name": "陈北峰",
+    "login_name": "chenbf",
+    "email": "chenbf@northstar.cn",
     "role": "管理员",
     "status": "启用",
-    "password_hash": "pbkdf2:sha256:1000000$Pgk99TR7Dhp5R5Lr$bb1567f0edbabb9fad193acef07cb2e24adbbb78859fccc3629d3af702f25686",
-    "created_at": "2026-10-09"
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
   },
   {
     "id": "U002",
-    "name": "陈宇航",
-    "email": "yuhang.chen@example.com",
-    "phone": "138 0012 3402",
-    "role": "普通用户",
+    "name": "李敏",
+    "login_name": "limin",
+    "email": "limin@northstar.cn",
+    "role": "管理员",
     "status": "启用",
-    "password_hash": "pbkdf2:sha256:1000000$DHgnDZ9XUKiwRC73$07c956ec39a2e5a99e900f5446f6602ac6ee9ae6493b6bf3bab4d6efdf7ad77d",
-    "created_at": "2026-10-07"
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
   },
   {
     "id": "U003",
-    "name": "王思涵",
-    "email": "sihan.wang@example.com",
-    "phone": "138 0012 3403",
-    "role": "普通用户",
-    "status": "停用",
-    "password_hash": "pbkdf2:sha256:1000000$COBwIXTgVIZ6QQaY$5846ca7af748f7ae602a9c3eb2f7b6ee98fd362708a4124ada2027726b559759",
-    "created_at": "2026-10-04"
+    "name": "周彦",
+    "login_name": "zhouyan",
+    "email": "zhouyan@northstar.cn",
+    "role": "管理员",
+    "status": "启用",
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
   },
   {
     "id": "U004",
-    "name": "周子墨",
-    "email": "zimo.zhou@example.com",
-    "phone": "138 0012 3404",
+    "name": "张伟",
+    "login_name": "zhangwei",
+    "email": "zhangwei@northstar.cn",
     "role": "普通用户",
     "status": "启用",
-    "password_hash": "pbkdf2:sha256:1000000$em2cHVOx6lprrVhG$f8d114b2eff65df0ff6bc32bb875443e6c9d1adb07bb25f12724459a71f6861f",
-    "created_at": "2026-09-28"
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
+  },
+  {
+    "id": "U005",
+    "name": "王芳",
+    "login_name": "wangfang",
+    "email": "wangfang@northstar.cn",
+    "role": "普通用户",
+    "status": "启用",
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
+  },
+  {
+    "id": "U006",
+    "name": "赵磊",
+    "login_name": "zhaolei",
+    "email": "zhaolei@northstar.cn",
+    "role": "普通用户",
+    "status": "启用",
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
+  },
+  {
+    "id": "U007",
+    "name": "孙悦",
+    "login_name": "sunyue",
+    "email": "sunyue@northstar.cn",
+    "role": "普通用户",
+    "status": "启用",
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
+  },
+  {
+    "id": "U008",
+    "name": "吴迪",
+    "login_name": "wudi",
+    "email": "wudi@northstar.cn",
+    "role": "普通用户",
+    "status": "启用",
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
+  },
+  {
+    "id": "U009",
+    "name": "陈晨",
+    "login_name": "chenchen",
+    "email": "chenchen@northstar.cn",
+    "role": "普通用户",
+    "status": "启用",
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
+  },
+  {
+    "id": "U010",
+    "name": "何佳",
+    "login_name": "hejia",
+    "email": "hejia@northstar.cn",
+    "role": "普通用户",
+    "status": "启用",
+    "phone": "",
+    "password_hash": "pbkdf2:sha256:1000000$lPKXol1jLhOvDPfi$03107669012d61fabfd5c5c536c2cda740fd23dbd08cb337c23a193c7bffd800"
   }
 ]

@@ -1,12 +1,18 @@
-"""公共 · 登录、退出与角色守卫（管理员 / 普通用户）。
+"""公共 · 登录、退出与角色守卫（统一账号体系）。
 
-- 会话：Flask session 保存 user_id，每次请求由 before_request 还原登录用户；
-- 角色：管理员可见全部页面；普通用户仅见核心工作流页面（任务 / 提醒 / 计划流程）；
+一套系统、一套登录：账号池 data/users.json 为账号权威（姓名 / 角色 / 状态 / 口令），
+角色统一为「管理员 / 普通用户」两种；登录后由 app.sync_account 把身份同步进
+data/system.json 用户表（目标闭环侧），两线共用同一 session["user_id"]。
+
+- 管理员：全部页面与全站数据；目标拆解 / 发布 / 派工等写操作；
+- 普通用户：任务 / 提醒 / 计划流程 + 自己的目标（承接确认、只读拆解树）；
 - 守卫：未登录跳转登录页（JSON 请求返回 401）；普通用户访问管理页时重定向回本角色首页。
 """
 
 from flask import flash, g, jsonify, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
+
+from backend import core
 
 ROLE_ADMIN = "管理员"
 ROLE_USER = "普通用户"
@@ -20,7 +26,7 @@ PASSWORD_MAX_LENGTH = 64
 # /hub（AI 任务中枢）跨线聚合全量计划与任务，同样划归管理员专属
 ADMIN_PATH_PREFIXES = ("/dashboard", "/data", "/settings", "/users", "/analytics", "/hub")
 
-PUBLIC_ENDPOINTS = {"static", "login"}
+PUBLIC_ENDPOINTS = {"static", "login", "logout"}
 
 
 def hash_password(password):
@@ -69,8 +75,21 @@ def find_user(users, user_id):
     return next((user for user in users if user.get("id") == user_id), None)
 
 
+def _match_account(users, keyword):
+    """账号匹配：邮箱或登录名（login_name），大小写不敏感。"""
+    keyword = (keyword or "").strip().lower()
+    if not keyword:
+        return None
+    return next(
+        (item for item in users
+         if (item.get("email") or "").lower() == keyword
+         or (item.get("login_name") or "").lower() == keyword),
+        None,
+    )
+
+
 def _demo_accounts(users):
-    """登录页演示提示：每类角色取第一个启用账号。"""
+    """登录页演示提示：管理员 / 普通用户各取第一个启用账号。"""
     accounts = []
     for role in ALLOWED_ROLES:
         user = next(
@@ -78,12 +97,18 @@ def _demo_accounts(users):
             None,
         )
         if user:
-            accounts.append({"name": user["name"], "email": user["email"], "role": role})
+            accounts.append({
+                "name": user["name"],
+                "email": user["email"],
+                "login": user.get("login_name") or user["email"],
+                "role": role,
+            })
     return accounts
 
 
 def register(app, services):
     read_users = services.read_users
+    sync_account = services.sync_account
 
     @app.before_request
     def require_login():
@@ -100,6 +125,8 @@ def register(app, services):
             return redirect(url_for("login", next=target))
 
         g.current_user = user
+        # 统一账号：把身份同步到目标闭环用户表（缺失即补建，姓名 / 状态 / 角色跟随账号池）
+        sync_account(user)
         if not is_admin(user) and is_admin_path(request.path):
             if _wants_json() and request.method != "GET":
                 return jsonify({"ok": False, "message": "该操作仅管理员可用。"}), 403
@@ -109,8 +136,36 @@ def register(app, services):
 
     @app.route("/login", methods=("GET", "POST"))
     def login():
-        # 系统合并为单一入口：旧登录页退役，统一跳转 NS 登录。
-        return redirect(url_for("ns_login"))
+        users = read_users()
+        signed_in = find_user(users, session.get("user_id"))
+        if signed_in is not None and signed_in.get("status") == "启用" and request.method == "GET":
+            return redirect(landing_path(signed_in))
+
+        account = ""
+        if request.method == "POST":
+            account = request.form.get("email", "").strip()
+            password = request.form.get("password", "")
+            candidate = _match_account(users, account)
+            if candidate is None or not verify_password(candidate.get("password_hash"), password):
+                flash("邮箱 / 登录名或密码不正确，请重试。", "error")
+            elif candidate.get("status") != "启用":
+                flash("该账号已停用，请联系管理员。", "error")
+            else:
+                session.clear()
+                session["user_id"] = candidate["id"]
+                sync_account(candidate)
+                target = _safe_next(request.args.get("next") or request.form.get("next"), candidate)
+                flash("欢迎回来，%s（%s）。" % (candidate.get("name") or "", candidate.get("role") or ""), "success")
+                return redirect(target or landing_path(candidate))
+
+        return render_template(
+            "pages/login.html",
+            page_name="登录",
+            email=account,
+            next_target=request.args.get("next", ""),
+            demo_password=DEFAULT_DEMO_PASSWORD,
+            demo_accounts=_demo_accounts(users),
+        )
 
     @app.post("/logout")
     def logout():

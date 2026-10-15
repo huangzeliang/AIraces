@@ -86,7 +86,10 @@ def build_seed(now=None):
     action_defs = [
         ("goal.create", "创建目标"), ("goal.submit_confirm", "提交确认"), ("goal.confirm_accept", "承接确认"),
         ("goal.publish", "发布目标"), ("goal.smart_apply", "采纳 SMART 建议"), ("goal.ai_draft", "AI 拆解建议"),
+        ("goal.smart_check", "SMART 五维质检"),
         ("assign.dispatch", "下达派工"), ("assign.override", "超载强制下发"),
+        ("assign.check", "饱和度试算校验"), ("assign.analyze", "AI 派工分析"), ("assign.plan", "生成智能计划项"),
+        ("staff.profile_edit", "维护员工能力档案"),
         ("task.create", "创建任务"), ("task.update", "更新任务"), ("task.mount_goal", "挂目标申请"),
         ("daily.submit", "提交日计划"), ("daily.review", "审核日计划"), ("daily.slider", "进度拉条"),
         ("progress.manual", "手动更新进度"),
@@ -130,7 +133,9 @@ def build_seed(now=None):
                         "guidance.generate", "dep.save"]
     managers_fields = ["field:objective.content", "field:objective.owner_id", "field:work_task.assignees",
                        "field:staff_profile.capacity", "field:assessment.final_score"]
-    staff_menus = ["workbench", "today", "progress", "warning", "changes", "critical_path", "review", "retro", "compare"]
+    # 演示态账号统一为两种角色：管理员（全站读写）/ 普通用户（承接与执行）
+    staff_menus = ["workbench", "today", "goal_smart", "goal_tree", "assign",
+                   "progress", "warning", "changes", "critical_path", "review", "retro", "compare"]
     staff_actions = ["goal.confirm_accept", "task.create", "task.update", "task.mount_goal", "daily.submit",
                      "daily.slider", "change.apply", "review.submit", "review.appeal", "retro.create",
                      "guidance.generate"]
@@ -141,27 +146,22 @@ def build_seed(now=None):
         return [p["perm_id"] for p in perms if p["perm_code"] in codes]
 
     store["role"] = [
-        {"role_id": "R001", "role_code": "super_admin", "role_name": "系统管理员", "scope_type": "ALL",
-         "is_builtin": True, "status": "启用", "remark": "全局配置与审计，不参与业务操作"},
+        {"role_id": "R001", "role_code": "admin", "role_name": "管理员", "scope_type": "ALL",
+         "is_builtin": True, "status": "启用", "remark": "目标拆解、发布、派工、验收与系统设置（演示：管理员）"},
         {"role_id": "R002", "role_code": "manager", "role_name": "部门负责人", "scope_type": "DEPT",
-         "is_builtin": True, "status": "启用", "remark": "本部门及下级组织的目标、派工与验收"},
-        {"role_id": "R003", "role_code": "staff", "role_name": "员工", "scope_type": "SELF",
-         "is_builtin": True, "status": "启用", "remark": "承接目标、日计划、拉条与自评"},
+         "is_builtin": True, "status": "启用", "remark": "本部门及下级组织的目标、派工与验收（可选角色，演示账号默认未分配）"},
+        {"role_id": "R003", "role_code": "staff", "role_name": "普通用户", "scope_type": "SELF",
+         "is_builtin": True, "status": "启用", "remark": "承接目标、执行任务、日计划与自评（演示：普通用户）"},
     ]
-    super_all = [p["perm_id"] for p in perms if p["perm_code"].startswith("menu:")] + \
-        [p["perm_id"] for p in perms if p["perm_code"] in (
-            "action:org.manage", "action:role.manage", "action:user.manage", "action:period.manage",
-            "action:dict.manage", "action:settings.manage", "action:data.import", "action:data.export",
-            "action:data.resolve", "action:data.backup", "field:setting.value", "field:role.grant")]
     store["role_permission"] = (
-        [{"role_id": "R001", "perm_id": pid} for pid in super_all] +
+        [{"role_id": "R001", "perm_id": p["perm_id"]} for p in perms] +
         [{"role_id": "R002", "perm_id": pid} for pid in perms_for(managers_menus, managers_actions, managers_fields)] +
         [{"role_id": "R003", "perm_id": pid} for pid in perms_for(staff_menus, staff_actions, staff_fields)]
     )
     store["user_role"] = [
         {"user_id": "U001", "role_id": "R001", "org_unit_id": "ORG-000", "granted_by": "system", "granted_at": dtime_iso(-30)},
-        {"user_id": "U002", "role_id": "R002", "org_unit_id": "ORG-001", "granted_by": "U001", "granted_at": dtime_iso(-28)},
-        {"user_id": "U003", "role_id": "R002", "org_unit_id": "ORG-002", "granted_by": "U001", "granted_at": dtime_iso(-28)},
+        {"user_id": "U002", "role_id": "R001", "org_unit_id": "ORG-001", "granted_by": "U001", "granted_at": dtime_iso(-28)},
+        {"user_id": "U003", "role_id": "R001", "org_unit_id": "ORG-002", "granted_by": "U001", "granted_at": dtime_iso(-28)},
     ] + [
         {"user_id": uid, "role_id": "R003", "org_unit_id": org, "granted_by": "U001", "granted_at": dtime_iso(-27)}
         for uid, org in (("U004", "ORG-101"), ("U005", "ORG-102"), ("U006", "ORG-101"), ("U007", "ORG-101"),
@@ -356,6 +356,17 @@ def build_seed(now=None):
              detail="季度持续工作包：设计令牌、SVG 组件、适配基线。"),
         task("T-018", "管理端页面全面适配改造", "O-007", "", "U007", 200, "todo", 0, 10, 55),
     ]
+    # 待派工样例（A4 智能派工演示）：挂执行中目标、无执行人，进入 /assign 的「待派工」清单
+    store["work_task"].append({
+        "task_id": "T-015", "title": "上线前全链路回归与演练",
+        "detail": "发布前全链路回归、回滚演练与上线检查单执行。",
+        "parent_task_id": "", "objective_id": "O-001", "kr_id": "KR-001", "priority": "高",
+        "plan_hours": 24, "plan_start": d(9), "plan_end": d(14),
+        "progress": 0, "exec_rate": 0.0, "status": "todo", "source": "dispatch",
+        "is_demo": False, "manual_override": False, "blocked_reason": "",
+        "assignees": [], "plan_items": [],
+        "created_at": dtime_iso(8, 9), "updated_at": dtime_iso(8, 9),
+    })
     store["task_assignee"] = [
         {"task_id": t["task_id"], "user_id": a["user_id"], "role_in_task": a["role_in_task"],
          "weight": a["weight"], "is_owner": a["is_owner"]}
@@ -576,7 +587,7 @@ def build_seed(now=None):
     dict_defs = [
         ("position", [("backend", "后端工程师"), ("frontend", "前端工程师"), ("data", "数据工程师"),
                       ("product", "产品经理"), ("market", "市场专员"), ("manager", "部门负责人"),
-                      ("super_admin", "系统管理员")]),
+                      ("super_admin", "综合管理岗")]),
         ("ability", [("Python", "Python"), ("Flask", "Flask"), ("SQL", "SQL"), ("数据可视化", "数据可视化"),
                      ("AI应用", "AI 应用"), ("客户沟通", "客户沟通"), ("项目管理", "项目管理"),
                      ("性能优化", "性能优化"), ("监控", "监控"), ("前端工程", "前端工程"), ("SVG", "SVG"),
