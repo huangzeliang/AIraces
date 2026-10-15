@@ -43,7 +43,7 @@
         <button class="ns-account-chip" type="button" data-login="{{ account.login_name }}"><strong>{{ account.display_name }}</strong><small>{{ account.login_name }} · {{ account.org_name }}</small></button>
         {% endfor %}
       </div>
-      <p class="ns-login-foot">旧版 <a href="/login">/login</a> 与本入口相互独立，互不影响。</p>
+      <p class="ns-login-foot">旧版 /login 入口已统一跳转到本登录页，系统为单一入口。</p>
     </section>
   </main>
   <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
