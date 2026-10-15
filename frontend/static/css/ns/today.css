@@ -82,6 +82,7 @@
 @media(max-width:700px){
   .td-date-nav{width:100%}
   .td-tab{min-width:44px}
+  .td-ring a{display:inline-flex;align-items:center;min-height:44px}
   .td-date-form{flex:1 1 100%;flex-wrap:wrap}
   .td-date-form .ns-input{flex:1}
   .td-toolbar-meta{width:100%}

@@ -64,5 +64,6 @@
 @media(max-width:700px){
   .wn-alert .button,.wn-reminder-actions .button{min-height:44px}
   .wn-gd-list li .button{width:100%;justify-self:stretch}
-  .wn-tab{height:36px}
+  .wn-tab{height:44px}
+  .wn-checks a{display:inline-flex;align-items:center;min-height:44px}
 }
