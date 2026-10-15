@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day" data-login-url="/ns/login">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7ff">
+  <title>{% block title %}{{ ns_page_title }} · Northstar 目标闭环{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components/modal.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ns/ns.css') }}">
+  {% block page_css %}{% endblock %}
+</head>
+<body class="ns-body">
+  <div class="app-shell">
+    {% include 'ns/components/sidebar.html' %}
+    <div class="main-area">
+      {% include 'ns/components/topbar.html' %}
+      <main class="content">{% block content %}{% endblock %}</main>
+    </div>
+  </div>
+  {% include 'ns/components/mobile_nav.html' %}
+  <div class="ns-toast-region" id="ns-toast-region" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/components/modal.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/components/shell.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ns/app.js') }}"></script>
+  {% block page_js %}{% endblock %}
+</body>
+</html>

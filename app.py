@@ -196,6 +196,27 @@ for module_name in (
 ):
     import_module(module_name).register(app, services)
 
+# ---------------------------------------------------------------------------
+# NS 线（目标拆解与验证闭环 · 工作线 B）：独立账号体系（U001~U010）与页面壳，
+# 数据源 data/system.json（backend/core），路由统一走 /ns 与 /api/ns 前缀，
+# 与旧系统完全并存、互不影响；注册后端点对旧登录守卫整体放行，由 NS 守卫自查登录。
+# ---------------------------------------------------------------------------
+for module_name in (
+    "backend.ns_auth",        # NS 登录 / 退出 / 守卫 / 错误包 / 非 B 线菜单占位页
+    "backend.ns_workbench",   # B5 个人工作台
+    "backend.ns_progress",    # B1 进度更新
+    "backend.ns_warning",     # B2 预警与指导
+    "backend.ns_changes",     # B3 变更管理
+    "backend.ns_deps",        # B4 关键路径与阻塞
+    "backend.ns_today",       # B6 日计划与任务
+    "backend.ns_scheduler",   # NS 后台巡检（提醒 / 连续异常补偿）
+):
+    import_module(module_name).register(app, services)
+
+for _endpoint in list(app.view_functions):
+    if _endpoint.startswith("ns_"):
+        auth.PUBLIC_ENDPOINTS.add(_endpoint)
+
 
 def migrate_legacy_data():
     """启动时补齐旧数据：角色归一为两种、密码哈希、任务归属 user_id。

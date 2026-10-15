@@ -1,0 +1,193 @@
+{% extends 'ns/layout.html' %}
+{% block page_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ns/workbench.css') }}">{% endblock %}
+{% block content %}
+{% if overview.partial %}
+<div class="ns-banner is-yellow"><span class="ns-banner-icon" aria-hidden="true">⚠</span>
+  <span><strong>部分区块加载降级</strong>：{{ overview.failed_sections | join('、') }} 暂时不可用，其余数据正常展示。</span>
+</div>
+{% endif %}
+
+<section class="wb-hello">
+  <div class="wb-hello-main">
+    <p class="wb-eyebrow">{{ ns_role_name }} · {{ ns_scope_label }}</p>
+    <h1>{{ ns_user.display_name }}，欢迎回来</h1>
+    <p class="wb-sub">我的目标、待我处理、提醒与今日节奏都在这里；异常会自动进入三色预警。</p>
+    <div class="wb-chips">
+      <a class="wb-chip" href="{{ url_for('ns_warning') }}"><span class="wb-chip-num">{{ overview.unread_count }}</span>未读提醒</a>
+      <span class="wb-chip"><span class="wb-chip-num">{{ overview.streak.days }}</span>连续异常天数</span>
+      <span class="wb-chip"><span class="wb-chip-num">{{ overview.todo_groups | length }}</span>待办分组</span>
+      <span class="wb-chip"><span class="wb-chip-num">{{ overview.my_objectives | length }}</span>我的目标</span>
+    </div>
+  </div>
+  <div class="wb-hello-side">
+    <a class="button button-primary" href="{{ url_for('ns_today') }}">今天做什么 →</a>
+    <a class="button button-secondary" href="{{ url_for('ns_progress') }}">更新进度</a>
+  </div>
+</section>
+
+{% if overview.streak.days > 0 %}
+<div class="ns-banner {{ 'is-red' if overview.streak.days >= 5 else 'is-yellow' }}">
+  <span class="ns-banner-icon" aria-hidden="true">⚠</span>
+  <span><strong>连续 {{ overview.streak.days }} 天未完成当日计划</strong>（{{ overview.streak.window_start }} ~ {{ overview.streak.window_end }}，最低完成率 {{ overview.streak.min_progress }}%）。
+  阈值 {{ overview.streak.threshold }} 天，{{ '已升级展示。' if overview.streak.days >= 5 else '连续 ≥5 天将升级展示。' }}
+  <a href="{{ url_for('ns_warning') }}">查看预警与指导</a></span>
+</div>
+{% endif %}
+
+<div class="wb-split">
+  <div class="wb-col">
+    <section class="ns-card">
+      <div class="ns-card-head">
+        <div><h2>我的目标</h2><p>按健康度排序（滞后在前）；点击进入拆解树或验收。</p></div>
+        <div class="ns-card-actions"><a class="button button-small button-secondary" href="{{ url_for('ns_progress') }}">全部目标</a></div>
+      </div>
+      {% if overview.my_objectives %}
+      <ul class="wb-obj-list">
+        {% for row in overview.my_objectives %}
+        <li class="wb-obj">
+          <span class="wb-obj-ring js-ring is-{{ row.health }}" data-value="{{ row.progress }}" data-caption="完成"></span>
+          <div class="wb-obj-main">
+            <div class="wb-obj-title">
+              <strong>{{ row.title }}</strong>
+              <span class="ns-pill is-muted no-dot">{{ row.status_label }}</span>
+              <span class="ns-pill is-{{ 'red' if row.health == 'lagging' else 'green' }}">{{ row.health_label }}</span>
+            </div>
+            <p class="ns-mini">{{ row.objective_id }} · 责任人 {{ row.owner_name }} · 截止 {{ row.plan_end[:10] or '—' }}</p>
+            <div class="wb-obj-metrics">
+              <span>完成 <b>{{ row.progress }}%</b></span>
+              <span>时间 <b>{{ row.time_progress }}%</b></span>
+              <span>差值 <b class="{{ 'is-neg' if row.delta < 0 }}">{{ row.delta }} pp</b></span>
+            </div>
+          </div>
+          <a class="wb-obj-action" href="{{ row.deep_link }}">{{ row.next_action }} →</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% if overview.my_objectives_total_more %}
+      <p class="ns-mini wb-more">还有 {{ overview.my_objectives_total_more }} 条目标未展示，<a href="{{ url_for('ns_progress') }}">进入进度更新查看</a>。</p>
+      {% endif %}
+      {% else %}
+      <div class="ns-empty">当前没有与你相关的目标。可以在拆解树中确认承接，或在日计划中自建任务。</div>
+      {% endif %}
+    </section>
+
+    <section class="ns-card">
+      <div class="ns-card-head">
+        <div><h2>待我处理</h2><p>五类待办分组展示，不混成一条流水。</p></div>
+      </div>
+      {% if overview.todo_groups %}
+      <div class="wb-todo-grid">
+        {% for group in overview.todo_groups %}
+        <article class="wb-todo">
+          <header>
+            <strong>{{ group.group_name }}</strong>
+            <span class="ns-pill is-purple no-dot">{{ group.count }}</span>
+          </header>
+          <ul>
+            {% for item in group.items %}
+            <li><a href="{{ item.link }}">{{ item.title }}</a><small>{{ item.meta }}</small></li>
+            {% endfor %}
+          </ul>
+          {% if group.more_count %}<p class="ns-mini">另有 {{ group.more_count }} 条</p>{% endif %}
+          <a class="wb-todo-action" href="{{ group.items[0].link }}">{{ group.action_text }} →</a>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="ns-empty">今天没有待你处理的事项，保持节奏。</div>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="wb-col">
+    <section class="ns-card" id="wb-reminders">
+      <div class="ns-card-head">
+        <div><h2>我的提醒</h2><p>共 {{ overview.my_reminders_total }} 条，最近 {{ overview.my_reminders | length }} 条。</p></div>
+        <div class="ns-card-actions">
+          <button class="button button-small button-secondary" type="button" id="wb-read-all" {% if not overview.unread_count %}disabled{% endif %}>全部已读</button>
+          <a class="button button-small button-ghost" href="{{ url_for('ns_warning') }}">提醒中心</a>
+        </div>
+      </div>
+      {% if overview.my_reminders %}
+      <ul class="wb-rem-list" id="wb-rem-list">
+        {% for r in overview.my_reminders %}
+        <li class="wb-rem {{ 'is-unread' if r.status == '未读' }}" data-reminder-id="{{ r.reminder_id }}" data-link="{{ r.deep_link }}">
+          <span class="wb-rem-dot is-{{ r.level }}" aria-hidden="true"></span>
+          <div>
+            <a class="wb-rem-title" href="{{ r.deep_link }}">{{ r.title }}</a>
+            <p>{{ r.body }}</p>
+            <small>{{ r.created_at[:16].replace('T', ' ') }}{{ ' · 未读' if r.status == '未读' else '' }}</small>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="ns-empty">暂无提醒。进度更新后，超期 / 临期 / 偏差会自动生成提醒。</div>
+      {% endif %}
+    </section>
+
+    {% if overview.manager_block %}
+    <section class="ns-card">
+      <div class="ns-card-head">
+        <div><h2>团队健康度</h2><p>管理者视角：范围内任务三色分布与成员负荷。</p></div>
+        <a class="button button-small button-secondary" href="{{ url_for('ns_warning') }}">查看预警</a>
+      </div>
+      {% set hc = overview.manager_block.health_count %}
+      <div class="wb-health">
+        <div class="wb-health-cell is-red"><strong>{{ hc.red }}</strong><span>红色（超期 / 阻塞）</span></div>
+        <div class="wb-health-cell is-yellow"><strong>{{ hc.yellow }}</strong><span>黄色（偏差）</span></div>
+        <div class="wb-health-cell is-green"><strong>{{ hc.green }}</strong><span>正常</span></div>
+      </div>
+      <p class="ns-mini">待我审批的变更：<b>{{ overview.manager_block.pending_approval }}</b> 条 · <a href="{{ url_for('ns_changes') }}">进入变更管理</a></p>
+      {% if overview.manager_block.load_rows %}
+      <div class="ns-table-wrap">
+        <table class="ns-table wb-load-table">
+          <thead><tr><th>成员</th><th>在途工时</th><th>饱和度</th></tr></thead>
+          <tbody>
+            {% for row in overview.manager_block.load_rows %}
+            <tr>
+              <td>{{ row.name }}</td>
+              <td class="num">{{ row.open_hours }} / {{ row.capacity }} h</td>
+              <td>
+                <div class="wb-load">
+                  <span class="ns-bar is-slim is-{{ row.level }}"><i style="width:{{ [row.saturation, 100] | min }}%"></i></span>
+                  <b>{{ row.saturation }}%</b>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if overview.staff_block %}
+    <section class="ns-card">
+      <div class="ns-card-head">
+        <div><h2>今日计划</h2><p>{{ overview.staff_block.today }}</p></div>
+        <a class="button button-small button-secondary" href="{{ url_for('ns_today') }}">去填报</a>
+      </div>
+      {% set sb = overview.staff_block %}
+      <div class="wb-today">
+        <div class="wb-today-cell">
+          <span class="ns-mini">日计划状态</span>
+          <strong>{{ sb.plan.day_status_label }}</strong>
+          <small>{{ sb.plan.item_count }} 个计划项{{ '，当日完成率 ' ~ sb.plan.day_progress ~ '%' if sb.plan.day_progress is not none else '' }}</small>
+        </div>
+        <div class="wb-today-cell">
+          <span class="ns-mini">在途任务</span>
+          <strong>{{ sb.open_count }}</strong>
+          <small>{{ '最近截止：' ~ sb.nearest.title if sb.nearest else '暂无在途任务' }}</small>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block page_js %}
+<script src="{{ url_for('static', filename='js/ns/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ns/workbench.js') }}"></script>
+{% endblock %}

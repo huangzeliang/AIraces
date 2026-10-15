@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day" data-login-url="/ns/login">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7ff">
+  <title>登录 · Northstar 目标闭环</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ns/ns.css') }}">
+</head>
+<body class="ns-body ns-login-body">
+  <main class="ns-login-wrap">
+    <section class="ns-login-hero" aria-label="产品介绍">
+      <a class="brand" href="{{ url_for('ns_login') }}"><span class="brand-mark">N</span><span><strong>Northstar</strong><small>目标闭环</small></span></a>
+      <p class="eyebrow">执行与工作台 · 工作线 B</p>
+      <h1>每天拉一次进度条，<br>目标全程可追踪。</h1>
+      <p class="ns-login-lead">日计划审核通过后即可更新进度；偏差自动预警、变更留痕可回放、关键路径定位唯一热点阻塞。</p>
+      <ul class="ns-login-points">
+        <li><span aria-hidden="true">✓</span>日计划 · 三视图 × 三粒度</li>
+        <li><span aria-hidden="true">⚑</span>三色预警 · 连续异常双角色提醒</li>
+        <li><span aria-hidden="true">⇄</span>变更原因必填 · 通过后写新版本</li>
+        <li><span aria-hidden="true">∿</span>关键路径 · 唯一热点阻塞识别</li>
+      </ul>
+      <p class="ns-login-note">演示口令统一为 123456，勾选下方任一账号快速填充。</p>
+    </section>
+
+    <section class="ns-login-panel" aria-label="登录表单">
+      <div class="ns-login-theme"><button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="切换到夜晚模式"><span class="theme-sun" aria-hidden="true">☀</span><span class="theme-moon" aria-hidden="true">☾</span><span class="theme-label">白天</span></button></div>
+      <h2>账号登录</h2>
+      <p class="ns-login-sub">U001~U010 演示账号：超管 / 部门负责人 / 员工三种角色。</p>
+      {% if error %}<p class="ns-login-error" role="alert">{{ error }}</p>{% endif %}
+      <form method="post" action="{{ url_for('ns_login') }}" class="ns-login-form">
+        <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+        <label for="ns-login-name">账号</label>
+        <input id="ns-login-name" name="login_name" type="text" autocomplete="username" required value="{{ login_name }}" placeholder="如 chenbf / limin / zhangwei">
+        <label for="ns-login-password">口令</label>
+        <input id="ns-login-password" name="password" type="password" autocomplete="current-password" required placeholder="演示口令 {{ demo_password }}">
+        <button class="button button-primary ns-login-submit" type="submit">登录工作台</button>
+      </form>
+      <div class="ns-login-accounts" aria-label="演示账号快速填充">
+        {% for account in accounts %}
+        <button class="ns-account-chip" type="button" data-login="{{ account.login_name }}"><strong>{{ account.display_name }}</strong><small>{{ account.login_name }} · {{ account.org_name }}</small></button>
+        {% endfor %}
+      </div>
+      <p class="ns-login-foot">旧版 <a href="/login">/login</a> 与本入口相互独立，互不影响。</p>
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+  <script>
+    (function () {
+      'use strict';
+      var nameInput = document.getElementById('ns-login-name');
+      var passwordInput = document.getElementById('ns-login-password');
+      document.querySelectorAll('.ns-account-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          nameInput.value = chip.getAttribute('data-login');
+          passwordInput.value = '{{ demo_password }}';
+          document.querySelectorAll('.ns-account-chip').forEach(function (other) {
+            other.classList.toggle('is-active', other === chip);
+            other.setAttribute('aria-pressed', other === chip ? 'true' : 'false');
+          });
+          passwordInput.focus();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

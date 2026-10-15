@@ -1,0 +1,14 @@
+{% extends 'ns/layout.html' %}
+{% block content %}
+<section class="ns-card ns-empty-card" aria-label="尚未接入">
+  <p class="eyebrow">菜单占位</p>
+  <h1>{{ ns_page_title }}</h1>
+  <p>{{ ns_page_subtitle }}</p>
+  <p>本次交付聚焦「工作线 B · 执行与工作台」：个人工作台、日计划与任务、进度更新、预警与指导、变更管理、关键路径与阻塞。该菜单可在后续工作线接入后直接复用现有账号体系与页面壳。</p>
+  <p class="ns-empty-actions">
+    <a class="button button-primary" href="{{ url_for('ns_workbench') }}">去个人工作台</a>
+    <a class="button" href="{{ url_for('ns_today') }}">去日计划与任务</a>
+    <a class="button" href="{{ url_for('ns_critical_path') }}">看关键路径</a>
+  </p>
+</section>
+{% endblock %}

@@ -90,6 +90,7 @@ def build_seed(now=None):
         ("task.create", "创建任务"), ("task.update", "更新任务"), ("task.mount_goal", "挂目标申请"),
         ("daily.submit", "提交日计划"), ("daily.review", "审核日计划"), ("daily.slider", "进度拉条"),
         ("progress.manual", "手动更新进度"),
+        ("guidance.generate", "AI 过程指导"), ("dep.save", "维护依赖关系"),
         ("change.apply", "发起变更"), ("change.approve", "审批变更"),
         ("review.submit", "完成提报"), ("review.accept", "对照验收"), ("review.appeal", "验收申诉"),
         ("retro.create", "编写复盘"), ("retro.convert", "复盘转改进"),
@@ -125,12 +126,14 @@ def build_seed(now=None):
                       "progress", "warning", "changes", "critical_path", "review", "retro", "compare"]
     managers_actions = ["goal.create", "goal.submit_confirm", "goal.publish", "goal.smart_apply", "goal.ai_draft",
                         "assign.dispatch", "assign.override", "task.create", "daily.review", "progress.manual",
-                        "change.approve", "review.accept", "retro.create", "retro.convert", "data.export"]
+                        "change.approve", "review.accept", "retro.create", "retro.convert", "data.export",
+                        "guidance.generate", "dep.save"]
     managers_fields = ["field:objective.content", "field:objective.owner_id", "field:work_task.assignees",
                        "field:staff_profile.capacity", "field:assessment.final_score"]
-    staff_menus = ["workbench", "today", "progress", "warning", "review", "retro", "compare"]
+    staff_menus = ["workbench", "today", "progress", "warning", "changes", "critical_path", "review", "retro", "compare"]
     staff_actions = ["goal.confirm_accept", "task.create", "task.update", "task.mount_goal", "daily.submit",
-                     "daily.slider", "change.apply", "review.submit", "review.appeal", "retro.create"]
+                     "daily.slider", "change.apply", "review.submit", "review.appeal", "retro.create",
+                     "guidance.generate"]
     staff_fields = ["field:objective.status_confirm", "field:assessment.self_score"]
 
     def perms_for(menu_keys, action_keys, field_keys):
@@ -250,8 +253,13 @@ def build_seed(now=None):
          "published_snapshot": {"published_at": dtime_iso(-12, 10),
                                 "criteria": ["性能 P95 优化到 300ms 内", "技术债存量下降 50%"],
                                 "krs": [{"kr_id": "KR-008", "target_value": 300}]}},
-        {"objective_id": "O-101", "title": "市场部 Q4 品牌曝光增长 50%", "source": "部门重点工作",
-         "parent_id": "", "level": "dept", "org_unit_id": "ORG-002", "owner_id": "U003",
+        {"objective_id": "O-008", "title": "个人工作台与提醒中心上线", "source": "上级拆解",
+         "parent_id": "O-001", "level": "team", "org_unit_id": "ORG-101", "owner_id": "U004",
+         "period_id": "P-2026Q4", "weight": 5, "plan_start": d(1), "plan_end": d(20),
+         "success_criteria": ["工作台五组待办聚合可用", "提醒中心支持已知悉抑制"],
+         "smart": smart([17, 16, 17, 17, 15]), "progress": 0.0, "attainment": None,
+         "status": "pending_confirm", "is_archived": False, "published_snapshot": None},
+        {"objective_id": "O-101", "title": "市场部 Q4 品牌曝光增长 50%", "source": "部门重点工作", "parent_id": "", "level": "dept", "org_unit_id": "ORG-002", "owner_id": "U003",
          "period_id": "P-2026Q4", "weight": 60, "plan_start": d(0), "plan_end": d(80),
          "success_criteria": ["品牌曝光量达到 180 万", "完成 3 场行业活动"],
          "smart": smart([17, 17, 16, 17, 16]), "progress": 45.0, "attainment": None,
@@ -416,6 +424,16 @@ def build_seed(now=None):
          "day_progress": 0.0, "streak_abnormal": 0, "reviewer_id": "U002", "reviewed_at": dtime_iso(-1, 19),
          "reject_reason": "工时与目标口径不一致，请拆分到具体任务后重新提交",
          "submitted_at": dtime_iso(-2, 10), "ack_at": ""},
+        # U010（何佳）连续三日完成率未达 100%：演示 F-413 双角色提醒 / 升级判定
+        {"plan_id": "DP-006", "user_id": "U010", "plan_date": rel(-3), "day_status": "approved",
+         "day_progress": 62.0, "streak_abnormal": 0, "reviewer_id": "U003", "reviewed_at": dtime_iso(-3, 21),
+         "reject_reason": "", "submitted_at": dtime_iso(-4, 9), "ack_at": dtime_iso(-3, 22)},
+        {"plan_id": "DP-007", "user_id": "U010", "plan_date": rel(-2), "day_status": "approved",
+         "day_progress": 70.0, "streak_abnormal": 0, "reviewer_id": "U003", "reviewed_at": dtime_iso(-2, 21),
+         "reject_reason": "", "submitted_at": dtime_iso(-3, 9), "ack_at": ""},
+        {"plan_id": "DP-008", "user_id": "U010", "plan_date": rel(-1), "day_status": "approved",
+         "day_progress": 55.0, "streak_abnormal": 0, "reviewer_id": "U003", "reviewed_at": dtime_iso(-1, 21),
+         "reject_reason": "", "submitted_at": dtime_iso(-2, 9), "ack_at": ""},
     ]
     store["daily_plan_item"] = [
         {"item_id": "DIT-001", "plan_id": "DP-001", "task_id": "T-002", "plan_hours": 4,
@@ -440,6 +458,12 @@ def build_seed(now=None):
          "plan_desc": "设计令牌与组件盘点", "done": False, "progress": 0, "sort_no": 2, "abnormal_flag": ""},
         {"item_id": "DIT-011", "plan_id": "DP-005", "task_id": "T-005", "plan_hours": 6,
          "plan_desc": "KPI 聚合接口", "done": False, "progress": 0, "sort_no": 1, "abnormal_flag": ""},
+        {"item_id": "DIT-012", "plan_id": "DP-006", "task_id": "T-014", "plan_hours": 5,
+         "plan_desc": "渠道排期表初稿", "done": False, "progress": 62, "sort_no": 1, "abnormal_flag": ""},
+        {"item_id": "DIT-013", "plan_id": "DP-007", "task_id": "T-014", "plan_hours": 5,
+         "plan_desc": "投放素材对接与排期确认", "done": False, "progress": 70, "sort_no": 1, "abnormal_flag": ""},
+        {"item_id": "DIT-014", "plan_id": "DP-008", "task_id": "T-014", "plan_hours": 5,
+         "plan_desc": "渠道数据回收模板", "done": False, "progress": 55, "sort_no": 1, "abnormal_flag": ""},
     ]
 
     # ------------------------------------------------------------------ 变更 / 验收 / 复盘
@@ -503,19 +527,29 @@ def build_seed(now=None):
         {"reminder_id": "RM-001", "user_id": "U006", "target_type": "task", "target_id": "T-011",
          "alert_type": "overdue", "level": "red", "title": "任务已超期：缺陷清理专项",
          "body": "T-011 的计划结束已达 2 天，当前进度 0%，请更新或发起变更。",
-         "status": "未读", "created_at": dtime_iso(-1, 6), "read_at": "", "ack_at": ""},
+         "status": "未读", "created_at": dtime_iso(-1, 6), "read_at": "", "ack_at": "",
+         "trigger_id": "", "role": "", "dedupe_key": "alert:AL-overdue-T-011:U006"},
         {"reminder_id": "RM-002", "user_id": "U002", "target_type": "task", "target_id": "T-006",
-         "alert_type": "deviation", "level": "yellow", "title": "进度偏差：三视图 SVG 组件阻塞",
+         "alert_type": "deviation", "level": "red", "title": "进度异常：三视图 SVG 组件",
          "body": "T-006 阻塞 3 天，位于关键路径（T-001 → T-003 → T-005 → T-006）。",
-         "status": "未读", "created_at": dtime_iso(-1, 6), "read_at": "", "ack_at": ""},
-        {"reminder_id": "RM-003", "user_id": "U010", "target_type": "daily_plan", "target_id": "",
-         "alert_type": "daily_streak", "level": "red", "title": "连续 3 天未更新任务进度",
-         "body": "何佳已连续 3 天无通过审核的日计划，请及时更新或说明原因。",
-         "status": "未读", "created_at": dtime_iso(0, 6), "read_at": "", "ack_at": ""},
+         "status": "未读", "created_at": dtime_iso(-1, 6), "read_at": "", "ack_at": "",
+         "trigger_id": "", "role": "", "dedupe_key": "alert:AL-deviation-T-006:U002"},
+        {"reminder_id": "RM-003", "user_id": "U010", "target_type": "user", "target_id": "U010",
+         "alert_type": "daily_streak", "level": "yellow", "title": "连续 3 天未完成当日计划",
+         "body": "你已连续 3 天（%s ~ %s）当日完成率未达 100%%，最低 55%%。今天已无待办项，保持节奏即可。建议先处理关键路径上的任务；连续 ≥5 天将升级展示。" % (rel(-3), rel(-1)),
+         "status": "未读", "created_at": dtime_iso(-1, 6), "read_at": "", "ack_at": "",
+         "trigger_id": "streak:U010:%s" % rel(-3), "role": "staff",
+         "dedupe_key": "streak:self:U010:%s:w" % rel(-3),
+         "meta": {"days": 3, "window_start": rel(-3), "window_end": rel(-1), "min_progress": 55.0,
+                  "subject_name": "何佳"}},
         {"reminder_id": "RM-004", "user_id": "U003", "target_type": "user", "target_id": "U010",
-         "alert_type": "daily_streak", "level": "yellow", "title": "成员连续 3 天未更新进度",
-         "body": "何佳（市场部）连续 3 天未更新任务进度，请关注并跟进。",
-         "status": "未读", "created_at": dtime_iso(0, 6), "read_at": "", "ack_at": ""},
+         "alert_type": "daily_streak", "level": "yellow", "title": "何佳 连续 3 天进度异常",
+         "body": "何佳（市场专员）连续 3 天（%s ~ %s）当日完成率未达 100%%，最低 55%%。请关注并跟进，可发起 AI 过程指导或调整派工。" % (rel(-3), rel(-1)),
+         "status": "未读", "created_at": dtime_iso(-1, 6), "read_at": "", "ack_at": "",
+         "trigger_id": "streak:U010:%s" % rel(-3), "role": "manager",
+         "dedupe_key": "streak:mgr:U003:U010:%s:w" % rel(-3),
+         "meta": {"days": 3, "window_start": rel(-3), "window_end": rel(-1), "min_progress": 55.0,
+                  "subject_name": "何佳", "critical_count": 0, "hotspot_title": "", "impact_days": 0}},
         {"reminder_id": "RM-005", "user_id": "U007", "target_type": "daily_plan", "target_id": "DP-004",
          "alert_type": "checkpoint", "level": "yellow", "title": "今日日计划尚未提交",
          "body": "距离今日结束不足 6 小时，请完成日计划提交。",

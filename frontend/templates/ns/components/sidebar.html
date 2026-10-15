@@ -1,0 +1,11 @@
+<aside class="sidebar">
+  <a class="brand" href="{{ url_for('ns_workbench') }}"><span class="brand-mark">N</span><span><strong>Northstar</strong><small>目标闭环</small></span></a>
+  <div class="workspace-card"><span class="workspace-badge">{{ ns_org_name[0] if ns_org_name else 'N' }}</span><span><strong>{{ ns_org_name or '星北科技' }}</strong><small>{{ ns_role_name }} · {{ ns_scope_label }}</small></span></div>
+
+  {% include 'ns/components/nav_menu.html' %}
+
+  <div class="sidebar-spacer"></div>
+  <div class="side-tip"><span class="tip-icon" aria-hidden="true">✦</span><strong>执行与工作台</strong><p>日计划审核通过后即可拉条，进度经任务、目标两级上卷；偏差与超期自动进入三色预警。</p></div>
+  <div class="profile"><span class="profile-avatar">{{ ns_user.display_name[0] if ns_user else '—' }}</span><span><strong>{{ ns_user.display_name if ns_user else '未登录' }}</strong><small>{{ ns_position_label }} · {{ ns_org_name }}</small></span></div>
+  <form method="post" action="{{ url_for('ns_logout') }}"><button class="button nav-logout" type="submit"><span aria-hidden="true">⏻</span>退出登录</button></form>
+</aside>

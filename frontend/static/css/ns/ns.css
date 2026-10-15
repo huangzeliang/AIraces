@@ -1,0 +1,154 @@
+/* NS 线（工作线 B）公共样式：壳层修正 + 通用组件 + 登录页。
+   全部走 tokens.css 语义变量，双主题自动适配；页面专属样式放 css/ns/<page>.css。 */
+
+/* ---------- 壳层修正（UI 规范 8.2：手机端不得仅隐藏白天/夜晚文字） ---------- */
+body.ns-body .theme-label{display:inline}
+
+/* ---------- 通用按钮补充（旧系统按页复制，NS 统一在此定义） ---------- */
+.button-secondary{background:var(--surface);border-color:var(--border);color:var(--text)}
+.button-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.button-danger{background:var(--danger-soft);border-color:transparent;color:var(--danger)}
+.button-danger:hover{border-color:var(--danger)}
+.button-ghost{background:transparent;border-color:transparent;color:var(--accent)}
+.button-ghost:hover{background:var(--accent-soft)}
+.button-small{height:32px;padding:0 11px;font-size:11.5px;border-radius:10px}
+.button[disabled],.button[aria-disabled="true"]{opacity:.5;cursor:not-allowed;transform:none}
+.button-primary[disabled]:hover{transform:none}
+
+/* ---------- 卡片与栅格 ---------- */
+.ns-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--card-shadow);padding:20px;min-width:0}
+.ns-card+.ns-card{margin-top:16px}
+.ns-card.is-flat{box-shadow:none}
+.ns-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.ns-card-head h2{font-size:15px;margin:0;letter-spacing:-.2px}
+.ns-card-head p{margin:4px 0 0;font-size:11.5px;color:var(--muted)}
+.ns-card-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ns-grid{display:grid;gap:16px}
+.ns-grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.ns-grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ns-grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ns-split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+
+/* ---------- 状态药丸 / 徽标 ---------- */
+.ns-pill{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:999px;font-size:11px;font-weight:800;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.ns-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.ns-pill.no-dot::before{display:none}
+.ns-pill.is-green{background:var(--green-soft);color:var(--green)}
+.ns-pill.is-yellow{background:var(--prio-mid-soft);color:var(--prio-mid)}
+.ns-pill.is-red{background:var(--danger-soft);color:var(--danger)}
+.ns-pill.is-muted{background:var(--bg);color:var(--muted)}
+.ns-pill.is-purple{background:var(--purple-soft);color:var(--purple)}
+.ns-mini{font-size:11px;color:var(--muted);font-weight:700}
+
+/* ---------- 进度条 ---------- */
+.ns-bar{height:8px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--border)}
+.ns-bar>i{display:block;height:100%;border-radius:99px;background:var(--accent);transition:width .2s}
+.ns-bar.is-green>i{background:var(--green)}
+.ns-bar.is-yellow>i{background:var(--prio-mid)}
+.ns-bar.is-red>i{background:var(--danger)}
+.ns-bar.is-slim{height:6px}
+
+/* ---------- 表格（外层容器局部横向滚动，页面根节点不横向溢出） ---------- */
+.ns-table-wrap{overflow-x:auto;overscroll-behavior-x:contain}
+.ns-table-wrap::after{content:"← 可左右滑动查看全部列 →";display:none;font-size:10.5px;color:var(--subtle);padding-top:6px}
+@media(max-width:700px){.ns-table-wrap::after{display:block}}
+.ns-table{width:100%;border-collapse:collapse;min-width:640px}
+.ns-table th{font-size:11px;letter-spacing:.4px;color:var(--subtle);text-align:left;font-weight:800;padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+.ns-table td{padding:12px;border-bottom:1px solid var(--border);font-size:12.5px;vertical-align:top}
+.ns-table tbody tr:hover{background:var(--accent-soft)}
+.ns-table .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- 表单 ---------- */
+.ns-field{display:grid;gap:6px;margin-bottom:12px;min-width:0}
+.ns-field>label,.ns-field>span.ns-label{font-size:11.5px;font-weight:800;color:var(--muted)}
+.ns-field .req{color:var(--danger);margin-left:2px}
+.ns-field .hint{font-size:11px;color:var(--subtle)}
+.ns-input,.ns-select,.ns-textarea{width:100%;height:40px;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);color:var(--text);padding:0 12px;font-size:13px}
+.ns-textarea{height:auto;min-height:84px;padding:10px 12px;line-height:1.7;resize:vertical}
+.ns-input:focus-visible,.ns-select:focus-visible,.ns-textarea:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.ns-inline-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.ns-inline-form .ns-field{margin-bottom:0;flex:1 1 180px}
+.ns-check{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;font-weight:700;color:var(--text)}
+.ns-check input{width:18px;height:18px;accent-color:var(--accent);margin:1px 0 0}
+
+/* ---------- 提示条 ---------- */
+.ns-banner{display:flex;gap:10px;align-items:flex-start;border-radius:14px;padding:12px 14px;border:1px solid var(--border);background:var(--surface);font-size:12.5px;line-height:1.75;margin-bottom:14px}
+.ns-banner strong{font-weight:900}
+.ns-banner .ns-banner-icon{flex:none;font-size:15px;line-height:1.4}
+.ns-banner.is-red{background:var(--danger-soft);border-color:transparent;color:var(--danger)}
+.ns-banner.is-yellow{background:var(--prio-mid-soft);border-color:transparent;color:var(--prio-mid)}
+.ns-banner.is-green{background:var(--green-soft);border-color:transparent;color:var(--green)}
+.ns-banner.is-accent{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.ns-banner.is-muted{background:var(--bg);color:var(--muted)}
+
+/* ---------- Toast ---------- */
+.ns-toast-region{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;display:grid;gap:8px;width:min(420px,calc(100vw - 32px));pointer-events:none}
+.ns-toast{pointer-events:auto;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:12px;box-shadow:0 12px 32px rgba(10,14,40,.22);padding:11px 14px;font-size:12.5px;font-weight:600;color:var(--text);animation:ns-toast-in .18s ease-out}
+.ns-toast.is-error{border-left-color:var(--danger)}
+.ns-toast.is-success{border-left-color:var(--green)}
+[data-theme="night"] .ns-toast{box-shadow:0 12px 32px #0009}
+@keyframes ns-toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- 空态与占位 ---------- */
+.ns-empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.8}
+.ns-empty-card{max-width:680px;margin:5vh auto}
+.ns-empty-card h1{font-size:24px;margin:6px 0 10px;letter-spacing:-.6px}
+.ns-empty-card p{color:var(--muted);font-size:13px;line-height:1.85}
+.ns-empty-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.ns-loading{padding:22px 10px;text-align:center;color:var(--subtle);font-size:12px}
+
+/* ---------- 登录页 ---------- */
+.ns-login-body{min-height:100vh;display:grid;place-items:center;padding:24px 16px;background:radial-gradient(1100px 520px at 88% -12%,color-mix(in srgb,var(--accent) 9%,transparent),transparent),var(--bg)}
+.ns-login-wrap{width:min(1060px,100%);display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:20px;align-items:stretch}
+.ns-login-hero{background:#f8e996;color:#22264b;border-radius:22px;padding:30px 28px;display:flex;flex-direction:column;gap:13px;box-shadow:var(--card-shadow)}
+[data-theme="night"] .ns-login-hero{background:linear-gradient(148deg,#132738,#182638);color:var(--text)}
+.ns-login-hero .brand{padding:0 0 10px}
+.ns-login-hero .eyebrow{color:inherit;opacity:.72}
+.ns-login-hero h1{font-size:29px;line-height:1.35;letter-spacing:-1px;margin:2px 0 0}
+.ns-login-lead{margin:0;font-size:13px;line-height:1.9;opacity:.86}
+.ns-login-points{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:9px;font-size:13px;font-weight:700}
+.ns-login-points li{display:flex;gap:9px;align-items:center}
+.ns-login-points span{width:24px;height:24px;border-radius:8px;background:rgba(255,255,255,.55);display:grid;place-items:center;font-size:13px;flex:none}
+[data-theme="night"] .ns-login-points span{background:rgba(76,225,207,.14)}
+.ns-login-note{margin:auto 0 0;font-size:11.5px;font-weight:800;opacity:.75}
+.ns-login-panel{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:26px;display:flex;flex-direction:column;box-shadow:var(--card-shadow);min-width:0}
+.ns-login-theme{display:flex;justify-content:flex-end;margin-bottom:6px}
+.ns-login-panel h2{font-size:20px;margin:4px 0 6px;letter-spacing:-.5px}
+.ns-login-sub{margin:0;color:var(--muted);font-size:12px}
+.ns-login-error{background:var(--danger-soft);color:var(--danger);border-radius:12px;padding:10px 13px;font-size:12.5px;font-weight:700;margin:12px 0 0;line-height:1.7}
+.ns-login-form{display:grid;gap:8px;margin-top:14px}
+.ns-login-form label{font-size:12px;font-weight:800;color:var(--muted)}
+.ns-login-form input{height:44px;border:1px solid var(--border);border-radius:var(--radius-control);background:var(--surface);color:var(--text);padding:0 13px;font-size:15px}
+.ns-login-form input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.ns-login-submit{margin-top:10px;height:46px}
+.ns-login-accounts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:20px;max-height:250px;overflow-y:auto;padding-right:2px;overscroll-behavior:contain}
+.ns-account-chip{text-align:left;border:1px solid var(--border);background:var(--bg);border-radius:12px;padding:8px 11px;min-height:46px;display:grid;gap:2px;cursor:pointer;transition:border-color .2s,background .2s}
+.ns-account-chip strong{font-size:12.5px;color:var(--text)}
+.ns-account-chip small{font-size:10.5px;color:var(--muted);overflow-wrap:anywhere}
+.ns-account-chip:hover{border-color:var(--accent)}
+.ns-account-chip.is-active{border-color:var(--accent);background:var(--accent-soft)}
+.ns-login-foot{margin:16px 0 0;font-size:11.5px;color:var(--subtle)}
+.ns-login-foot a{color:var(--accent);font-weight:800;text-decoration:underline}
+
+/* ---------- 移动端修正（UI 规范 8.3：输入字号 ≥16px、触摸目标 ≥44px） ---------- */
+@media(max-width:980px){
+  .ns-grid.cols-3,.ns-grid.cols-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ns-split{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:700px){
+  .ns-grid.cols-2,.ns-grid.cols-3,.ns-grid.cols-4{grid-template-columns:minmax(0,1fr)}
+  .ns-body .button{min-height:44px}
+  .ns-body .button-small{min-height:40px}
+  .ns-body input,.ns-body select,.ns-body textarea{font-size:16px}
+  .ns-body .ns-input,.ns-body .ns-select{height:44px}
+  .ns-login-wrap{grid-template-columns:minmax(0,1fr)}
+  .ns-login-panel{order:1}
+  .ns-login-hero{order:2;padding:24px 20px}
+  .ns-login-hero h1{font-size:23px}
+  .ns-login-accounts{grid-template-columns:minmax(0,1fr)}
+  .ns-toast-region{bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+}
+@media(prefers-reduced-motion:reduce){
+  .ns-toast{animation:none}
+  .ns-bar>i{transition:none}
+}

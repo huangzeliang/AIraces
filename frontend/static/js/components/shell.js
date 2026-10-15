@@ -65,13 +65,15 @@
     if (wide.addEventListener) { wide.addEventListener('change', onWide); } else { wide.addListener(onWide); }
   }
 
-  // 会话过期：接口返回 401 时回到登录页（登录页自身除外）
-  if (window.location.pathname !== '/login' && typeof window.fetch === 'function') {
+  // 会话过期：接口返回 401 时回到登录页（登录页自身除外）。
+  // NS 线页面在 <html data-login-url="/ns/login"> 上声明自己的登录页，默认仍为旧系统 /login。
+  var loginUrl = document.documentElement.getAttribute('data-login-url') || '/login';
+  if (window.location.pathname !== loginUrl && typeof window.fetch === 'function') {
     var originalFetch = window.fetch.bind(window);
     window.fetch = function () {
       return originalFetch.apply(null, arguments).then(function (response) {
         if (response.status === 401) {
-          window.location.href = '/login';
+          window.location.href = loginUrl;
         }
         return response;
       });

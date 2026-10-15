@@ -1,0 +1,8 @@
+{% for group in ns_nav %}
+<p class="nav-caption">{{ group.name }}</p>
+<nav class="nav-menu" aria-label="{{ group.name }}">
+  {% for item in group['items'] %}
+  <a class="nav-item{% if item.menu == ns_active %} active{% endif %}" href="{{ item.url }}"{% if item.menu == ns_active %} aria-current="page"{% endif %}><span aria-hidden="true">{{ item.icon }}</span>{{ item.label }}</a>
+  {% endfor %}
+</nav>
+{% endfor %}

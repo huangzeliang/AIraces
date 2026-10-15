@@ -1,0 +1,9 @@
+{% extends 'ns/layout.html' %}
+{% block content %}
+<section class="ns-card ns-empty-card" aria-label="无权访问">
+  <p class="eyebrow">403 · 权限不足</p>
+  <h1>当前角色无法访问该菜单</h1>
+  <p>缺少权限点 <code>menu:{{ missing_menu }}</code>。请返回你的工作台，或联系系统管理员调整角色授权。</p>
+  <p><a class="button button-primary" href="{{ url_for('ns_workbench') }}">返回工作台</a></p>
+</section>
+{% endblock %}
